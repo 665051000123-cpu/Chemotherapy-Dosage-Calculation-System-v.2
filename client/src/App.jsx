@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useCalculations } from './utils/useCalculations';
-import { Moon, Sun, ChevronRight, ArrowLeft, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings } from 'lucide-react';
+import { Moon, Sun, ChevronRight, ArrowLeft, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill } from 'lucide-react';
 import axios from 'axios';
 import Login from './components/Login';
 import Notification from './components/Notification';
 import AdminUsers from './components/AdminUsers';
 import ChangePassword from './components/ChangePassword';
+import DrugsInfo from './components/DrugsInfo';
 
 const API_BASE = '/api';
 
@@ -19,6 +20,8 @@ function App() {
     const [notification, setNotification] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
+    const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+    const [timeoutCountdown, setTimeoutCountdown] = useState(30);
 
     const showNotification = (message, type = 'info') => {
         setNotification({ message, type });
@@ -250,6 +253,59 @@ function App() {
         setUser(null);
         setStep('auth');
     };
+
+    const lastActivityRef = useRef(Date.now());
+
+    // Inactivity / Session Timeout tracking
+    useEffect(() => {
+        if (!user) {
+            setShowTimeoutWarning(false);
+            return;
+        }
+
+        // Reset activity timestamp upon login / session start
+        lastActivityRef.current = Date.now();
+
+        // Reset inactivity timer on any interaction event
+        const resetTimer = () => {
+            lastActivityRef.current = Date.now();
+        };
+
+        const events = ['mousemove', 'keydown', 'mousedown', 'click', 'scroll', 'touchstart'];
+        events.forEach(event => {
+            window.addEventListener(event, resetTimer);
+        });
+
+        // Interval to check inactivity every second
+        const checkInterval = setInterval(() => {
+            const elapsed = Date.now() - lastActivityRef.current;
+            const timeoutLimit = 3600000; // 1 hour
+            const warningLimit = 3570000; // 59 minutes 30 seconds (show warning 30 seconds before)
+
+            if (elapsed >= timeoutLimit) {
+                // Time is up! Clean up and logout.
+                clearInterval(checkInterval);
+                setShowTimeoutWarning(false);
+                handleLogout();
+                showNotification("เซสชันหมดเวลาเนื่องจากไม่มีการใช้งานระบบ", "warning");
+            } else if (elapsed >= warningLimit) {
+                // Show warning and update countdown seconds
+                const remainingSecs = Math.ceil((timeoutLimit - elapsed) / 1000);
+                setShowTimeoutWarning(true);
+                setTimeoutCountdown(remainingSecs > 0 ? remainingSecs : 0);
+            } else {
+                // User is active, hide warning modal if it was open
+                setShowTimeoutWarning(false);
+            }
+        }, 1000);
+
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, resetTimer);
+            });
+            clearInterval(checkInterval);
+        };
+    }, [user]);
 
     const handleDeleteLog = (log) => {
         if (!user || user.role?.toUpperCase() !== 'ADMIN') return;
@@ -493,6 +549,14 @@ function App() {
                             >
                                 <LogOut size={14} /> ออกจากระบบ (Logout)
                             </button>
+                            {step !== 'drugs-info' && (
+                                <button
+                                    onClick={() => setStep('drugs-info')}
+                                    className="flex items-center gap-1.5 text-xs font-black text-emerald-500 hover:text-emerald-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
+                                >
+                                    <Pill size={14} /> ข้อมูลยา (Drugs)
+                                </button>
+                            )}
                             {user.role?.toUpperCase() === 'ADMIN' && step !== 'admin-users' && (
                                 <button
                                     onClick={() => setStep('admin-users')}
@@ -510,7 +574,7 @@ function App() {
                 {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />} {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
             </button>
 
-            <div className={`w-full max-w-5xl mx-auto my-auto print:my-0 print:pt-0 ${user ? 'pt-32 md:pt-36' : 'pt-4 md:pt-12'}`}>
+            <div className={`w-full max-w-full mx-auto my-auto print:my-0 print:pt-0 ${user ? 'pt-32 md:pt-36' : 'pt-4 md:pt-12'}`}>
                 {step === 'auth' ? (
                     <Login onLoginSuccess={(userData) => {
                         setUser(userData);
@@ -546,6 +610,13 @@ function App() {
                             <button onClick={handlePatientCheckIn} className="w-full btn-primary">เข้าสู่ระบบคำนวณ ➔</button>
                         </div>
                     </div>
+                ) : step === 'drugs-info' ? (
+                    <DrugsInfo
+                        currentUser={user}
+                        onBack={() => setStep('login')}
+                        showNotification={showNotification}
+                        theme={theme}
+                    />
                 ) : step === 'admin-users' ? (
                     <AdminUsers
                         currentUser={user}
@@ -792,7 +863,7 @@ function App() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-400 mb-1.5">วิธีคำนวณการทำงานของไต (GFR Mode)</label>
+                                                    <label className="block text-xs font-bold text-slate-400 mb-1.5">วิธีคำนวณการทำงานของไต (eGFR Mode)</label>
                                                     <div className={`grid grid-cols-2 gap-2 p-1 rounded-xl border transition-all duration-300 ${theme === 'dark'
                                                         ? 'bg-slate-800/40 border-slate-700/30'
                                                         : 'bg-slate-100 border-slate-200'
@@ -827,27 +898,27 @@ function App() {
 
                                             {!useAutoGfr ? (
                                                 <div className="space-y-2">
-                                                    <label className="block text-xs font-bold text-slate-400 mb-1">อัตราการกรองของไต (GFR Value, ml/min)</label>
+                                                    <label className="block text-xs font-bold text-slate-400 mb-1">อัตราการกรองของไต (eGFR Value, ml/min)</label>
                                                     <input
                                                         type="number"
-                                                        placeholder="ระบุค่า GFR (ml/min)"
+                                                        placeholder="ระบุค่า eGFR (ml/min)"
                                                         value={drugParams.gfr}
                                                         className="form-control"
                                                         onChange={e => setDrugParams({ ...drugParams, gfr: e.target.value })}
                                                     />
                                                     {parseFloat(drugParams.gfr) > 125 && (
                                                         <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[11px] font-bold leading-normal text-amber-500">
-                                                            ⚠️ GFR เกิน 125 ml/min: ถูกจำกัดไว้ที่ 125 ml/min ในสูตร Calvert เพื่อความปลอดภัย (Capped at 125)
+                                                            ⚠️ eGFR เกิน 125 ml/min: ถูกจำกัดไว้ที่ 125 ml/min ในสูตร Calvert เพื่อความปลอดภัย (Capped at 125)
                                                         </div>
                                                     )}
                                                     {parseFloat(drugParams.gfr) < 15 && parseFloat(drugParams.gfr) > 0 && (
                                                         <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-[11px] font-bold leading-normal text-red-500">
-                                                            🚨 ไตเสื่อมระดับรุนแรง (GFR &lt; 15 ml/min): โปรดระมัดระวังการใช้ยา Carboplatin
+                                                            🚨 ไตเสื่อมระดับรุนแรง (eGFR &lt; 15 ml/min): โปรดระมัดระวังการใช้ยา Carboplatin
                                                         </div>
                                                     )}
                                                     {parseFloat(drugParams.gfr) < 0 && (
                                                         <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-[11px] font-bold leading-normal text-red-500">
-                                                            ❌ ค่า GFR ไม่สามารถติดลบได้
+                                                            ❌ ค่า eGFR ไม่สามารถติดลบได้
                                                         </div>
                                                     )}
                                                 </div>
@@ -898,12 +969,12 @@ function App() {
                                                     {autoGfrValue > 125 && (
                                                         <div className={`p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-[11px] font-bold leading-normal ${theme === 'dark' ? 'text-red-400' : 'text-red-600'
                                                             }`}>
-                                                            ⚠️ GFR เกิน 125 ml/min: ถูกจำกัดไว้ที่ 125 ml/min เพื่อความปลอดภัยในการคำนวณขนาดยา (Capped at 125)
+                                                            ⚠️ eGFR เกิน 125 ml/min: ถูกจำกัดไว้ที่ 125 ml/min เพื่อความปลอดภัยในการคำนวณขนาดยา (Capped at 125)
                                                         </div>
                                                     )}
                                                     {autoGfrValue < 15 && autoGfrValue > 0 && (
                                                         <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-[11px] font-bold leading-normal text-red-500">
-                                                            🚨 ไตเสื่อมระดับรุนแรง (GFR &lt; 15 ml/min): โปรดระมัดระวังการใช้ยา Carboplatin
+                                                            🚨 ไตเสื่อมระดับรุนแรง (eGFR &lt; 15 ml/min): โปรดระมัดระวังการใช้ยา Carboplatin
                                                         </div>
                                                     )}
                                                 </div>
@@ -1168,8 +1239,8 @@ function App() {
                                 type="button"
                                 onClick={() => setDeleteConfirmLog(null)}
                                 className={`w-1/2 py-3 px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 cursor-pointer text-center ${theme === 'dark'
-                                        ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
-                                        : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
+                                    ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
+                                    : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
                                     }`}
                             >
                                 ยกเลิก
@@ -1183,6 +1254,56 @@ function App() {
                                 className="w-1/2 bg-rose-600 hover:bg-rose-500 text-white text-sm font-black py-3 px-4 rounded-xl active:scale-95 cursor-pointer text-center transition-all shadow-md shadow-rose-900/10"
                             >
                                 ลบประวัติ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showTimeoutWarning && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
+                    <div className="premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-amber-500/30 shadow-[0_20px_50px_rgba(245,158,11,0.15)] text-center">
+                        <div className="w-16 h-16 bg-amber-500/10 rounded-full mx-auto mb-4 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                            <Info size={28} className="animate-pulse" />
+                        </div>
+                        <h3 className="font-black text-xl mb-2 text-amber-500">
+                            การแจ้งเตือนการหมดเวลา
+                        </h3>
+                        <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+                            ระบบกำลังจะออกจากระบบอัตโนมัติเนื่องจากไม่มีการใช้งานระบบเป็นเวลานาน โปรดยืนยันว่าคุณต้องการใช้งานระบบต่อหรือไม่
+                        </p>
+
+                        <div className="mb-6 flex flex-col items-center justify-center">
+                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/5 border-2 border-amber-500/20 relative animate-pulse">
+                                <span className="font-black text-2xl text-amber-500">
+                                    {timeoutCountdown}
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-amber-500/70 mt-2 font-bold uppercase tracking-wider">วินาทีสุดท้าย (Seconds Left)</p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleLogout();
+                                    setShowTimeoutWarning(false);
+                                }}
+                                className={`w-1/2 py-3 px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 cursor-pointer text-center ${theme === 'dark'
+                                    ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
+                                    : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
+                                    }`}
+                            >
+                                ออกจากระบบ
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    lastActivityRef.current = Date.now();
+                                    setShowTimeoutWarning(false);
+                                }}
+                                className="w-1/2 bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-500 hover:to-orange-400 text-white text-sm font-black py-3 px-4 rounded-xl active:scale-95 cursor-pointer text-center transition-all shadow-md shadow-orange-950/10"
+                            >
+                                ใช้งานต่อ
                             </button>
                         </div>
                     </div>

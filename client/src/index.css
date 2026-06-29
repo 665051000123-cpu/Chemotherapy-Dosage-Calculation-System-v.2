@@ -245,3 +245,82 @@ body:not(.light-mode) .gender-text-highlight {
   color: #f8fafc !important;
   /* White/Light Slate in Dark Mode */
 }
+
+/* Sizing optimization for 1024x768 screen resolution */
+@media screen and (max-width: 1024px) or (max-height: 768px) {
+  :root {
+    --card-padding: 1rem;
+  }
+  
+  body {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  /* Form control tightening */
+  .form-control {
+    padding: 0.625rem 0.875rem !important; /* 10px 14px */
+    font-size: 0.875rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  /* Buttons tightening */
+  .btn-primary {
+    padding: 0.625rem 1rem !important;
+    font-size: 0.875rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  /* Premium card padding reduction */
+  .premium-card {
+    padding: 1rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  /* Tighter margins and spacings */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+  .gap-6 {
+    gap: 1rem !important;
+  }
+  .p-6 {
+    padding: 1rem !important;
+  }
+  .mb-5 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Scale down header bar items */
+  h2 {
+    font-size: 1.125rem !important; /* 18px */
+  }
+  h3 {
+    font-size: 1rem !important; /* 16px */
+  }
+
+  /* Adjust grid gap for compact view */
+  .gap-4 {
+    gap: 0.75rem !important;
+  }
+  
+  /* Make lists and tables tighter */
+  th, td {
+    padding: 0.625rem 0.75rem !important;
+    font-size: 0.75rem !important; /* 12px */
+  }
+  
+  /* Shrink large values on metrics cards */
+  .text-3xl {
+    font-size: 1.5rem !important; /* 24px */
+  }
+  
+  /* Compact custom dropdowns and selections */
+  select.form-control {
+    padding-right: 2rem !important;
+  }
+  
+  /* Scrollable table max-height reduction for 768px screen height */
+  .scrollable-table-container {
+    max-height: 250px !important;
+  }
+}

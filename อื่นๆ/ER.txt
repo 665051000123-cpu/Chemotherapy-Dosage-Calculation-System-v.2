@@ -1,0 +1,51 @@
+CREATE DATABASE clinical_db;
+USE clinical_db;
+
+-- 1. ตาราง users
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(50),
+    username VARCHAR(50),
+    password VARCHAR(255),
+    role VARCHAR(20)
+);
+
+-- 2. ตาราง login
+CREATE TABLE login (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50),
+    employee_id VARCHAR(50),
+    password VARCHAR(255),
+    role VARCHAR(20),
+    must_change_password TINYINT
+);
+
+-- 3. ตาราง activity_logs
+CREATE TABLE activity_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp VARCHAR(50),
+    employee_id VARCHAR(50),
+    username VARCHAR(50),
+    action_type VARCHAR(50),
+    details TEXT
+);
+
+-- 4. ตาราง dosage_logs
+CREATE TABLE dosage_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp VARCHAR(50),
+    hn VARCHAR(20),
+    patient_name VARCHAR(255),
+    calculated_bsa VARCHAR(20),
+    formula_used VARCHAR(255)
+);
+
+-- 5. ตาราง dose_logs
+CREATE TABLE dose_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp VARCHAR(50),
+    hn VARCHAR(50),
+    patient_name VARCHAR(255),
+    calculated_bsa DECIMAL(7,4),
+    prescribed_dose VARCHAR(50)
+);

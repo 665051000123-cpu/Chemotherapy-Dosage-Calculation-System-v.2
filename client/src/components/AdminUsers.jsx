@@ -4,6 +4,52 @@ import axios from 'axios';
 
 const API_BASE = '/api';
 
+const getDonutSlices = (data, cx, cy, r, innerR) => {
+    let currentAngle = -90; // Start at the top (12 o'clock)
+    const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
+    
+    return data.map((item) => {
+        const angle = (item.value / total) * 360;
+        
+        // Calculate start and end coordinates for outer arc
+        const startRad = (currentAngle * Math.PI) / 180;
+        const endRad = ((currentAngle + angle) * Math.PI) / 180;
+        
+        const x1 = cx + r * Math.cos(startRad);
+        const y1 = cy + r * Math.sin(startRad);
+        const x2 = cx + r * Math.cos(endRad);
+        const y2 = cy + r * Math.sin(endRad);
+        
+        // Calculate start and end coordinates for inner arc
+        const ix1 = cx + innerR * Math.cos(startRad);
+        const iy1 = cy + innerR * Math.sin(startRad);
+        const ix2 = cx + innerR * Math.cos(endRad);
+        const iy2 = cy + innerR * Math.sin(endRad);
+        
+        const largeArcFlag = angle > 180 ? 1 : 0;
+        
+        // Path command for donut slice (outer arc -> line to inner -> inner arc back -> close)
+        const d = [
+            'M', x1, y1,
+            'A', r, r, 0, largeArcFlag, 1, x2, y2,
+            'L', ix2, iy2,
+            'A', innerR, innerR, 0, largeArcFlag, 0, ix1, iy1,
+            'Z'
+        ].join(' ');
+        
+        const slice = {
+            ...item,
+            d,
+            startAngle: currentAngle,
+            endAngle: currentAngle + angle,
+            percent: Math.round((item.value / total) * 100)
+        };
+        
+        currentAngle += angle;
+        return slice;
+    });
+};
+
 const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, theme }) => {
     const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'users' | 'logs' | 'activities'
     const [users, setUsers] = useState([]);
@@ -17,6 +63,7 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
     const [activitySearchQuery, setActivitySearchQuery] = useState('');
     const [logSearchQuery, setLogSearchQuery] = useState('');
     const [deleteConfirmUser, setDeleteConfirmUser] = useState(null);
+    const [statusChangeConfirm, setStatusChangeConfirm] = useState(null);
 
     // Filter states for Login History (logs)
     const [showLogFilterPanel, setShowLogFilterPanel] = useState(false);
@@ -30,6 +77,10 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
     const [activityStartDateFilter, setActivityStartDateFilter] = useState('');
     const [activityEndDateFilter, setActivityEndDateFilter] = useState('');
     const [activityActionFilter, setActivityActionFilter] = useState('all');
+
+    // Filter states for Dashboard statistics
+    const [statsStartDate, setStatsStartDate] = useState('');
+    const [statsEndDate, setStatsEndDate] = useState('');
 
     const isDark = theme === 'dark';
 
@@ -114,6 +165,44 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
     }, [activeTab]);
 
     const fetchStats = async () => {
+        setStatsLoading(true);
+        try {
+            const params = {};
+            if (statsStartDate.trim() && statsEndDate.trim()) {
+                params.startDate = statsStartDate.trim();
+                params.endDate = statsEndDate.trim();
+            }
+            const res = await axios.get(`${API_BASE}/admin/stats`, {
+                headers: { 'x-employee-id': currentUser.employee_id },
+                params
+            });
+            if (res.data.success) {
+                setStats(res.data.stats);
+            }
+        } catch (err) {
+            console.error("Fetch stats failed:", err);
+            showNotification(`ไม่สามารถดึงข้อมูลสถิติได้: ${err.response?.data?.message || err.message}`, "error");
+        } finally {
+            setStatsLoading(false);
+        }
+    };
+
+    const handleApplyStatsFilter = () => {
+        if (!statsStartDate.trim() || !statsEndDate.trim()) {
+            showNotification("กรุณากรอกวันที่ให้ครบถ้วนทั้งวันเริ่มต้นและสิ้นสุด", "error");
+            return;
+        }
+        const datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
+        if (!datePattern.test(statsStartDate) || !datePattern.test(statsEndDate)) {
+            showNotification("รูปแบบวันที่ไม่ถูกต้อง กรุณาใช้รูปแบบ วว/ดด/ปปปป (เช่น 24/06/2569)", "error");
+            return;
+        }
+        fetchStats();
+    };
+
+    const handleClearStatsFilter = async () => {
+        setStatsStartDate('');
+        setStatsEndDate('');
         setStatsLoading(true);
         try {
             const res = await axios.get(`${API_BASE}/admin/stats`, {
@@ -220,14 +309,50 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
             username: user.username,
             employee_id: user.employee_id,
             password: '', // Leave blank to keep current password
-            role: user.role || 'pharmacist'
+            role: user.role || 'pharmacist',
+            is_active: user.is_active !== undefined ? user.is_active : 1
         });
         setShowEditPassword(false);
     };
 
+    const handleToggleStatus = (user) => {
+        if (user.employee_id === currentUser.employee_id) {
+            showNotification("ไม่สามารถระงับการใช้งานบัญชีผู้ใช้งานของตนเองได้", "error");
+            return;
+        }
+        const newStatus = user.is_active === 0 ? 1 : 0;
+        const statusText = newStatus === 1 ? 'เปิดใช้งาน' : 'ระงับการใช้งาน';
+        
+        setStatusChangeConfirm({
+            user,
+            newStatus,
+            statusText
+        });
+    };
+
+    const handleConfirmStatusChange = async () => {
+        if (!statusChangeConfirm) return;
+        const { user, newStatus, statusText } = statusChangeConfirm;
+        try {
+            const res = await axios.patch(`${API_BASE}/admin/users/${user.id}/status`, 
+                { is_active: newStatus },
+                { headers: { 'x-employee-id': currentUser.employee_id } }
+            );
+            if (res.data.success) {
+                showNotification(res.data.message || `เปลี่ยนสถานะเป็น ${statusText} สำเร็จ`, "success");
+                fetchUsers();
+            }
+        } catch (err) {
+            console.error("Toggle user status failed:", err);
+            showNotification(`ไม่สามารถเปลี่ยนสถานะผู้ใช้ได้: ${err.response?.data?.message || err.message}`, "error");
+        } finally {
+            setStatusChangeConfirm(null);
+        }
+    };
+
     const handleEditSubmit = async (e) => {
         e.preventDefault();
-        const { username, employee_id, role } = editForm;
+        const { username, employee_id, role, is_active } = editForm;
         if (!username || !employee_id) {
             showNotification("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน", "error");
             return;
@@ -450,10 +575,62 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
 
             {activeTab === 'dashboard' ? (
                 <div className="space-y-6">
+                    {/* Date Filter Panel */}
+                    <div className={`p-5 rounded-2xl border flex flex-col md:flex-row md:items-end justify-between gap-4 ${
+                        isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200 shadow-sm'
+                    }`}>
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[11px] font-black text-slate-400 mb-1.5 uppercase ml-1">วันที่เริ่มต้น (Start Date)</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="วว/ดด/ปปปป (เช่น 24/06/2569)"
+                                        value={statsStartDate}
+                                        onChange={e => handleDateInputChange(e.target.value, statsStartDate, setStatsStartDate)}
+                                        className="form-control py-2.5 pl-10 pr-4 text-sm rounded-xl font-bold"
+                                    />
+                                    <Filter size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[11px] font-black text-slate-400 mb-1.5 uppercase ml-1">วันที่สิ้นสุด (End Date)</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="วว/ดด/ปปปป (เช่น 29/06/2569)"
+                                        value={statsEndDate}
+                                        onChange={e => handleDateInputChange(e.target.value, statsEndDate, setStatsEndDate)}
+                                        className="form-control py-2.5 pl-10 pr-4 text-sm rounded-xl font-bold"
+                                    />
+                                    <Filter size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-2.5 md:self-end">
+                            <button
+                                onClick={handleApplyStatsFilter}
+                                className="py-2.5 px-6 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-sm transition-all active:scale-95 cursor-pointer shadow-md"
+                            >
+                                กรองข้อมูล
+                            </button>
+                            <button
+                                onClick={handleClearStatsFilter}
+                                className={`py-2.5 px-6 rounded-xl border font-black text-sm transition-all active:scale-95 cursor-pointer ${
+                                    isDark 
+                                        ? 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700' 
+                                        : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 shadow-sm'
+                                }`}
+                            >
+                                ล้างค่า
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Stats Metric Cards */}
                     {statsLoading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[1, 2, 3, 4].map(i => (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            {[1, 2, 3].map(i => (
                                 <div key={i} className="premium-card p-6 animate-pulse flex flex-col justify-between h-[120px]">
                                     <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-2/3"></div>
                                     <div className="h-8 bg-slate-300 dark:bg-slate-700 rounded w-1/2 mt-4 font-black"></div>
@@ -461,7 +638,7 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                             ))}
                         </div>
                     ) : stats ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             {/* Card 1: Total Calculations */}
                             <div className={`premium-card p-5 border-l-4 border-l-indigo-500 bg-gradient-to-br ${
                                 isDark ? 'from-indigo-500/10 to-purple-500/5 border-indigo-500/20' : 'from-indigo-50 to-white border-indigo-200'
@@ -500,19 +677,6 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                     <User size={24} />
                                 </div>
                             </div>
-
-                            {/* Card 4: Today's Calculations */}
-                            <div className={`premium-card p-5 border-l-4 border-l-amber-500 bg-gradient-to-br ${
-                                isDark ? 'from-amber-500/10 to-rose-500/5 border-amber-500/20' : 'from-amber-50 to-white border-amber-200'
-                            } flex justify-between items-center transition-all hover:translate-y-[-2px]`}>
-                                <div className="space-y-2">
-                                    <p className="text-xs font-black uppercase opacity-70 tracking-wider">จำนวนการใช้ยาในวันนี้</p>
-                                    <h3 className="text-3xl font-black tracking-tight">{stats.todayCalculations.toLocaleString()}</h3>
-                                </div>
-                                <div className={`p-3 rounded-2xl ${isDark ? 'bg-amber-950/40 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
-                                    <TrendingUp size={24} />
-                                </div>
-                            </div>
                         </div>
                     ) : (
                         <div className="premium-card p-6 text-center text-slate-500 font-bold italic">
@@ -522,86 +686,183 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
 
                     {/* Charts & Rankings */}
                     {!statsLoading && stats && (
-                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                            {/* Drug Distribution */}
-                            <div className="lg:col-span-3 premium-card p-6">
-                                <h3 className="font-black mb-5 uppercase tracking-wider text-sm flex items-center gap-2 opacity-90">
-                                    <Activity size={18} className="text-sky-500 dark:text-sky-400" />
-                                    ประวัติจำนวนการใช้ยา
-                                </h3>
-                                <div className="space-y-5">
-                                    {(() => {
-                                        const drugCounts = stats.drugCounts || {};
-                                        const totalDrugSum = Object.values(drugCounts).reduce((a, b) => a + b, 0) || 1;
-                                        const drugColors = {
-                                            'Vincristine': 'from-purple-500 to-indigo-500',
-                                            'Carboplatin': 'from-sky-500 to-blue-500',
-                                            'Bleomycin': 'from-teal-500 to-emerald-500',
-                                            'CV Regimen': 'from-amber-500 to-orange-500',
-                                            'BC Regimen': 'from-rose-500 to-pink-500',
-                                            'Other': 'from-slate-400 to-slate-500'
-                                        };
-
-                                        return Object.entries(drugCounts).map(([drugName, count]) => {
-                                            const percent = totalDrugSum > 0 ? Math.round((count / totalDrugSum) * 100) : 0;
-                                            const colorClass = drugColors[drugName] || 'from-sky-500 to-indigo-500';
-                                            return (
-                                                <div key={drugName} className="space-y-2">
-                                                    <div className="flex justify-between items-center text-sm">
-                                                        <span className="font-black opacity-90">{drugName}</span>
-                                                        <span className="font-bold font-mono text-xs opacity-75">
-                                                            {count.toLocaleString()} ครั้ง ({percent}%)
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                                {/* Drug Distribution - Bar Chart */}
+                                <div className="lg:col-span-3 premium-card p-6 flex flex-col justify-between">
+                                    <h3 className="font-black mb-5 uppercase tracking-wider text-sm flex items-center gap-2 opacity-90">
+                                        <Activity size={18} className="text-indigo-500 dark:text-indigo-400" />
+                                        จำนวนการใช้ยาแยกตามสูตร/ตัวยา
+                                    </h3>
+                                    
+                                    <div className="h-[250px] w-full flex items-end justify-between px-2 pt-6 relative border-b border-slate-700/20">
+                                        {/* SVG Grid Lines */}
+                                        <div className="absolute inset-x-0 top-0 bottom-0 flex flex-col justify-between pointer-events-none opacity-[0.07] dark:opacity-[0.05]">
+                                            <div className="border-t border-dashed border-current h-0 w-full" />
+                                            <div className="border-t border-dashed border-current h-0 w-full" />
+                                            <div className="border-t border-dashed border-current h-0 w-full" />
+                                            <div className="border-t border-dashed border-current h-0 w-full" />
+                                        </div>
+                                        
+                                        {(() => {
+                                            const drugCounts = stats.drugCounts || {};
+                                            const items = Object.entries(drugCounts);
+                                            const maxVal = Math.max(...items.map(([_, v]) => v)) || 1;
+                                            
+                                            const drugColors = {
+                                                'Vincristine': 'from-purple-500 to-indigo-500 shadow-purple-500/10',
+                                                'Carboplatin': 'from-sky-500 to-blue-500 shadow-sky-500/10',
+                                                'Bleomycin': 'from-teal-500 to-emerald-500 shadow-teal-500/10',
+                                                'CV Regimen': 'from-amber-500 to-orange-500 shadow-amber-500/10',
+                                                'BC Regimen': 'from-rose-500 to-pink-500 shadow-rose-500/10',
+                                                'Other': 'from-slate-400 to-slate-500 shadow-slate-500/10'
+                                            };
+                                            
+                                            return items.map(([name, val]) => {
+                                                const pct = maxVal > 0 ? (val / maxVal) * 80 : 0; // max height is 80%
+                                                const bgGradient = drugColors[name] || 'from-indigo-500 to-purple-500';
+                                                return (
+                                                    <div key={name} className="flex flex-col items-center flex-1 group">
+                                                        <span className="text-[10px] font-black font-mono mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-y-1">
+                                                            {val} ครั้ง
+                                                        </span>
+                                                        <div 
+                                                            className={`w-10 sm:w-12 bg-gradient-to-t ${bgGradient} rounded-t-xl transition-all duration-500 group-hover:brightness-110 shadow-lg relative`}
+                                                            style={{ height: `${pct}%`, minHeight: val > 0 ? '8px' : '2px' }}
+                                                        >
+                                                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black font-mono opacity-85 group-hover:hidden">
+                                                                {val}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[9px] font-black text-center mt-3 truncate w-full px-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                                                            {name}
                                                         </span>
                                                     </div>
-                                                    <div className="w-full h-3 bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden shadow-inner border border-slate-700/5">
-                                                        <div
-                                                            className={`h-full bg-gradient-to-r ${colorClass} rounded-full transition-all duration-700 ease-out`}
-                                                            style={{ width: `${percent}%` }}
-                                                        />
+                                                );
+                                            });
+                                        })()}
+                                    </div>
+                                </div>
+
+                                {/* Drug Share - Donut Chart */}
+                                <div className="lg:col-span-2 premium-card p-6 flex flex-col justify-between">
+                                    <h3 className="font-black mb-5 uppercase tracking-wider text-sm flex items-center gap-2 opacity-90">
+                                        <TrendingUp size={18} className="text-sky-500 dark:text-sky-400" />
+                                        สัดส่วนการใช้ยาเคมีบำบัด
+                                    </h3>
+                                    
+                                    <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center justify-center h-full py-4 gap-6">
+                                        {(() => {
+                                            const drugCounts = stats.drugCounts || {};
+                                            const rawData = Object.entries(drugCounts).map(([name, val]) => ({ name, value: val }));
+                                            const total = rawData.reduce((s, i) => s + i.value, 0) || 0;
+                                            
+                                            const COLORS = {
+                                                'Vincristine': '#8b5cf6', // Violet
+                                                'Carboplatin': '#0ea5e9', // Sky
+                                                'Bleomycin': '#14b8a6', // Teal
+                                                'CV Regimen': '#f59e0b', // Amber
+                                                'BC Regimen': '#f43f5e', // Rose
+                                                'Other': '#64748b' // Slate
+                                            };
+                                            
+                                            if (total === 0) {
+                                                return (
+                                                    <div className="text-center p-8 opacity-60 font-bold italic text-xs w-full">
+                                                        ไม่มีข้อมูลการใช้ยา
                                                     </div>
-                                                </div>
+                                                );
+                                            }
+
+                                            const cx = 100;
+                                            const cy = 100;
+                                            const r = 80;
+                                            const innerR = 55;
+                                            const slices = getDonutSlices(rawData, cx, cy, r, innerR);
+                                            
+                                            return (
+                                                <>
+                                                    <div className="relative w-[220px] h-[220px] shrink-0">
+                                                        <svg width="220" height="220" viewBox="0 0 200 200" className="drop-shadow-lg">
+                                                            {slices.map((s, idx) => (
+                                                                <path 
+                                                                    key={idx}
+                                                                    d={s.d}
+                                                                    fill={COLORS[s.name] || '#6366f1'}
+                                                                    className="transition-all duration-300 hover:opacity-90 cursor-pointer"
+                                                                    title={`${s.name}: ${s.value} ครั้ง (${s.percent}%)`}
+                                                                />
+                                                            ))}
+                                                            <circle cx={cx} cy={cy} r={innerR - 2} fill={isDark ? '#1e293b' : '#ffffff'} />
+                                                            <text x={cx} y={cy - 12} textAnchor="middle" fill={isDark ? '#94a3b8' : '#64748b'} fontSize="11" fontWeight="900" opacity="0.8">
+                                                                ใช้ยาทั้งหมด
+                                                            </text>
+                                                            <text x={cx} y={cy + 12} textAnchor="middle" fill={isDark ? '#ffffff' : '#0f172a'} fontSize="26" fontWeight="900">
+                                                                {total}
+                                                            </text>
+                                                            <text x={cx} y={cy + 32} textAnchor="middle" fill={isDark ? '#94a3b8' : '#64748b'} fontSize="10" fontWeight="700" opacity="0.6">
+                                                                ครั้ง
+                                                            </text>
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    <div className="flex flex-col gap-2.5 flex-1 w-full max-w-[200px]">
+                                                        {slices.map((s, idx) => {
+                                                            if (s.value === 0) return null;
+                                                            return (
+                                                                <div key={idx} className="flex items-center gap-3 text-xs sm:text-sm">
+                                                                    <span 
+                                                                        className="h-3 w-3 rounded-full shrink-0 shadow-sm" 
+                                                                        style={{ backgroundColor: COLORS[s.name] || '#6366f1' }}
+                                                                    />
+                                                                    <span className="font-bold opacity-90 flex-1 truncate">{s.name}</span>
+                                                                    <span className="font-black font-mono opacity-70">{s.percent}%</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </>
                                             );
-                                        });
-                                    })()}
+                                        })()}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Pharmacist Leaderboard */}
-                            <div className="lg:col-span-2 premium-card p-6">
+                            <div className="premium-card p-6">
                                 <h3 className="font-black mb-5 uppercase tracking-wider text-sm flex items-center gap-2 opacity-90">
-                                    <TrendingUp size={18} className="text-emerald-500 dark:text-emerald-400" />
+                                    <Users size={18} className="text-emerald-500 dark:text-emerald-400" />
                                     การใช้งานของเภสัชกรสูงสุด (Top Active)
                                 </h3>
-                                <div className="space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                                     {stats.leaderboard && stats.leaderboard.length > 0 ? (
                                         stats.leaderboard.map((pharmacist) => {
                                             return (
                                                 <div
                                                     key={pharmacist.name}
-                                                    className={`p-3.5 rounded-xl border flex justify-between items-center transition-all ${
+                                                    className={`p-4 rounded-2xl border flex flex-col justify-between items-center text-center transition-all ${
                                                         isDark
-                                                            ? 'bg-slate-800/40 border-slate-700/40 hover:bg-slate-800/70'
-                                                            : 'bg-slate-50 border-slate-200/60 hover:bg-slate-100 shadow-sm'
+                                                            ? 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/60 hover:translate-y-[-2px]'
+                                                            : 'bg-slate-50 border-slate-200/60 hover:bg-slate-100 hover:translate-y-[-2px] shadow-sm'
                                                     }`}
                                                 >
-                                                    <div className="flex items-center gap-3">
-                                                        <div>
-                                                            <p className="font-black text-sm">{pharmacist.name}</p>
-                                                            <p className="text-[10px] opacity-60">เภสัชกรผู้คำนวณขนาดยา</p>
-                                                        </div>
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center mb-3">
+                                                        <User size={18} className="text-emerald-500" />
                                                     </div>
-                                                    <div className="text-right">
-                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-black font-mono border ${
-                                                            isDark ? 'bg-sky-950/40 text-sky-400 border-sky-900/30' : 'bg-sky-50 text-sky-600 border-sky-200'
-                                                        }`}>
-                                                            {pharmacist.count} ครั้ง
-                                                        </span>
+                                                    <div>
+                                                        <p className="font-black text-sm text-slate-800 dark:text-white truncate max-w-full">{pharmacist.name}</p>
+                                                        <p className="text-[9px] opacity-50 mt-0.5">เภสัชกรผู้บันทึก</p>
                                                     </div>
+                                                    <span className={`mt-3.5 px-3 py-1 rounded-full text-[10px] font-black font-mono border ${
+                                                        isDark ? 'bg-sky-950/40 text-sky-400 border-sky-900/30' : 'bg-sky-50 text-sky-600 border-sky-200'
+                                                    }`}>
+                                                        {pharmacist.count} ครั้ง
+                                                    </span>
                                                 </div>
                                             );
                                         })
                                     ) : (
-                                        <div className="text-center p-8 opacity-60 font-bold italic text-sm">
+                                        <div className="col-span-5 text-center p-8 opacity-60 font-bold italic text-sm">
                                             ยังไม่มีประวัติการคำนวณยาในระบบ
                                         </div>
                                     )}
@@ -737,25 +998,68 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                                             {u.role}
                                                         </span>
                                                     </td>
-                                                    <td className="p-4 text-center">
-                                                        {u.must_change_password === 1 ? (
-                                                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${
-                                                                isDark
-                                                                    ? 'bg-amber-950/30 text-amber-400 border-amber-900/30'
-                                                                    : 'bg-amber-50 text-amber-600 border-amber-200'
-                                                            }`}>
-                                                                รอเปลี่ยนรหัส
-                                                            </span>
-                                                        ) : (
-                                                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${
-                                                                isDark
-                                                                    ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/30'
-                                                                    : 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                                                            }`}>
-                                                                ใช้งานปกติ
-                                                            </span>
-                                                        )}
-                                                    </td>
+                                                     <td className="p-4 text-center">
+                                                         {u.employee_id === currentUser.employee_id ? (
+                                                             u.must_change_password === 1 ? (
+                                                                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${
+                                                                     isDark
+                                                                         ? 'bg-amber-950/30 text-amber-400 border-amber-900/30'
+                                                                         : 'bg-amber-50 text-amber-600 border-amber-200'
+                                                                 }`}>
+                                                                     รอเปลี่ยนรหัส
+                                                                 </span>
+                                                             ) : (
+                                                                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${
+                                                                     isDark
+                                                                         ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/30'
+                                                                         : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                                                 }`}>
+                                                                     ใช้งานปกติ
+                                                                 </span>
+                                                             )
+                                                         ) : (
+                                                             u.is_active === 0 ? (
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => handleToggleStatus(u)}
+                                                                     className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                                                                         isDark
+                                                                             ? 'bg-rose-950/30 hover:bg-rose-900/30 text-rose-400 border-rose-900/30'
+                                                                             : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
+                                                                     }`}
+                                                                     title="คลิกเพื่อเปิดใช้งาน"
+                                                                 >
+                                                                     ระงับการใช้งาน
+                                                                 </button>
+                                                             ) : u.must_change_password === 1 ? (
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => handleToggleStatus(u)}
+                                                                     className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                                                                         isDark
+                                                                             ? 'bg-amber-950/30 hover:bg-amber-900/30 text-amber-400 border-amber-900/30'
+                                                                             : 'bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200'
+                                                                     }`}
+                                                                     title="คลิกเพื่อระงับการใช้งาน"
+                                                                 >
+                                                                     รอเปลี่ยนรหัส
+                                                                 </button>
+                                                             ) : (
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => handleToggleStatus(u)}
+                                                                     className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                                                                         isDark
+                                                                             ? 'bg-emerald-950/30 hover:bg-emerald-900/30 text-emerald-400 border-emerald-900/30'
+                                                                             : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
+                                                                     }`}
+                                                                     title="คลิกเพื่อระงับการใช้งาน"
+                                                                 >
+                                                                     ใช้งานปกติ
+                                                                 </button>
+                                                             )
+                                                         )}
+                                                     </td>
                                                     <td className="p-4 text-center">
                                                         <div className="flex justify-center gap-2">
                                                             <button
@@ -1195,6 +1499,25 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                 </div>
                             </div>
 
+                            <div>
+                                <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">สถานะการใช้งาน (Status)</label>
+                                <div className="relative">
+                                    <select
+                                        className="form-control pl-10 text-sm appearance-none"
+                                        value={editForm.is_active}
+                                        onChange={e => setEditForm({ ...editForm, is_active: parseInt(e.target.value, 10) })}
+                                        disabled={editingUser.employee_id === currentUser.employee_id}
+                                    >
+                                        <option value={1}>ใช้งานปกติ (Active)</option>
+                                        <option value={0}>ระงับการใช้งาน (Suspended)</option>
+                                    </select>
+                                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                                </div>
+                                {editingUser.employee_id === currentUser.employee_id && (
+                                    <span className="text-[10px] text-rose-500 block mt-1 ml-1">ไม่สามารถระงับการใช้งานบัญชีตนเองได้</span>
+                                )}
+                            </div>
+
                             <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/50 mt-6">
                                 <button
                                     type="button"
@@ -1248,6 +1571,48 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                 className="w-1/2 bg-rose-600 hover:bg-rose-500 text-white text-sm font-black py-3 px-4 rounded-xl active:scale-95 cursor-pointer text-center transition-all shadow-md shadow-rose-900/10"
                             >
                                 ลบผู้ใช้
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Custom Status Change Confirmation Modal */}
+            {statusChangeConfirm && (
+                <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className={`premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-l-4 ${
+                        statusChangeConfirm.newStatus === 0 ? 'border-l-rose-500 border-rose-500/30' : 'border-l-emerald-500 border-emerald-500/30'
+                    }`}>
+                        <h3 className={`font-black text-lg mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-3 ${
+                            statusChangeConfirm.newStatus === 0 ? 'text-rose-500' : 'text-emerald-500'
+                        }`}>
+                            <Shield size={18} />
+                            {statusChangeConfirm.newStatus === 0 ? "ยืนยันการระงับการใช้งาน" : "ยืนยันการเปิดใช้งาน"}
+                        </h3>
+                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            คุณต้องการ{statusChangeConfirm.statusText}ผู้ใช้ <strong className="text-slate-200">"{statusChangeConfirm.user.username}"</strong> ใช่หรือไม่?
+                            {statusChangeConfirm.newStatus === 0 && " เมื่อดำเนินการแล้ว บัญชีนี้จะไม่สามารถล็อกอินเข้าสู่ระบบได้ชั่วคราว"}
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setStatusChangeConfirm(null)}
+                                className={`w-1/2 py-3 px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 cursor-pointer text-center ${isDark
+                                        ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
+                                        : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
+                                    }`}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmStatusChange}
+                                className={`w-1/2 text-white text-sm font-black py-3 px-4 rounded-xl active:scale-95 cursor-pointer text-center transition-all shadow-md ${
+                                    statusChangeConfirm.newStatus === 0 
+                                        ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-900/10' 
+                                        : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/10'
+                                }`}
+                            >
+                                ยืนยัน
                             </button>
                         </div>
                     </div>
