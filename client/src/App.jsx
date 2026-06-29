@@ -589,7 +589,7 @@ function App() {
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <input type="text" placeholder="HN ผู้ป่วย" required className="form-control" onChange={e => setPatient({ ...patient, hn: e.target.value })} />
+                            <input type="text" placeholder="H.N. ผู้ป่วย" required className="form-control" onChange={e => setPatient({ ...patient, hn: e.target.value })} />
                             <div className="grid grid-cols-4 gap-4">
                                 <div className="col-span-3">
                                     <input type="text" placeholder="ชื่อ-นามสกุล" className="form-control" onChange={e => setPatient({ ...patient, name: e.target.value })} />
@@ -1068,7 +1068,7 @@ function App() {
                                     </button>
                                     <input
                                         type="text"
-                                        placeholder="ค้นหา HN / ชื่อคนไข้..."
+                                        placeholder="ค้นหา H.N. / ชื่อคนไข้..."
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
                                         className="form-control py-2 px-4 text-sm rounded-xl border border-slate-700/30 font-bold focus:border-sky-500 w-[240px]"
@@ -1156,7 +1156,7 @@ function App() {
                                     <thead className="sticky top-0 z-10" style={{ backgroundColor: 'var(--table-header-bg)' }}>
                                         <tr className="bg-sky-600/10 text-slate-400 border-b border-slate-700/20">
                                             {renderTableHeader('วันที่บันทึก', 'w-[15%] whitespace-nowrap')}
-                                            {renderTableHeader('HN', 'w-[10%] whitespace-nowrap')}
+                                            {renderTableHeader('H.N.', 'w-[10%] whitespace-nowrap')}
                                             {renderTableHeader('ชื่อผู้ป่วย', 'w-[18%] whitespace-nowrap')}
                                             {renderTableHeader('เพศ', 'w-[8%] whitespace-nowrap', 'justify-center')}
                                             {renderTableHeader('อายุ', 'w-[8%] whitespace-nowrap', 'justify-center')}
@@ -1232,7 +1232,7 @@ function App() {
                             ยืนยันการลบประวัติ
                         </h3>
                         <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                            คุณแน่ใจหรือไม่ที่จะลบประวัติการคำนวณของ HN: <strong className="text-slate-200">{deleteConfirmLog.hn}</strong> ({deleteConfirmLog.patient_name || 'ไม่ระบุชื่อ'})? การกระทำนี้ไม่สามารถย้อนกลับได้
+                            คุณแน่ใจหรือไม่ที่จะลบประวัติการคำนวณของ H.N.: <strong className="text-slate-200">{deleteConfirmLog.hn}</strong> ({deleteConfirmLog.patient_name || 'ไม่ระบุชื่อ'})? การกระทำนี้ไม่สามารถย้อนกลับได้
                         </p>
                         <div className="flex gap-3">
                             <button

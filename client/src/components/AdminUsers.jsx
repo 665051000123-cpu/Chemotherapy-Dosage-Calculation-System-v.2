@@ -670,7 +670,7 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                 isDark ? 'from-teal-500/10 to-emerald-500/5 border-teal-500/20' : 'from-teal-50 to-white border-teal-200'
                             } flex justify-between items-center transition-all hover:translate-y-[-2px]`}>
                                 <div className="space-y-2">
-                                    <p className="text-xs font-black uppercase opacity-70 tracking-wider">จำนวนผู้ป่วย (HN สะสม)</p>
+                                    <p className="text-xs font-black uppercase opacity-70 tracking-wider">จำนวนผู้ป่วย (H.N. สะสม)</p>
                                     <h3 className="text-3xl font-black tracking-tight">{stats.totalPatients.toLocaleString()}</h3>
                                 </div>
                                 <div className={`p-3 rounded-2xl ${isDark ? 'bg-teal-950/40 text-teal-400' : 'bg-teal-100 text-teal-600'}`}>
