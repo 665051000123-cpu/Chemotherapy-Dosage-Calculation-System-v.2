@@ -21,7 +21,7 @@ export default {
                 },
                 rowSlideIn: {
                     '0%': { transform: 'translateY(10px)', opacity: '0', backgroundColor: 'rgba(16, 185, 129, 0.2)' },
-                    '100%': { transform: 'translateY(0)', opacity: '1' },
+                    '100%': { transform: 'none', opacity: '1' },
                 },
             },
         },

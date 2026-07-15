@@ -174,6 +174,34 @@ const ActivityLog = sequelize.define('ActivityLog', {
 });
 
 // 💊 Drug Model — maps to existing 'drugs' table
+
+const DrugRule = sequelize.define('DrugRule', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    drugName: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    keywords: {
+        type: DataTypes.JSON,
+        allowNull: true
+    },
+    title: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    desc: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    }
+}, {
+    tableName: 'drug_rules',
+    timestamps: false
+});
+
 const Drug = sequelize.define('Drug', {
     drug_id: {
         type: DataTypes.INTEGER,
@@ -190,7 +218,7 @@ const Drug = sequelize.define('Drug', {
         unique: true
     },
     drug_category: {
-        type: DataTypes.ENUM('CHEMOTHERAPY', 'TARGETED_THERAPY', 'IMMUNOTHERAPY'),
+        type: DataTypes.ENUM('CHEMOTHERAPY', 'TARGETED_THERAPY', 'IMMUNOTHERAPY', 'SUPPORTIVE_CARE'),
         defaultValue: 'CHEMOTHERAPY',
         allowNull: false
     },
@@ -219,6 +247,11 @@ const Drug = sequelize.define('Drug', {
         type: DataTypes.STRING(50),
         allowNull: true
     },
+    dose_per_pack_unit: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        defaultValue: 'mg'
+    },
     inventory_qty: {
         type: DataTypes.DECIMAL(10, 2),
         defaultValue: 0
@@ -235,6 +268,27 @@ const Drug = sequelize.define('Drug', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
+    prep_instructions: DataTypes.TEXT,
+    solvent: DataTypes.STRING(100),
+    admin_route: DataTypes.STRING(50),
+    concentration_per_ml: DataTypes.DECIMAL(10, 2),
+    cost_price: DataTypes.DECIMAL(10, 2),
+    expire_after_mix_days: DataTypes.INTEGER,
+    expire_after_mix_hours: DataTypes.INTEGER,
+    expire_after_recon_days: DataTypes.INTEGER,
+    warning_msg: DataTypes.TEXT,
+    storage_instruction: DataTypes.STRING(255),
+    infusion_rate: DataTypes.STRING(100),
+    alert_cumulative_dose: DataTypes.DECIMAL(10, 2),
+    alert_cumulative_dose_unit: DataTypes.STRING(20),
+    alert_concentration_max: DataTypes.DECIMAL(10, 2),
+    diluent_incompat: DataTypes.TEXT,
+    note: DataTypes.TEXT,
+    myelosuppression: DataTypes.STRING(255),
+    side_effect_info: DataTypes.TEXT,
+    stability_info: DataTypes.TEXT,
+    drug_interactions: DataTypes.TEXT,
+    usual_dosage: DataTypes.TEXT,
     created_at: DataTypes.DATE
 }, {
     tableName: 'drugs',
@@ -293,6 +347,29 @@ const Solvent = sequelize.define('Solvent', {
 ActivityLog.belongsTo(User, { foreignKey: 'employee_id', targetKey: 'employee_id', as: 'user', constraints: false });
 
 // Initialize and sync models
+
+// --- Seed Drug Rules ---
+async function seedDrugRules() {
+    const count = await DrugRule.count();
+    if (count === 0) {
+        console.log('Seeding initial drug rules...');
+        const initialRules = [
+            { drugName: 'PACLITAXEL', keywords: ['NSS'], title: 'คำเตือนการให้ยา', desc: 'ต้องผสมในขวดแก้วหรือขวดพลาสติกที่ปราศจากสาร Di(2-ethylhexyl) phthalate (DEHP) เท่านั้น' },
+            { drugName: 'BORTEZOMIB', keywords: ['NSS'], title: 'คำเตือนการให้ยา', desc: 'กรณีให้ทาง SC นิยมผสม NSS 1.4 ml (ความเข้มข้นจะเท่ากับ 2.5 mg/ml)' },
+            { drugName: 'CARBOPLATIN', keywords: ['D5W'], title: 'คำเตือนการให้ยา', desc: 'ผสม D5W เท่านั้น หากใช้ NSS อาจส่งผลต่อความคงตัวของยา' },
+            { drugName: 'CISPLATIN', keywords: ['D5W'], title: 'คำเตือนการให้ยา', desc: 'ผสม NSS เท่านั้น หากผสม D5W โดยไม่มี NSS อาจส่งผลต่อความคงตัวของยา' },
+            { drugName: 'OXALIPLATIN', keywords: ['NSS'], title: 'คำเตือนการให้ยา', desc: 'ห้ามผสมใน NSS ให้ผสม D-5-W' },
+            { drugName: 'BENDAMUSTINE', keywords: ['D5W'], title: 'คำเตือนการให้ยา', desc: 'ห้ามผสมใน D5W ให้ผสม NSS' },
+            { drugName: 'TRASTUZUMAB', keywords: ['D5W'], title: 'คำเตือนการให้ยา', desc: 'ห้ามผสมใน D5W ให้ผสม NSS' },
+            { drugName: 'PEMBROLIZUMAB', keywords: ['NSS'], title: 'คำเตือนการให้ยา', desc: 'ต้องใช้ in-line filter (ขนาดรูพรุน 0.2 ถึง 5.0 ไมครอน)' },
+            { drugName: 'ETOPOSIDE', keywords: ['NSS'], title: 'คำเตือนการให้ยา', desc: 'ผสม NSS หากความเข้มข้น > 0.4 mg/ml อาจเกิดตะกอนได้' },
+            { drugName: 'IFOSFAMIDE', keywords: ['NSS'], title: 'คำเตือนการให้ยา', desc: 'ให้ร่วมกับ MESNA เสมอ' }
+        ];
+        await DrugRule.bulkCreate(initialRules);
+        console.log('✅ Seeding complete.');
+    }
+}
+
 async function initializeDatabase() {
     try {
         await sequelize.authenticate();
@@ -312,7 +389,7 @@ async function initializeDatabase() {
         }
 
         // Sync models with DB (automatically creates tables if they do not exist)
-        await sequelize.sync();
+        await sequelize.sync({ alter: true });
         console.log('✅ Database schema synchronized.');
 
         // Check if title column exists in patients table, if not add it
@@ -428,6 +505,7 @@ async function initializeDatabase() {
             });
             console.log('✅ Default user (admin/1234) created.');
         }
+        await seedDrugRules();
     } catch (err) {
         console.error('❌ Database initialization failed:', err);
     }
@@ -1341,7 +1419,7 @@ app.put('/api/drugs/:id/inventory', requireHeadOrAdmin, async (req, res) => {
 // 👥 Admin Drug Management APIs
 app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
     try {
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1359,7 +1437,8 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
             max_dose_cap: max_dose_cap === '' ? null : max_dose_cap,
             max_bsa_cap: max_bsa_cap === '' ? null : max_bsa_cap,
             max_gfr_cap: max_gfr_cap === '' ? null : max_gfr_cap,
-            is_active: is_active !== undefined ? is_active : 1
+            is_active: is_active !== undefined ? is_active : 1,
+            dose_per_pack_unit
         });
 
         logActivity(employeeId, 'CREATE_DRUG', `เพิ่มยาใหม่: ${drug_name} (${calculation_type})`);
@@ -1376,7 +1455,7 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
 app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
     try {
         const drugId = req.params.id;
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1394,7 +1473,8 @@ app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
             max_dose_cap: max_dose_cap === '' ? null : max_dose_cap,
             max_bsa_cap: max_bsa_cap === '' ? null : max_bsa_cap,
             max_gfr_cap: max_gfr_cap === '' ? null : max_gfr_cap,
-            is_active
+            is_active,
+            dose_per_pack_unit
         }, { where: { drug_id: drugId } });
 
         logActivity(employeeId, 'UPDATE_DRUG', `แก้ไขยา ID ${drugId}: name=${drug_name}, type=${calculation_type}`);
@@ -1513,6 +1593,101 @@ app.post('/api/print', async (req, res) => {
     }
 });
 
+
+
+// --- Drug Rules API ---
+app.get('/api/drug_rules', async (req, res) => {
+    try {
+        const rules = await DrugRule.findAll();
+        res.json(rules);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/drug_rules', async (req, res) => {
+    try {
+        const rule = await DrugRule.create(req.body);
+        res.status(201).json(rule);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/drug_rules/:id', async (req, res) => {
+    try {
+        const rule = await DrugRule.findByPk(req.params.id);
+        if (rule) {
+            await rule.update(req.body);
+            res.json(rule);
+        } else {
+            res.status(404).json({ error: 'Rule not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/drug_rules/:id', async (req, res) => {
+    try {
+        const rule = await DrugRule.findByPk(req.params.id);
+        if (rule) {
+            await rule.destroy();
+            res.status(204).end();
+        } else {
+            res.status(404).json({ error: 'Rule not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- Drug Rules API ---
+app.get('/api/drug_rules', async (req, res) => {
+    try {
+        const rules = await DrugRule.findAll();
+        res.json(rules);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/drug_rules', async (req, res) => {
+    try {
+        const rule = await DrugRule.create(req.body);
+        res.status(201).json(rule);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/drug_rules/:id', async (req, res) => {
+    try {
+        const rule = await DrugRule.findByPk(req.params.id);
+        if (rule) {
+            await rule.update(req.body);
+            res.json(rule);
+        } else {
+            res.status(404).json({ error: 'Rule not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/drug_rules/:id', async (req, res) => {
+    try {
+        const rule = await DrugRule.findByPk(req.params.id);
+        if (rule) {
+            await rule.destroy();
+            res.status(204).end();
+        } else {
+            res.status(404).json({ error: 'Rule not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // รัน Server ที่พอร์ต 5004 เป็นตัวกลางกระจายคำสั่ง
 const PORT = 5004;

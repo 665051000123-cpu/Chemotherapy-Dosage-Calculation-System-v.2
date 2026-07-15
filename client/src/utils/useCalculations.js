@@ -56,6 +56,7 @@ export const useCalculations = () => {
     const calculateDose = useCallback((bsaValue, drugInput, params = {}) => {
         let dose = 0;
         let note = '';
+        let doseFormula = '';
 
         // If drugInput is a string, do backward compatibility for standard drug names
         if (typeof drugInput === 'string') {
@@ -100,7 +101,7 @@ export const useCalculations = () => {
             }
 
             const finalDoseValue = isNaN(dose) ? 'ว่าง' : dose.toFixed(2);
-            return { dose: finalDoseValue, note };
+            return { dose: finalDoseValue, note, doseFormula, drugVolume: null, vials: null };
         }
 
         // If drugInput is a drug configuration object from database:
@@ -130,6 +131,7 @@ export const useCalculations = () => {
             
             dose = usedBsa * targetDose;
             note = `BSA-based Calculation (${targetDose} ${doseUnit})${bsaNote}`;
+            doseFormula = `${usedBsa.toFixed(2)} m2 x ${targetDose} ${doseUnit}`;
             
             // Check dose cap
             if (drugObj.max_dose_cap !== null && drugObj.max_dose_cap !== undefined) {
@@ -155,6 +157,7 @@ export const useCalculations = () => {
             
             dose = usedWeight * targetDose;
             note = `Weight-based (${wtLabel}: ${usedWeight} kg × ${targetDose} ${doseUnit})`;
+            doseFormula = `${usedWeight} kg x ${targetDose} ${doseUnit}`;
             
             // Check dose cap
             if (drugObj.max_dose_cap !== null && drugObj.max_dose_cap !== undefined) {
@@ -168,6 +171,7 @@ export const useCalculations = () => {
         else if (calcType === 'FIXED_DOSE') {
             dose = targetDose;
             note = `Fixed Dose ${targetDose} ${doseUnit}`;
+            doseFormula = `${targetDose} ${doseUnit}`;
             
             // Check dose cap
             if (drugObj.max_dose_cap !== null && drugObj.max_dose_cap !== undefined) {
@@ -201,6 +205,7 @@ export const useCalculations = () => {
                 
                 dose = usedAuc * (usedGfr + 25);
                 note = `Calvert Formula (AUC ${usedAuc} × (CrCl + 25))${gfrNote}`;
+                doseFormula = `AUC ${usedAuc} x (CrCl ${usedGfr} + 25)`;
                 
                 // Check dose cap
                 if (drugObj.max_dose_cap !== null && drugObj.max_dose_cap !== undefined) {
@@ -213,8 +218,22 @@ export const useCalculations = () => {
             }
         }
 
+        let drugVolume = null;
+        let vials = null;
+        if (!isNaN(dose) && dose > 0) {
+            const concentration = parseFloat(drugObj.concentration_per_ml);
+            const dosePerPack = parseFloat(drugObj.dose_per_pack);
+            
+            if (!isNaN(concentration) && concentration > 0) {
+                drugVolume = (dose / concentration).toFixed(2);
+            }
+            if (!isNaN(dosePerPack) && dosePerPack > 0) {
+                vials = Math.ceil(dose / dosePerPack);
+            }
+        }
+
         const finalDoseValue = isNaN(dose) ? 'ว่าง' : dose.toFixed(2);
-        return { dose: finalDoseValue, note };
+        return { dose: finalDoseValue, note, doseFormula, drugVolume, vials };
     }, []);
 
     return {

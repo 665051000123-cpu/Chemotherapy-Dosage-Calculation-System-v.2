@@ -23,102 +23,111 @@
                     <p class="text-sm text-purple-600 font-medium">ลำดับการทำงานของ API (ระบบคำนวณและตรวจสอบขนาดยาเคมีบำบัด)</p>
                 </div>
             </div>
-                    </div>
+        </div>
 
         <div class="grid grid-cols-12 gap-4">
             
             <div class="col-span-3 space-y-4">
                 <div class="bg-[#F8FAFC] border border-slate-200 rounded-xl p-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-1 rounded mb-3 inline-block">API Endpoints (ในระบบ)</h3>
-                    <div class="space-y-2 text-xs font-mono">
+                    <div class="space-y-2 text-xs font-mono max-h-[400px] overflow-y-auto pr-1">
                         <div class="flex items-center gap-2"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">POST</span> <span class="text-slate-700">/api/auth/login</span></div>
                         <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/patients</span></div>
                         <div class="flex items-center gap-2"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">POST</span> <span class="text-slate-700">/api/patients</span></div>
                         <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/drugs</span></div>
                         <div class="flex items-center gap-2"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">POST</span> <span class="text-slate-700">/api/calculations</span></div>
                         <div class="flex items-center gap-2"><span class="bg-amber-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">PUT</span> <span class="text-slate-700">/api/users/password</span></div>
+                        
+                        <div class="border-t pt-2 my-2 border-slate-200 text-[10px] font-sans font-bold text-purple-600">เพิ่มเติมตามระบบงาน:</div>
+                        <div class="flex items-center gap-2"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">POST</span> <span class="text-slate-700">/api/print</span></div>
+                        <div class="flex items-center gap-2"><span class="bg-amber-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">PUT</span> <span class="text-slate-700">/api/users/:employee_id/printer</span></div>
+                        <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/admin/stats</span></div>
+                        <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/order-logs</span></div>
+                        <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/solvents</span></div>
+                        <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/admin/activities</span></div>
+                        <div class="flex items-center gap-2"><span class="bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold w-10 text-center">GET</span> <span class="text-slate-700">/api/admin/logins</span></div>
                     </div>
                 </div>
 
                 <div class="bg-[#F8FAFC] border border-slate-200 rounded-xl p-4 text-xs space-y-2">
-                    <div class="flex items-center gap-3"><span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">GET</span> <span>ดึงข้อมูลคนไข้/ตัวยา (Read)</span></div>
-                    <div class="flex items-center gap-3"><span class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded">POST</span> <span>บันทึกการคำนวณ/ผู้ใช้ (Create)</span></div>
-                    <div class="flex items-center gap-3"><span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded">PUT</span> <span>แก้ไขข้อมูล/รหัสผ่าน (Update)</span></div>
+                    <div class="flex items-center gap-3"><span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">GET</span> <span>ดึงข้อมูล (Read / Fetch)</span></div>
+                    <div class="flex items-center gap-3"><span class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded">POST</span> <span>บันทึก/สั่งการ (Create / Action)</span></div>
+                    <div class="flex items-center gap-3"><span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded">PUT</span> <span>แก้ไข/อัปเดตข้อมูล (Update)</span></div>
                 </div>
             </div>
 
             <div class="col-span-9 grid grid-cols-7 gap-2 relative">
                 
-                <div class="bg-white border-2 border-blue-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-blue-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-blue-600 text-white text-xs font-bold w-full text-center py-1 rounded">1. User Interface</div>
                     <div class="text-center my-4">
                         <i class="fa-solid fa-laptop-medical text-3xl text-blue-500 mb-2"></i>
-                        <p class="text-xs font-bold text-slate-700">หน้าเว็บระบบ</p>
-                        <p class="text-[10px] text-gray-400">React SPA (src/App.jsx)</p>
+                        <p class="text-xs font-bold text-slate-700">หน้าเว็บระบบ & Dashboard</p>
+                        <p class="text-[10px] text-gray-400">React SPA / Print Agent</p>
                     </div>
-                    <span class="text-[10px] text-gray-400 text-center">แพทย์/เภสัชกร กรอกสัดส่วนคนไข้</span>
+                    <span class="text-[10px] text-gray-400 text-center">แพทย์/เภสัชกร ดูสถิติ คีย์สั่งยา และตั้งค่าเครื่องพิมพ์</span>
                 </div>
 
-                <div class="bg-white border-2 border-sky-400 rounded-xl p-3 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-sky-400 rounded-xl p-3 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-sky-500 text-white text-xs font-bold w-full text-center py-1 rounded">2. Route</div>
                     <div class="text-center my-4">
                         <i class="fa-solid fa-route text-3xl text-sky-500 mb-2"></i>
                         <p class="text-xs font-bold text-slate-700">กำหนดเส้นทาง</p>
                         <p class="text-[10px] text-gray-400">Express Endpoint (server.js)</p>
                     </div>
-                    <span class="text-[10px] text-gray-400 text-center">ชี้เป้าหมายตาม URL</span>
+                    <span class="text-[10px] text-gray-400 text-center">ชี้เป้าหมาย URL ประวัติสั่งยา, สถิติ, และการพิมพ์</span>
                 </div>
 
-                <div class="bg-white border-2 border-purple-500 rounded-xl p-2 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-purple-500 rounded-xl p-2 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-purple-600 text-white text-xs font-bold w-full text-center py-1 rounded">3. Middleware</div>
                     <div class="w-full text-[10px] space-y-1 my-2 text-slate-600">
                         <div class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-purple-500"></i> JWT Authentication</div>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-purple-500"></i> Role Verification</div>
+                        <div class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-purple-500"></i> Admin/User Verification</div>
                         <div class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-purple-500"></i> Express JSON parser</div>
                         <div class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-purple-500"></i> CORS Security</div>
                     </div>
-                    <span class="text-[10px] text-gray-400 text-center">สกัดและกรองสิทธิ์การเข้าถึง</span>
+                    <span class="text-[10px] text-gray-400 text-center">ตรวจสอบสิทธิ์ Admin ในการดึง Audit Log</span>
                 </div>
 
-                <div class="bg-white border-2 border-indigo-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-indigo-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-indigo-600 text-white text-xs font-bold w-full text-center py-1 rounded">4. Controller</div>
                     <div class="text-center my-4">
                         <i class="fa-solid fa-code text-3xl text-indigo-500 mb-2"></i>
                         <p class="text-xs font-bold text-slate-700">รับ Request</p>
-                        <p class="text-[10px] text-gray-400">ถอด req.body (น้ำหนัก, ส่วนสูง, รหัสยา)</p>
+                        <p class="text-[10px] text-gray-400">ถอด req.body / req.params</p>
                     </div>
-                    <span class="text-[10px] text-gray-400 text-center">รับค่าพารามิเตอร์ของแอป</span>
+                    <span class="text-[10px] text-gray-400 text-center">รับพารามิเตอร์การคำนวณ, ตัวทำละลาย, ID เครื่องพิมพ์</span>
                 </div>
 
-                <div class="bg-white border-2 border-teal-500 rounded-xl p-2 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-teal-500 rounded-xl p-2 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-teal-600 text-white text-xs font-bold w-full text-center py-1 rounded">5. Service Layer</div>
                     <div class="w-full text-[9px] space-y-1 my-2 text-slate-600">
-                        <div class="flex items-center gap-1 font-bold text-teal-700"><i class="fa-solid fa-calculator"></i> คำนวณหาค่า BSA</div>
-                        <div class="flex items-center gap-1 font-bold text-teal-700"><i class="fa-solid fa-pills"></i> คำนวณ Chemotherapy Dose</div>
+                        <div class="flex items-center gap-1 font-bold text-teal-700"><i class="fa-solid fa-calculator"></i> คำนวณ BSA & Dose ยา</div>
                         <div class="flex items-center gap-1 text-rose-600 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> ตรวจสอบ Overdose</div>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-teal-500"></i> สอบทานความปลอดภัย</div>
+                        <div class="flex items-center gap-1 text-blue-700"><i class="fa-solid fa-print"></i> จัดการคิวพิมพ์ Offline Agent</div>
+                        <div class="flex items-center gap-1 text-amber-700"><i class="fa-solid fa-chart-pie"></i> ประมวลผลสถิติแดชบอร์ด</div>
                     </div>
-                    <span class="text-[10px] text-gray-400 text-center">ลอจิกการคำนวณสูตรแพทย์</span>
+                    <span class="text-[10px] text-gray-400 text-center">คำนวณสูตรร่วมกับสารละลายและสอบทานความปลอดภัย</span>
                 </div>
 
-                <div class="bg-white border-2 border-emerald-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-emerald-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-emerald-600 text-white text-xs font-bold w-full text-center py-1 rounded">6. Model</div>
                     <div class="text-center my-4">
                         <i class="fa-solid fa-cube text-3xl text-emerald-500 mb-2"></i>
                         <p class="text-xs font-bold text-slate-700">Data Mapper</p>
                         <p class="text-[10px] text-gray-400">จัดโครงสร้าง SQL Query Object</p>
                     </div>
-                    <span class="text-[10px] text-gray-400 text-center">เตรียมคำสั่งเขียน/อ่านตาราง</span>
+                    <span class="text-[10px] text-gray-400 text-center">เตรียมคำสั่งเขียน/อ่าน และดึงประวัติรอบยา (Cycles)</span>
                 </div>
 
-                <div class="bg-white border-2 border-cyan-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[240px]">
+                <div class="bg-white border-2 border-cyan-500 rounded-xl p-3 flex flex-col items-center justify-between min-h-[260px]">
                     <div class="bg-cyan-600 text-white text-xs font-bold w-full text-center py-1 rounded">7. Database</div>
-                    <div class="text-center my-4">
-                        <i class="fa-solid fa-database text-3xl text-cyan-500 mb-1"></i>
+                    <div class="text-center my-3">
+                        <i class="fa-solid fa-database text-2xl text-cyan-500 mb-1"></i>
                         <p class="text-xs font-bold text-slate-700 font-mono">MySQL DB</p>
-                        <p class="text-[9px] text-gray-400">ตาราง patients, drugs, logs</p>
+                        <p class="text-[8px] text-gray-400 leading-tight">patients, drugs, order_logs, solvents, default_printer, audit_logs</p>
                     </div>
-                    <span class="text-[10px] text-cyan-700 font-bold text-center">INSERT/SELECT ข้อมูลเสร็จสิ้น</span>
+                    <span class="text-[10px] text-cyan-700 font-bold text-center">จัดการข้อมูลแบบครบวงจร</span>
                 </div>
 
                 <div class="col-span-7 grid grid-cols-3 gap-4 mt-4">
@@ -133,8 +142,8 @@
                     <div class="bg-rose-50 border border-rose-300 rounded-xl p-3 flex items-center gap-4">
                         <div class="bg-rose-500 text-white p-3 rounded-lg"><i class="fa-solid fa-file-shield text-xl"></i></div>
                         <div class="text-xs">
-                            <h4 class="font-bold text-slate-800">9. Audit Log (ประวัติการแก้ไข)</h4>
-                            <p class="text-[10px] text-slate-600">บันทึกข้อมูลการคำนวณและประวัติผู้ใช้งานที่เข้ามาปรับปรุงค่าปริมาณยาเคมี</p>
+                            <h4 class="font-bold text-slate-800">9. Audit Log & History Viewer</h4>
+                            <p class="text-[10px] text-slate-600">บันทึกประวัติคำนวณ และมี Endpoint เฉพาะให้ Admin สามารถดึงข้อมูลกิจกรรม/การเข้าระบบขึ้นมาตรวจสอบบนตารางได้</p>
                         </div>
                     </div>
 
@@ -142,7 +151,7 @@
                         <div class="bg-slate-800 text-emerald-400 p-2.5 font-mono rounded-lg text-sm font-bold">{ &nbsp; }</div>
                         <div class="text-xs">
                             <h4 class="font-bold text-emerald-400">10. Response JSON</h4>
-                            <p class="text-[10px] text-slate-400">ส่งค่า Status, ผลลัพธ์มิลลิกรัมของยา, และข้อความยืนยันกลับไปยัง Client</p>
+                            <p class="text-[10px] text-slate-400">ส่งข้อมูลโดสยามิลลิกรัม, ข้อมูลกราฟสถิติ หรือประวัติล็อกกลับไปยัง Client</p>
                         </div>
                     </div>
                 </div>
@@ -151,23 +160,33 @@
         </div>
 
         <div class="mt-8 pt-4 border-t border-slate-100 grid grid-cols-12 gap-4 text-xs">
-            <div class="col-span-9 bg-slate-50 p-3 rounded-lg flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-                <span class="font-bold text-slate-700 mr-2">คำอธิบายลำดับข้อมูลหลัก:</span>
-                <span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px]">1 UI</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-sky-500 text-white px-2 py-0.5 rounded-full text-[10px]">2 Route</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-[10px]">3 Middleware</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[10px]">4 Controller</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-teal-600 text-white px-2 py-0.5 rounded-full text-[10px]">5 Service</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[10px]">6 Model</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-cyan-600 text-white px-2 py-0.5 rounded-full text-[10px]">7 DB</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px]">8-9 Services</span> <i class="fa-solid fa-arrow-right text-gray-300"></i>
-                <span class="bg-slate-900 text-white px-2 py-0.5 rounded-full text-[10px]">10 Response</span>
+            <div class="col-span-9 bg-slate-50 p-3 rounded-lg flex flex-wrap items-center gap-y-2 gap-x-1">
+                <span class="font-bold text-slate-700 mr-1 shrink-0">คำอธิบายลำดับข้อมูลหลัก:</span>
+                
+                <span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">1 UI & Dashboard</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-sky-500 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">2 Route Endpoints</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">3 Middleware Auth</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">4 Controller Params</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-teal-600 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">5 Service Logic</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">6 Model Cycles</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-cyan-600 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">7 DB Storage</span>
+                <i class="fa-solid fa-arrow-right text-gray-300 mx-0.5 shrink-0"></i>
+                
+                <span class="bg-slate-900 text-white px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0">10 Response</span>
             </div>
-            <div class="col-span-3 flex flex-col justify-center items-end text-[10px] text-gray-400 font-medium">
-                <p>Oncology Chemotherapy Project Architecture</p>
-                <p class="font-bold text-purple-600">by BUGpairoj & DevTeam</p>
-            </div>
-        </div>
+                    </div>
 
     </div>
 

@@ -1,0 +1,34 @@
+import sys
+
+filepath = 'client/src/App.jsx'
+with open(filepath, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Add button in Header
+header_btn_str = '''                              <button
+                                  onClick={() => setShowOfflinePrintHistory(true)}
+                                  className="flex items-center gap-1.5 text-xs font-black text-indigo-500 hover:text-indigo-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-r border-slate-700/50 pr-3 whitespace-nowrap"
+                              >
+                                  <Clock size={14} /> ประวัติออฟไลน์
+                              </button>
+'''
+if 'ประวัติออฟไลน์' not in content:
+    # Let's search for onClick={() => setShowPrinterSettings(true)}
+    idx = content.find('onClick={() => setShowPrinterSettings(true)}')
+    if idx != -1:
+        # find the closing button tag after this text
+        end_idx = content.find('</button>', idx)
+        if end_idx != -1:
+            end_idx += 9 # len('</button>')
+            content = content[:end_idx] + '\n' + header_btn_str + content[end_idx:]
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print('Button added successfully')
+        else:
+            print('Could not find closing button tag')
+    else:
+        print('Could not find onClick')
+else:
+    print('Button already exists')
+

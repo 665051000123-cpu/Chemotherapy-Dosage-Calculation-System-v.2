@@ -1,0 +1,39 @@
+ry' ? (
+                    <div className="animate-row-in space-y-6">
+                        <div id="history-print-area" className="max-w-7xl mx-auto premium-card p-6 md:p-8 relative bg-white">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-700/10">
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={handleBackFromHistory}
+                                        className="p-2.5 rounded-xl border border-slate-700/30 hover:bg-slate-700/10 transition-all cursor-pointer text-slate-400 hover:text-white mr-2 no-print"
+                                        title="ย้อนกลับ"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </button>
+                                    <div>
+                                        <h1 className="text-3xl font-black flex items-center gap-2 text-slate-800">
+                                            <History size={28} className="text-sky-400 print-hide" /> รายงานบันทึกประวัติการคำนวณ
+                                        </h1>
+                                        <p className="text-slate-500 font-medium">ประวัติและบันทึกข้อมูลการคำนวณขนาดยาเคมีบำบัดของผู้ป่วย</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2.5 no-print w-full md:w-auto">
+                                    <button
+                                        onClick={() => setShowFilterPanel(!showFilterPanel)}
+                                        className={`py-2 px-4 rounded-xl border flex items-center gap-2 text-sm font-bold transition-all duration-300 whitespace-nowrap ${showFilterPanel
+                                            ? 'bg-sky-600 border-sky-400 text-white shadow-md'
+                                            : theme === 'dark'
+                                                ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                                                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm'
+                                            }`}
+                                    >
+                                        <Filter size={15} /> {showFilterPanel ? 'ปิดตัวกรอง' : 'ตัวกรอง (Filters)'}
+                                    </button>
+                                    <input
+                                        type="text"
+                                        placeholder="ค้นหา H.N. / ชื่อคนไข้..."
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        className="form-control py-2 px-4 text-sm rounded-xl border border-slate-700/30 font-bold focus:border-sky-500 w-[240px]"
+                                    />
+    

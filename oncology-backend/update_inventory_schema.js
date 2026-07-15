@@ -20,6 +20,7 @@ async function alterTable() {
         const queries = [
             "ALTER TABLE drugs ADD COLUMN dose_per_pack DECIMAL(10,2) NULL;",
             "ALTER TABLE drugs ADD COLUMN package_type VARCHAR(50) NULL;",
+            "ALTER TABLE drugs ADD COLUMN dose_per_pack_unit VARCHAR(50) DEFAULT 'mg';",
             "ALTER TABLE drugs ADD COLUMN inventory_qty DECIMAL(10,2) DEFAULT 0;",
             "ALTER TABLE drugs ADD COLUMN inventory_min DECIMAL(10,2) DEFAULT 0;",
             "ALTER TABLE drugs ADD COLUMN inventory_max DECIMAL(10,2) DEFAULT 0;",

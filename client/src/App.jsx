@@ -181,7 +181,8 @@ function App() {
     const [selectedDrugs, setSelectedDrugs] = useState([]);
     const [singleDrugResults, setSingleDrugResults] = useState([]);
     const [drugParams, setDrugParams] = useState({ auc: 5, gfr: '' });
-    const [amputation, setAmputation] = useState('');
+    const [amputation, setAmputation] = useState('none');
+    const [isAmputationExpanded, setIsAmputationExpanded] = useState(false);
     const [ampDetails, setAmpDetails] = useState({ level: 'below_knee', method: 'weight_method' });
     const [showDrugInfo, setShowDrugInfo] = useState(false);
     const [showBsaInfo, setShowBsaInfo] = useState(false);
@@ -575,17 +576,17 @@ function App() {
                 currentParams.targetDose = drugParams.customTargetDoses[drugId];
             }
             const drugInfo = drugsInfo.find(d => d.id === drugId);
-            const { dose, note } = calculateDose(currentBsa, drugInfo?.raw || drugId, currentParams);
+            const { dose, note, doseFormula, drugVolume } = calculateDose(currentBsa, drugInfo?.raw || drugId, currentParams);
             const drugName = drugInfo?.name || drugId.toUpperCase();
-            let unit = 'mg';
+            let unit = drugInfo?.raw?.dose_per_pack_unit || 'mg';
             if (drugId === 'bleomycin') {
                 unit = 'units';
-            } else if (drugInfo?.raw?.standard_dose_unit) {
+            } else if (!drugInfo?.raw?.dose_per_pack_unit && drugInfo?.raw?.standard_dose_unit) {
                 const stdUnit = drugInfo.raw.standard_dose_unit.toLowerCase().trim();
                 if (stdUnit.includes('ml')) unit = 'ml';
                 else if (stdUnit.includes('unit')) unit = 'units';
             }
-            return { id: drugId, name: drugName, dose, note, unit };
+            return { id: drugId, name: drugName, dose, note, unit, doseFormula, drugVolume, prepInstructions: drugInfo?.raw?.prep_instructions || '' };
         });
         setSingleDrugResults(results);
         setFinalDose('');
@@ -623,18 +624,33 @@ function App() {
         setSingleDrugResults(prev => prev.map(item => item.id === drugId ? { ...item, unit: newUnit } : item));
     };
 
-    // Auto-sync dose from singleDrugResults to adminRows when calculation updates
+        // Auto-sync dose and volume from singleDrugResults to adminRows when calculation updates
     useEffect(() => {
         if (!singleDrugResults || singleDrugResults.length === 0) return;
-        
+
         setAdminRows(prevRows => {
             let changed = false;
             const newRows = prevRows.map(row => {
-                if (row.drugName && (!row.dose || row.dose.trim() === '')) {
-                    const foundResult = singleDrugResults.find(r => r.name.toLowerCase() === row.drugName.toLowerCase() || r.id.toLowerCase() === row.drugName.toLowerCase());
-                    if (foundResult && foundResult.dose !== undefined && foundResult.dose !== null && !isNaN(parseFloat(foundResult.dose))) {
+                const foundResult = singleDrugResults.find(r => r.name.toLowerCase() === row.drugName.toLowerCase() || r.id.toLowerCase() === row.drugName.toLowerCase());
+                if (foundResult && foundResult.dose !== undefined && foundResult.dose !== null && !isNaN(parseFloat(foundResult.dose))) {
+                    const newDose = `${foundResult.dose} ${foundResult.unit || 'mg'}`;
+                    const newDrugVolume = foundResult.drugVolume || '';
+                    const newVials = foundResult.vials || '';
+                    
+                    // We sync if dose, drugVolume, vials, doseFormula, or prepInstructions changed
+                    if (row.dose !== newDose || row.drugVolume !== newDrugVolume || row.vials !== newVials || row.doseFormula !== foundResult.doseFormula || row.prepInstructions !== foundResult.prepInstructions) {
                         changed = true;
-                        return { ...row, dose: `${foundResult.dose} ${foundResult.unit || 'mg'}` };
+                        
+                        // Calculate total volume dynamically if IV fluid volume is present
+                        let totalVol = '';
+                        const dv = parseFloat(newDrugVolume) || 0;
+                        const iv = parseFloat(row.volume) || 0;
+                        if (dv > 0 || iv > 0) {
+                            totalVol = (dv + iv).toFixed(2);
+                            if (totalVol.endsWith('.00')) totalVol = totalVol.replace('.00', '');
+                        }
+                        
+                        return { ...row, dose: newDose, calculatedDose: newDose, drugVolume: newDrugVolume, vials: newVials, totalVolume: totalVol, doseFormula: foundResult.doseFormula, prepInstructions: foundResult.prepInstructions };
                     }
                 }
                 return row;
@@ -881,7 +897,7 @@ function App() {
                 .sticker {
                     width: 8cm;
                     height: 5cm;
-                    padding: 0.2cm 0.4cm;
+                    padding: 1.0cm 0.4cm 0.2cm 0.4cm;
                     box-sizing: border-box;
                     display: flex;
                     flex-direction: column;
@@ -946,7 +962,7 @@ function App() {
                     </div>
                     <div class="row drug-title">
                         <span>ยา: <span class="drug-name-u">${r.drugName || '-'}</span></span>
-                        <span>${r.dose || '--'} mg. in ${r.solvent || '--'} ${r.volume ? r.volume + ' ml.' : ''}</span>
+                        <span>${r.dose || '--'} in ${r.solvent || '--'} ${r.volume ? r.volume + ' ml.' : ''}</span>
                     </div>
                     <div class="row">
                         <div class="row-left-gap">
@@ -955,11 +971,11 @@ function App() {
                         </div>
                     </div>
                     <div class="row">
-                        <span>การเก็บยา: ${r.storage || ''}</span>
+                        <span>การเก็บยา: ${r.storage || (drugsInfo.find(d => d.name.toLowerCase() === (r.drugName || '').toLowerCase() || d.id.toLowerCase() === (r.drugName || '').toLowerCase())?.raw?.storage_instruction || '')}</span>
                         <span>(${index + 1}/${rowsToPrint.length})</span>
                     </div>
                     <div class="row">
-                        <span>คำเตือน: ${r.warning || ''}</span>
+                        <span>คำเตือน: ${r.warning || (drugsInfo.find(d => d.name.toLowerCase() === (r.drugName || '').toLowerCase() || d.id.toLowerCase() === (r.drugName || '').toLowerCase())?.raw?.warning_msg || '')}</span>
                     </div>
                     <div class="row" style="margin-top: auto;">
                         <span>ผลิต: ${pTime.split(' ')[0]}</span>
@@ -1050,23 +1066,76 @@ function App() {
         const producedTime = formatDateTime(now);
 
         let drugBlocks = '';
-        const rowsToPrint = activeRows.some(r => r.drugName) ? activeRows : (singleDrugResults.length > 0 ? singleDrugResults.map(r => ({ drugName: r.name, dose: r.dose })) : activeRows);
+        const rowsToPrint = activeRows.some(r => r.drugName) ? activeRows : (singleDrugResults.length > 0 ? singleDrugResults.map(r => ({ drugName: r.name, dose: r.dose, doseFormula: r.doseFormula, prepInstructions: r.prepInstructions, drugVolume: r.drugVolume })) : activeRows);
         
         rowsToPrint.forEach((row, i) => {
+            let printDrugVolume = '';
+            let printVials = row.vials || '';
+            let finalPrepInstructions = row.prepInstructions || 'ไม่ต้องละลาย (Ready to use)';
+            
+            if (row.drugName) {
+                const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
+                let concentration = 0;
+                let dosePerPack = 0;
+                if (dInfo && dInfo.raw) {
+                    concentration = parseFloat(dInfo.raw.concentration_per_ml) || 0;
+                    dosePerPack = parseFloat(dInfo.raw.dose_per_pack) || 0;
+                }
+                
+                if (concentration === 0 || dosePerPack === 0) {
+                    const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
+                    if (drugKey) {
+                        concentration = DRUG_CONCENTRATION_DATA[drugKey].concentration || concentration;
+                        dosePerPack = DRUG_CONCENTRATION_DATA[drugKey].dosePerPack || dosePerPack;
+                    }
+                }
+                
+                let volPerPack = 0;
+                if (concentration > 0 && dosePerPack > 0) {
+                    volPerPack = dosePerPack / concentration;
+                    printDrugVolume = volPerPack.toFixed(2);
+                    if (printDrugVolume.endsWith('.00')) printDrugVolume = printDrugVolume.replace('.00', '');
+                } else {
+                    // Fallback to volPerPack directly if concentration is 0 (e.g. powder with known reconstitution volume)
+                    const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
+                    if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].volPerPack > 0) {
+                        printDrugVolume = DRUG_CONCENTRATION_DATA[drugKey].volPerPack.toString();
+                        dosePerPack = DRUG_CONCENTRATION_DATA[drugKey].dosePerPack || 0;
+                    }
+                }
+                
+                if (!printVials && row.dose) {
+                    const numVal = parseFloat(row.dose.toString().replace(/[^\d.]/g, ''));
+                    if (!isNaN(numVal) && dosePerPack > 0) {
+                        printVials = Math.ceil(numVal / dosePerPack);
+                    }
+                }
+            }
+
             drugBlocks += `
                 <div class="drug-block">
-                    <div class="drug-header">
+                    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; margin-bottom: 6px;">
                         <div style="width: 20px;">${i + 1}.</div>
-                        <div>Drug <span class="line-input" style="width: 250px;">${row.drugName || ''}</span></div>
-                        <div style="margin-left: 10px;">Dose formular <span class="line-input" style="width: 150px;"></span></div>
-                        <div style="margin-left: 10px;">Dose <span class="line-input" style="width: 100px; text-align: center;">${row.dose || ''}</span> mg</div>
+                        <div>Drug</div>
+                        <div class="line-input" style="width: 180px; margin: 0 10px 0 5px;">${row.drugName || ''}</div>
+                        <div>Dose formular</div>
+                        <div class="line-input" style="flex: 1; min-width: 150px; margin: 0 10px 0 5px;">${row.doseFormula || ''}</div>
+                        <div>Dose</div>
+                        <div class="line-input" style="width: 90px; text-align: center; margin-left: 5px;">${row.dose || ''}</div>
                     </div>
-                    <div style="margin-left: 20px; margin-bottom: 4px;">
-                        สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution) <span class="line-input" style="width: 400px;"></span>
+                    <div style="display: flex; align-items: flex-end; margin-left: 20px; margin-bottom: 6px;">
+                        <div style="white-space: nowrap; margin-right: 5px;">สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution)</div>
+                        <div class="line-input" style="flex: 1;">${finalPrepInstructions}</div>
                     </div>
-                    <div style="margin-left: 20px; margin-bottom: 4px;">
-                        ปริมาตรยาที่เตรียม <span class="line-input" style="width: 150px; text-align: center;">${row.volume || ''}</span> ml 
-                        Add ลงใน Diluent <span class="line-input" style="width: 250px;">${row.solvent || ''}</span>
+                    <div style="display: flex; align-items: flex-end; margin-left: 20px; margin-bottom: 6px;">
+                        <div style="white-space: nowrap; margin-right: 5px;">ปริมาตรยาที่เตรียม</div>
+                        <div class="line-input" style="width: 80px; text-align: center; font-weight: bold;">${printDrugVolume}</div>
+                        <div style="white-space: nowrap; margin-left: 5px;">ml ${printVials ? `(ใช้ ${printVials} ขวด)` : ''}</div>
+                        <div style="white-space: nowrap; margin-left: 15px; margin-right: 5px;">(Add ลงใน Diluent</div>
+                        <div class="line-input" style="flex: 1;">${row.solvent || ''}</div>
+                        <div style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ปริมาตร</div>
+                        <div class="line-input" style="width: 80px; text-align: center;">${row.volume || ''}</div>
+                        <div style="white-space: nowrap; margin-left: 5px;">ml)</div>
                     </div>
                     <div class="qc-section" style="margin-left: 20px;">
                         <div class="qc-title">การตรวจสอบคุณภาพยาเคมีบำบัดที่ผสมเสร็จ</div>
@@ -1196,20 +1265,6 @@ function App() {
                 BSA = Square root of [(Weight(kg) x Height(cm)) / 3600] = <span class="line-input" style="width: 80px; text-align: center;">${bsa ? Number(bsa).toFixed(4) : ''}</span> m²
             </div>
 
-            <div class="lab-row">
-                <div><span class="checkbox-square"></span> ANC > 1,500 cell/mm³ <span class="text-sm">[ANC= [(%Neutrophils+%Band)xWBC/100]]</span></div>
-                <div><span class="checkbox-square"></span> Hb > 10 g/dl and</div>
-                <div><span class="checkbox-square"></span> Plt > 100,000 /mm³</div>
-            </div>
-
-            <div class="row" style="display: flex; gap: 10px; align-items: baseline;">
-                <div style="white-space: nowrap;">ผล Lab อื่นๆ <span class="line-input" style="width: 150px;"></span></div>
-                <div class="text-xs">(Creatinine clearance ใช้สูตร CrCl= [72xScr (mg/dL)/(140-อายุ)xน้ำหนัก (kg)]x(0.85 if female)]</div>
-            </div>
-
-            <div class="row">
-                Drug regimen <span class="line-input" style="width: 80%;">${selectedRegimen === 'custom' ? 'Custom' : selectedRegimen === 'cv' ? 'CV Regimen' : selectedRegimen === 'bc' ? 'BC Regimen' : (selectedRegimen || '')}</span>
-            </div>
 
             <div class="drug-section">
                 <div style="font-weight: bold; margin-bottom: 10px;">Working formula</div>
@@ -1519,7 +1574,7 @@ function App() {
     const handleAddRow = () => {
         setAdminRows(prev => [
             ...prev,
-            { id: Date.now(), route: '', solvent: '', startDate: '', startTime: '', endDate: '', endTime: '', rate: '', order: prev.length + 1, skipped: false }
+            { id: Date.now(), drugName: '', route: '', solvent: '', startDate: '', startTime: '', endDate: '', endTime: '', rate: '', order: prev.length + 1, skipped: false, dose: '', calculatedDose: '', volume: '', drugVolume: '', vials: '', warning: '' }
         ]);
     };
 
@@ -1755,6 +1810,40 @@ function App() {
             }
         }
     }, [patient.cycle]);
+
+    // Auto-populate adminRows based on selected drugs
+    useEffect(() => {
+        if (selectedDrugs.length > 0) {
+            setAdminRows(prev => {
+                let newRows = [...prev];
+                let changed = false;
+                
+                selectedDrugs.forEach(drugId => {
+                    const drug = drugsInfo.find(d => d.id === drugId);
+                    if (drug) {
+                        const exists = newRows.some(r => r.drugName && r.drugName.toLowerCase() === drug.name.toLowerCase());
+                        if (!exists) {
+                            // Find an empty row to use
+                            const emptyIdx = newRows.findIndex(r => !r.drugName && !r.dose);
+                            if (emptyIdx >= 0) {
+                                newRows[emptyIdx] = { ...newRows[emptyIdx], drugName: drug.name };
+                            } else {
+                                newRows.push({
+                                    id: Date.now() + Math.random(),
+                                    order: newRows.length + 1,
+                                    drugName: drug.name,
+                                    route: '', solvent: '', startDate: '', startTime: '', endDate: '', endTime: '', rate: '', skipped: false, dose: '', calculatedDose: '', volume: '', storage: '', warning: ''
+                                });
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                
+                return changed ? newRows : prev;
+            });
+        }
+    }, [selectedDrugs]);
 
     const lastActivityRef = useRef(Date.now());
 
@@ -3004,103 +3093,7 @@ function App() {
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 workspace-section">
                             <div className="lg:col-span-8 space-y-5">
-                                {/* Amputation in one row */}
-                                <div className="grid grid-cols-1 gap-5">                                    {/* Amputation Selection */}
-                                    <div className="premium-card p-5 border-t-4 border-t-indigo-500 bg-gradient-to-b from-indigo-50/50 to-white dark:from-indigo-950/20 dark:to-slate-800">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-2">
-                                                <h2 className="text-sm font-black text-sky-700 dark:text-sky-300">ประวัติการสูญเสียอวัยวะ (แขน/ขา)</h2>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowAmpInfo(!showAmpInfo)}
-                                                className="flex items-center gap-1.5 text-[10px] font-black text-sky-500 hover:text-sky-400 p-1.5 bg-sky-600/5 rounded-lg border border-sky-500/20 transition-all no-print"
-                                            >
-                                                <Info size={12} /> ข้อมูลสูตร
-                                            </button>
-                                        </div>
-                                        <div className="grid grid-cols-1 gap-3 mb-3">
-                                            {[
-                                                { id: 'none', label: 'ปกติ (None)' },
-                                                { id: 'amputee', label: 'มีประวัติตัดแขนขา (Amputee)' }
-                                            ].map(opt => (
-                                                <label key={opt.id} className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-3 ${amputation === opt.id ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-500' : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-sky-300'}`}>
-                                                    <input 
-                                                        type="radio" 
-                                                        name="amputationStatus" 
-                                                        checked={amputation === opt.id} 
-                                                        onChange={() => setAmputation(opt.id)} 
-                                                        className="w-4 h-4 text-sky-600 border-slate-300 focus:ring-sky-500 cursor-pointer" 
-                                                    />
-                                                    <span className={`text-sm font-black ${amputation === opt.id ? 'text-sky-700 dark:text-sky-300' : 'text-slate-600 dark:text-slate-400'}`}>
-                                                        {opt.label}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                        {amputation === 'amputee' && (
-                                            <div className="p-3 bg-sky-50/50 dark:bg-sky-900/10 rounded-xl border border-sky-100 dark:border-sky-800 space-y-3">
-                                                <div>
-                                                    <div className="text-xs font-bold text-sky-700 dark:text-sky-400 mb-2">ระบุตำแหน่งที่สูญเสีย:</div>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        {[
-                                                            { id: 'below_knee', label: 'ใต้เข่า (BK)' },
-                                                            { id: 'above_knee', label: 'เหนือเข่า (AK)' },
-                                                            { id: 'below_elbow', label: 'ใต้ศอก (BE)' },
-                                                            { id: 'above_elbow', label: 'เหนือศอก (AE)' }
-                                                        ].map(opt => (
-                                                            <label key={opt.id} className={`px-3 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-2 ${ampDetails.level === opt.id ? 'bg-white dark:bg-slate-800 border-sky-400 shadow-sm' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-sky-300'}`}>
-                                                                <input 
-                                                                    type="radio" 
-                                                                    name="ampLevel" 
-                                                                    checked={ampDetails.level === opt.id} 
-                                                                    onChange={() => setAmpDetails({ ...ampDetails, level: opt.id })} 
-                                                                    className="w-4 h-4 text-sky-600 cursor-pointer" 
-                                                                />
-                                                                <span className={`text-xs font-bold ${ampDetails.level === opt.id ? 'text-sky-700 dark:text-sky-300' : 'text-slate-600 dark:text-slate-400'}`}>
-                                                                    {opt.label}
-                                                                </span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs font-bold text-sky-700 dark:text-sky-400 mb-2">วิธีปรับคำนวณ:</div>
-                                                    <div className="grid grid-cols-1 gap-2">
-                                                        {[
-                                                            { id: 'weight_method', label: 'ปรับตามน้ำหนัก (Weight)' },
-                                                            { id: 'bsa_method', label: 'ปรับตามพื้นที่ผิว (BSA)' }
-                                                        ].map(opt => (
-                                                            <label key={opt.id} className={`px-3 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-2 ${ampDetails.method === opt.id ? 'bg-white dark:bg-slate-800 border-sky-400 shadow-sm' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-sky-300'}`}>
-                                                                <input 
-                                                                    type="radio" 
-                                                                    name="ampMethod" 
-                                                                    checked={ampDetails.method === opt.id} 
-                                                                    onChange={() => setAmpDetails({ ...ampDetails, method: opt.id })} 
-                                                                    className="w-4 h-4 text-sky-600 cursor-pointer" 
-                                                                />
-                                                                <span className={`text-xs font-bold ${ampDetails.method === opt.id ? 'text-sky-700 dark:text-sky-300' : 'text-slate-600 dark:text-slate-400'}`}>
-                                                                    {opt.label}
-                                                                </span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {showAmpInfo && (
-                                            <div className="animate-pop mt-3 p-4 rounded-xl border bg-sky-50/80 dark:bg-sky-950/40 border-sky-200 dark:border-sky-500/30">
-                                                <h3 className="font-bold text-sky-700 dark:text-sky-300 mb-2 text-xs flex items-center gap-1.5">
-                                                    <Info size={14} /> รายละเอียดการสูญเสียอวัยวะ
-                                                </h3>
-                                                <div className="space-y-2 text-[10px] text-slate-600 dark:text-slate-400">
-                                                    <p><b>ตัดตามน้ำหนัก:</b> หักสัดส่วน % น้ำหนักอวัยวะที่หายไป</p>
-                                                    <p><b>ตัดตาม BSA:</b> ลด BSA ตามสัดส่วนพื้นที่อวัยวะ</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
+                                {/* Amputation moved to Lab section */}
 
                                 <div className="premium-card p-5 relative z-50 border-t-4 border-t-emerald-500 bg-gradient-to-b from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800">
                                     <div className="flex items-center justify-between mb-4">
@@ -3132,14 +3125,7 @@ function App() {
                                             className="form-control text-xs w-28 px-3 py-1.5 bg-white dark:bg-slate-900" 
                                             placeholder="เช่น 1/6" 
                                             value={patient.cycle || ''}
-                                            onChange={e => {
-                                                let val = e.target.value;
-                                                const oldVal = patient.cycle || '';
-                                                if (val.length === 1 && oldVal.length === 0 && /^\d$/.test(val)) {
-                                                    val = val + '/' + val;
-                                                }
-                                                setPatient({ ...patient, cycle: val });
-                                            }}
+                                            onChange={e => setPatient({ ...patient, cycle: e.target.value })}
                                         />
                                     </div>
 
@@ -3620,7 +3606,107 @@ function App() {
                                             </div>
                                             )}
                                         </div>
+                                    </div>
 
+                                    {/* Amputation Selection (Moved here) */}
+                                    <div className="mt-4 p-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/30 dark:bg-indigo-900/10 space-y-3">
+                                        <div className="flex items-center justify-between cursor-pointer select-none" onClick={() => setIsAmputationExpanded(!isAmputationExpanded)}>
+                                            <div className="flex items-center gap-2">
+                                                {isAmputationExpanded ? <ChevronDown size={18} className="text-indigo-600" /> : <ChevronRight size={18} className="text-indigo-600" />}
+                                                <h3 className="text-sm font-black text-indigo-700 dark:text-indigo-300">ประวัติการสูญเสียอวัยวะ (แขน/ขา) {!isAmputationExpanded && amputation === 'none' && <span className="text-xs font-normal text-slate-500 ml-2"> - ปกติ</span>}</h3>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); setShowAmpInfo(!showAmpInfo); }}
+                                                className="flex items-center gap-1.5 text-[10px] font-black text-indigo-500 hover:text-indigo-400 p-1.5 bg-indigo-600/5 rounded-lg border border-indigo-500/20 transition-all no-print"
+                                            >
+                                                <Info size={12} /> ข้อมูลสูตร
+                                            </button>
+                                        </div>
+                                        {isAmputationExpanded && (
+                                            <div className="animate-in fade-in slide-in-from-top-2 duration-200 pt-2 border-t border-indigo-100 dark:border-indigo-800/30">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                                    {[
+                                                        { id: 'none', label: 'ปกติ (None)' },
+                                                        { id: 'amputee', label: 'มีประวัติตัดแขนขา (Amputee)' }
+                                                    ].map(opt => (
+                                                        <label key={opt.id} className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-3 ${amputation === opt.id ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500' : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
+                                                            <input 
+                                                                type="radio" 
+                                                                name="amputationStatus" 
+                                                                checked={amputation === opt.id} 
+                                                                onChange={() => setAmputation(opt.id)} 
+                                                                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer" 
+                                                            />
+                                                            <span className={`text-sm font-black ${amputation === opt.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-400'}`}>
+                                                                {opt.label}
+                                                            </span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                                {amputation === 'amputee' && (
+                                                    <div className="p-3 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-800 space-y-3">
+                                                        <div>
+                                                            <div className="text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-2">ระบุตำแหน่งที่สูญเสีย:</div>
+                                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                                                {[
+                                                                    { id: 'below_knee', label: 'ใต้เข่า (BK)' },
+                                                                    { id: 'above_knee', label: 'เหนือเข่า (AK)' },
+                                                                    { id: 'below_elbow', label: 'ใต้ศอก (BE)' },
+                                                                    { id: 'above_elbow', label: 'เหนือศอก (AE)' }
+                                                                ].map(opt => (
+                                                                    <label key={opt.id} className={`px-3 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-2 ${ampDetails.level === opt.id ? 'bg-white dark:bg-slate-800 border-indigo-400 shadow-sm' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
+                                                                        <input 
+                                                                            type="radio" 
+                                                                            name="ampLevel" 
+                                                                            checked={ampDetails.level === opt.id} 
+                                                                            onChange={() => setAmpDetails({ ...ampDetails, level: opt.id })} 
+                                                                            className="w-4 h-4 text-indigo-600 cursor-pointer" 
+                                                                        />
+                                                                        <span className={`text-xs font-bold ${ampDetails.level === opt.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-400'}`}>
+                                                                            {opt.label}
+                                                                        </span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-2">วิธีปรับคำนวณ:</div>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                                {[
+                                                                    { id: 'weight_method', label: 'ปรับตามน้ำหนัก (Weight)' },
+                                                                    { id: 'bsa_method', label: 'ปรับตามพื้นที่ผิว (BSA)' }
+                                                                ].map(opt => (
+                                                                    <label key={opt.id} className={`px-3 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-2 ${ampDetails.method === opt.id ? 'bg-white dark:bg-slate-800 border-indigo-400 shadow-sm' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
+                                                                        <input 
+                                                                            type="radio" 
+                                                                            name="ampMethod" 
+                                                                            checked={ampDetails.method === opt.id} 
+                                                                            onChange={() => setAmpDetails({ ...ampDetails, method: opt.id })} 
+                                                                            className="w-4 h-4 text-indigo-600 cursor-pointer" 
+                                                                        />
+                                                                        <span className={`text-xs font-bold ${ampDetails.method === opt.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-400'}`}>
+                                                                            {opt.label}
+                                                                        </span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {showAmpInfo && (
+                                                    <div className="animate-pop mt-3 p-4 rounded-xl border bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-500/30">
+                                                        <h3 className="font-bold text-indigo-700 dark:text-indigo-300 mb-2 text-xs flex items-center gap-1.5">
+                                                            <Info size={14} /> รายละเอียดการสูญเสียอวัยวะ
+                                                        </h3>
+                                                        <div className="space-y-2 text-[10px] text-slate-600 dark:text-slate-400">
+                                                            <p><b>ตัดตามน้ำหนัก:</b> หักสัดส่วน % น้ำหนักอวัยวะที่หายไป</p>
+                                                            <p><b>ตัดตาม BSA:</b> ลด BSA ตามสัดส่วนพื้นที่อวัยวะ</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Warnings list in Section 05 */}
@@ -3724,12 +3810,6 @@ function App() {
                                             disabled={(singleDrugResults.length === 0 || singleDrugResults.some(r => isIncompleteDose(r.dose))) || bsa > 4.5 || bsa < 0.3}
                                         >
                                             บันทึก ➔
-                                        </button>
-                                        <button
-                                            onClick={printCalculationA4}
-                                            className="w-full btn btn-secondary text-sm flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer font-bold no-print text-slate-700 dark:text-slate-300"
-                                        >
-                                            <Printer size={18} /> พิมพ์ผลการคำนวณ (A5)
                                         </button>
                                     </div>
                                     {calculationDetails.pharmacistNote && (
@@ -3867,22 +3947,31 @@ function App() {
                                                                             }
                                                                         }
 
-                                                                        let autoVol = row.volume;
+                                                                        let autoVol = row.drugVolume;
                                                                         if (val && matchedDose) {
-                                                                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === val.toLowerCase());
-                                                                            if (drugKey) {
-                                                                                const drugData = DRUG_CONCENTRATION_DATA[drugKey];
-                                                                                if (drugData.concentration > 0) {
-                                                                                    const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
-                                                                                    if (!isNaN(numVal)) {
-                                                                                        autoVol = (numVal / drugData.concentration).toFixed(2);
-                                                                                        if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                            const dInfo = drugsInfo.find(d => d.name.toLowerCase() === val.toLowerCase() || d.id.toLowerCase() === val.toLowerCase());
+                                                                            if (dInfo && dInfo.raw && dInfo.raw.concentration_per_ml > 0) {
+                                                                                const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
+                                                                                if (!isNaN(numVal)) {
+                                                                                    autoVol = (numVal / parseFloat(dInfo.raw.concentration_per_ml)).toFixed(2);
+                                                                                    if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                                }
+                                                                            } else {
+                                                                                const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === val.toLowerCase());
+                                                                                if (drugKey) {
+                                                                                    const drugData = DRUG_CONCENTRATION_DATA[drugKey];
+                                                                                    if (drugData.concentration > 0) {
+                                                                                        const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
+                                                                                        if (!isNaN(numVal)) {
+                                                                                            autoVol = (numVal / drugData.concentration).toFixed(2);
+                                                                                            if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                             }
                                                                         }
                                                                         
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, drugName: val, dose: matchedDose, calculatedDose: calcDose, volume: autoVol } : r));
+                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, drugName: val, dose: matchedDose, calculatedDose: calcDose, drugVolume: autoVol } : r));
                                                                         checkSolventRules(val, row.solvent);
                                                                     }}
                                                                     placeholder="ค้นหา/ระบุชื่อยา..."
@@ -3925,23 +4014,34 @@ function App() {
                                                                         
                                                                         const newVal = numVal ? `${numVal} ${currentUnit}` : '';
                                                                         
-                                                                        let autoVol = row.volume;
+                                                                        let autoVol = row.drugVolume;
                                                                         if (row.drugName) {
-                                                                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
-                                                                            if (drugKey) {
-                                                                                const drugData = DRUG_CONCENTRATION_DATA[drugKey];
-                                                                                if (drugData.concentration > 0) {
-                                                                                    const parsedNum = parseFloat(numVal);
-                                                                                    if (!isNaN(parsedNum)) {
-                                                                                        autoVol = (parsedNum / drugData.concentration).toFixed(2);
-                                                                                        if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
-                                                                                    } else {
-                                                                                        autoVol = '';
+                                                                            const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
+                                                                            if (dInfo && dInfo.raw && dInfo.raw.concentration_per_ml > 0) {
+                                                                                const parsedNum = parseFloat(numVal);
+                                                                                if (!isNaN(parsedNum)) {
+                                                                                    autoVol = (parsedNum / parseFloat(dInfo.raw.concentration_per_ml)).toFixed(2);
+                                                                                    if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                                } else {
+                                                                                    autoVol = '';
+                                                                                }
+                                                                            } else {
+                                                                                const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
+                                                                                if (drugKey) {
+                                                                                    const drugData = DRUG_CONCENTRATION_DATA[drugKey];
+                                                                                    if (drugData.concentration > 0) {
+                                                                                        const parsedNum = parseFloat(numVal);
+                                                                                        if (!isNaN(parsedNum)) {
+                                                                                            autoVol = (parsedNum / drugData.concentration).toFixed(2);
+                                                                                            if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                                        } else {
+                                                                                            autoVol = '';
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                             }
                                                                         }
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, dose: newVal, volume: autoVol } : r));
+                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, dose: newVal, drugVolume: autoVol } : r));
                                                                     }}
                                                                     placeholder="ระบุตัวเลข"
                                                                     className={`form-control py-1.5 px-2 text-xs rounded-lg w-[75px] text-center ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
@@ -4050,7 +4150,22 @@ function App() {
                                                                 type="text"
                                                                 value={row.volume || ''}
                                                                 disabled={isLockedRow}
-                                                                onChange={e => setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, volume: e.target.value } : r))}
+                                                                                                                    onChange={e => {
+                                                        const newVol = e.target.value;
+                                                        setAdminRows(prev => prev.map((r, i) => {
+                                                            if (i === idx) {
+                                                                let totalVol = '';
+                                                                const dv = parseFloat(r.drugVolume) || 0;
+                                                                const iv = parseFloat(newVol) || 0;
+                                                                if (dv > 0 || iv > 0) {
+                                                                    totalVol = (dv + iv).toFixed(2);
+                                                                    if (totalVol.endsWith('.00')) totalVol = totalVol.replace('.00', '');
+                                                                }
+                                                                return { ...r, volume: newVol, totalVolume: totalVol };
+                                                            }
+                                                            return r;
+                                                        }));
+                                                    }}
                                                                 placeholder="เช่น 500 ml"
                                                                 className={`form-control py-1.5 px-3 text-xs rounded-lg min-w-[80px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
                                                             />

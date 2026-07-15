@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer } from 'lucide-react';
+import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope } from 'lucide-react';
 import axios from 'axios';
+import DrugRulesManager from './DrugRulesManager';
 
 const API_BASE = '/api';
 
@@ -13,6 +14,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
 
     // Form Modal states
     const [showFormModal, setShowFormModal] = useState(false);
+    const [showRulesManager, setShowRulesManager] = useState(false);
+    const [viewingDrugInfo, setViewingDrugInfo] = useState(null);
     const [editingDrug, setEditingDrug] = useState(null);
     const [drugForm, setDrugForm] = useState({
         drug_code: '',
@@ -25,7 +28,35 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         max_dose_cap: '',
         max_bsa_cap: '',
         max_gfr_cap: '125',
-        is_active: 1
+        is_active: 1,
+        dose_per_pack: '',
+        dose_per_pack_unit: 'mg',
+        package_type: '',
+        inventory_qty: '',
+        inventory_min: '',
+        inventory_max: '',
+        is_auto_dispensed: false,
+        prep_instructions: '',
+        solvent: '',
+        admin_route: '',
+        concentration_per_ml: '',
+        cost_price: '',
+        expire_after_mix_days: '',
+        expire_after_mix_hours: '',
+        expire_after_recon_days: '',
+        warning_msg: '',
+        storage_instruction: '',
+        infusion_rate: '',
+        alert_cumulative_dose: '',
+        alert_cumulative_dose_unit: '',
+        alert_concentration_max: '',
+        diluent_incompat: '',
+        note: '',
+        myelosuppression: '',
+        side_effect_info: '',
+        stability_info: '',
+        drug_interactions: '',
+        usual_dosage: ''
     });
 
     const [deleteConfirmDrug, setDeleteConfirmDrug] = useState(null);
@@ -61,7 +92,34 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_dose_cap: '',
             max_bsa_cap: '',
             max_gfr_cap: '',
-            is_active: 1
+            is_active: 1,
+            dose_per_pack: '',
+            package_type: '',
+            inventory_qty: '',
+            inventory_min: '',
+            inventory_max: '',
+            is_auto_dispensed: false,
+            prep_instructions: '',
+            solvent: '',
+            admin_route: '',
+            concentration_per_ml: '',
+            cost_price: '',
+            expire_after_mix_days: '',
+            expire_after_mix_hours: '',
+            expire_after_recon_days: '',
+            warning_msg: '',
+            storage_instruction: '',
+            infusion_rate: '',
+            alert_cumulative_dose: '',
+            alert_cumulative_dose_unit: '',
+            alert_concentration_max: '',
+            diluent_incompat: '',
+            note: '',
+            myelosuppression: '',
+            side_effect_info: '',
+            stability_info: '',
+            drug_interactions: '',
+            usual_dosage: ''
         });
         setShowFormModal(true);
     };
@@ -79,7 +137,35 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_dose_cap: drug.max_dose_cap !== null && drug.max_dose_cap !== undefined ? drug.max_dose_cap.toString() : '',
             max_bsa_cap: drug.max_bsa_cap !== null && drug.max_bsa_cap !== undefined ? drug.max_bsa_cap.toString() : '',
             max_gfr_cap: drug.max_gfr_cap !== null && drug.max_gfr_cap !== undefined ? drug.max_gfr_cap.toString() : '',
-            is_active: drug.is_active !== undefined ? drug.is_active : 1
+            is_active: drug.is_active !== undefined ? drug.is_active : 1,
+            dose_per_pack: drug.dose_per_pack !== null && drug.dose_per_pack !== undefined ? drug.dose_per_pack.toString() : '',
+            dose_per_pack_unit: drug.dose_per_pack_unit || 'mg',
+            package_type: drug.package_type || '',
+            inventory_qty: drug.inventory_qty !== null && drug.inventory_qty !== undefined ? drug.inventory_qty.toString() : '',
+            inventory_min: drug.inventory_min !== null && drug.inventory_min !== undefined ? drug.inventory_min.toString() : '',
+            inventory_max: drug.inventory_max !== null && drug.inventory_max !== undefined ? drug.inventory_max.toString() : '',
+            is_auto_dispensed: drug.is_auto_dispensed === 1 || drug.is_auto_dispensed === true,
+            prep_instructions: drug.prep_instructions || '',
+            solvent: drug.solvent || '',
+            admin_route: drug.admin_route || '',
+            concentration_per_ml: drug.concentration_per_ml || '',
+            cost_price: drug.cost_price || '',
+            expire_after_mix_days: drug.expire_after_mix_days || '',
+            expire_after_mix_hours: drug.expire_after_mix_hours || '',
+            expire_after_recon_days: drug.expire_after_recon_days || '',
+            warning_msg: drug.warning_msg || '',
+            storage_instruction: drug.storage_instruction || '',
+            infusion_rate: drug.infusion_rate || '',
+            alert_cumulative_dose: drug.alert_cumulative_dose || '',
+            alert_cumulative_dose_unit: drug.alert_cumulative_dose_unit || '',
+            alert_concentration_max: drug.alert_concentration_max !== null && drug.alert_concentration_max !== undefined ? drug.alert_concentration_max.toString() : '',
+            diluent_incompat: drug.diluent_incompat || '',
+            note: drug.note || '',
+            myelosuppression: drug.myelosuppression || '',
+            side_effect_info: drug.side_effect_info || '',
+            stability_info: drug.stability_info || '',
+            drug_interactions: drug.drug_interactions || '',
+            usual_dosage: drug.usual_dosage || ''
         });
         setShowFormModal(true);
     };
@@ -99,7 +185,29 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_dose_cap: drugForm.max_dose_cap === '' ? null : parseFloat(drugForm.max_dose_cap),
             max_bsa_cap: drugForm.max_bsa_cap === '' ? null : parseFloat(drugForm.max_bsa_cap),
             max_gfr_cap: drugForm.max_gfr_cap === '' ? null : parseInt(drugForm.max_gfr_cap, 10),
-            is_active: parseInt(drugForm.is_active, 10)
+            is_active: parseInt(drugForm.is_active, 10),
+            dose_per_pack: drugForm.dose_per_pack === '' ? null : parseFloat(drugForm.dose_per_pack),
+            package_type: drugForm.package_type,
+            inventory_qty: drugForm.inventory_qty === '' ? 0 : parseFloat(drugForm.inventory_qty),
+            inventory_min: drugForm.inventory_min === '' ? 0 : parseFloat(drugForm.inventory_min),
+            inventory_max: drugForm.inventory_max === '' ? 0 : parseFloat(drugForm.inventory_max),
+            is_auto_dispensed: drugForm.is_auto_dispensed ? 1 : 0,
+            prep_instructions: drugForm.prep_instructions,
+            solvent: drugForm.solvent,
+            admin_route: drugForm.admin_route,
+            concentration_per_ml: drugForm.concentration_per_ml,
+            cost_price: drugForm.cost_price,
+            expire_after_mix_days: drugForm.expire_after_mix_days,
+            expire_after_mix_hours: drugForm.expire_after_mix_hours,
+            expire_after_recon_days: drugForm.expire_after_recon_days,
+            warning_msg: drugForm.warning_msg,
+            storage_instruction: drugForm.storage_instruction,
+            infusion_rate: drugForm.infusion_rate,
+            alert_cumulative_dose: drugForm.alert_cumulative_dose,
+            alert_cumulative_dose_unit: drugForm.alert_cumulative_dose_unit,
+            alert_concentration_max: drugForm.alert_concentration_max,
+            diluent_incompat: drugForm.diluent_incompat,
+            note: drugForm.note
         };
 
         try {
@@ -199,8 +307,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         <th>ประเภทการคำนวณ</th>
                         <th>ขนาดยามาตรฐาน</th>
                         <th>หน่วย</th>
-                        <th class="text-center">Dose Cap</th>
-                        <th class="text-center">CrCl CAP</th>
+                        <th class="text-center">จำกัดปริมาณยาสูงสุด (Dose Cap)</th>
+                        <th class="text-center">จำกัดค่าไต (CrCl Cap)</th>
                         <th class="text-center">น้ำหนักที่ใช้</th>
                         <th class="text-center">สถานะ</th>
                     </tr>
@@ -357,6 +465,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
 
     
     return (
+        <>
         <div className="animate-row-in space-y-6">
             {/* Header */}
             <div className="w-full premium-card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
@@ -400,12 +509,20 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         <Printer size={16} /> พิมพ์
                     </button>
                     {isAdmin && (
-                        <button
-                            onClick={handleOpenAddModal}
-                            className="btn-primary text-sm py-2 px-4 rounded-xl flex items-center gap-2 cursor-pointer shrink-0 shadow-md"
-                        >
-                            <Plus size={16} /> เพิ่มยาใหม่
-                        </button>
+                        <>
+                            <button
+                                onClick={() => setShowRulesManager(true)}
+                                className="bg-amber-500 hover:bg-amber-600 text-white text-sm py-2 px-4 rounded-xl flex items-center gap-2 cursor-pointer shrink-0 shadow-md transition-colors"
+                            >
+                                <Shield size={16} /> จัดการกฎข้อห้ามสารละลาย
+                            </button>
+                            <button
+                                onClick={handleOpenAddModal}
+                                className="btn-primary text-sm py-2 px-4 rounded-xl flex items-center gap-2 cursor-pointer shrink-0 shadow-md"
+                            >
+                                <Plus size={16} /> เพิ่มยาใหม่
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
@@ -444,7 +561,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         <ShieldAlert size={20} />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase opacity-60 tracking-wider">ยาที่มี Dose Cap</p>
+                        <p className="text-[10px] font-black uppercase opacity-60 tracking-wider">ยาที่มีการจำกัดปริมาณยาสูงสุด (Dose Cap)</p>
                         <p className="text-2xl font-black">{drugs.filter(d => d.max_dose_cap !== null && d.max_dose_cap !== undefined).length}</p>
                     </div>
                 </div>
@@ -474,13 +591,11 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[13%]">ประเภทการคำนวณ</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[10%]">ขนาดยามาตรฐาน</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[7%]">หน่วย</th>
-                                    <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[9%] text-center">Dose Cap</th>
-                                    <th className="px-2.5 py-3 text-[11px] font-black tracking-wider opacity-60 w-[9%] text-center">CrCl CAP</th>
+                                    <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[9%] text-center">จำกัดปริมาณยาสูงสุด (Dose Cap)</th>
+                                    <th className="px-2.5 py-3 text-[11px] font-black tracking-wider opacity-60 w-[9%] text-center">จำกัดค่าไต (CrCl Cap)</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[9%] text-center">น้ำหนักที่ใช้</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[7%] text-center">สถานะ</th>
-                                    {isAdmin && (
-                                        <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[8%] text-center no-print">การจัดการ</th>
-                                    )}
+                                    <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[8%] text-center no-print">การจัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -554,32 +669,44 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                         <td className="px-2.5 py-3 text-center">
                                             {getStatusBadge(drug.is_active)}
                                         </td>
-                                        {isAdmin && (
-                                            <td className="px-2.5 py-3 text-center no-print">
-                                                <div className="flex justify-center gap-1.5">
-                                                    <button
-                                                        onClick={() => handleOpenEditModal(drug)}
-                                                        className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
-                                                            ? 'bg-sky-950/30 hover:bg-sky-900/40 text-sky-400 hover:text-sky-300 border-sky-900/50'
-                                                            : 'bg-sky-50 hover:bg-sky-100 text-sky-600 hover:text-sky-700 border-sky-200 shadow-sm'
-                                                            }`}
-                                                        title="แก้ไข"
-                                                    >
-                                                        <Edit2 size={14} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteClick(drug)}
-                                                        className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
-                                                            ? 'bg-rose-950/30 hover:bg-rose-900/40 text-rose-400 hover:text-rose-300 border-rose-900/50'
-                                                            : 'bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border-rose-200 shadow-sm'
-                                                            }`}
-                                                        title="ลบ"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        )}
+                                        <td className="px-2.5 py-3 text-center no-print">
+                                            <div className="flex justify-center gap-1.5">
+                                                <button
+                                                    onClick={() => setViewingDrugInfo(drug)}
+                                                    className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
+                                                        ? 'bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-400 hover:text-emerald-300 border-emerald-900/50'
+                                                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 border-emerald-200 shadow-sm'
+                                                        }`}
+                                                    title="ดูรายละเอียดเพิ่มเติม"
+                                                >
+                                                    <FlaskConical size={14} />
+                                                </button>
+                                                {isAdmin && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleOpenEditModal(drug)}
+                                                            className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
+                                                                ? 'bg-sky-950/30 hover:bg-sky-900/40 text-sky-400 hover:text-sky-300 border-sky-900/50'
+                                                                : 'bg-sky-50 hover:bg-sky-100 text-sky-600 hover:text-sky-700 border-sky-200 shadow-sm'
+                                                                }`}
+                                                            title="แก้ไข"
+                                                        >
+                                                            <Edit2 size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteClick(drug)}
+                                                            className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
+                                                                ? 'bg-rose-950/30 hover:bg-rose-900/40 text-rose-400 hover:text-rose-300 border-rose-900/50'
+                                                                : 'bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border-rose-200 shadow-sm'
+                                                                }`}
+                                                            title="ลบ"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -587,6 +714,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                     </div>
                 )}
             </div>
+        </div>
 
             {/* Form Modal (Add / Edit) */}
             {showFormModal && (
@@ -606,9 +734,35 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         </h3>
 
                         <form onSubmit={handleFormSubmit} className="space-y-4">
+                            {/* ดึงข้อมูลยาที่มีอยู่แล้ว */}
+                            <div className="mb-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50">
+                                <label className="block text-xs font-black opacity-70 mb-1.5 uppercase flex items-center gap-2 text-sky-600 dark:text-sky-400">
+                                    <Search size={14} /> ค้นหารายชื่อยา (เลือกเพื่อดึงข้อมูลมาแก้ไข)
+                                </label>
+                                <select
+                                    className="form-control text-sm font-bold text-sky-600 dark:text-sky-400 bg-white dark:bg-slate-900 border-sky-200 dark:border-sky-900 focus:border-sky-500"
+                                    onChange={(e) => {
+                                        if(e.target.value) {
+                                            const selected = drugs.find(d => d.drug_id.toString() === e.target.value);
+                                            if(selected) {
+                                                handleOpenEditModal(selected);
+                                            }
+                                        } else {
+                                            handleOpenAddModal();
+                                        }
+                                    }}
+                                    value={editingDrug ? editingDrug.drug_id : ""}
+                                >
+                                    <option value="">+ เพิ่มข้อมูลยาใหม่ (New Drug)</option>
+                                    {drugs.map(d => (
+                                        <option key={d.drug_id} value={d.drug_id}>[ {d.drug_code || '-'} ] {d.drug_name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">CODE (Drug Code)</label>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">รหัสยา (Drug Code)</label>
                                     <input
                                         type="text"
                                         placeholder="ตัวอย่างเช่น H0201208"
@@ -696,7 +850,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-200 dark:border-slate-700/50 pt-4 mt-2">
                                 <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">Dose Cap (mg)</label>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">จำกัดขนาดยาสูงสุด (Dose Cap mg)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -707,7 +861,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">Max BSA Cap (m²)</label>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">จำกัดพื้นที่ผิวร่างกายสูงสุด (Max BSA m²)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -718,7 +872,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 ml-1">MAX CrCl CAP (ml/min)</label>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 ml-1">จำกัดค่าการทำงานไตสูงสุด (Max CrCl ml/min)</label>
                                     <input
                                         type="number"
                                         placeholder="เช่น 125"
@@ -739,6 +893,160 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                     <option value={1}>เปิดการใช้งาน (Active)</option>
                                     <option value={0}>ปิดการใช้งาน (Inactive)</option>
                                 </select>
+                            </div>
+
+                            {/* Additional Drug Details Section */}
+                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                                <FlaskConical size={16} className="text-amber-500" />
+                                ข้อมูลทางเทคนิคและข้อควรระวัง (Technical & Warnings)
+                            </h4>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">รายละเอียดวิธีการผสมยา</label>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="เช่น นำผงยาผสมกับน้ำเกลือ 5 ml จะได้ความเข้มข้น 3 mg/ml" value={drugForm.prep_instructions} onChange={e => setDrugForm({...drugForm, prep_instructions: e.target.value})}></textarea>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ความเข้มข้น/ปริมาตร (Per ml.)</label>
+                                    <input type="number" step="0.01" className="form-control text-sm" value={drugForm.concentration_per_ml} onChange={e => setDrugForm({...drugForm, concentration_per_ml: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ราคาทุน (บาท)</label>
+                                    <input type="number" step="0.01" className="form-control text-sm" value={drugForm.cost_price} onChange={e => setDrugForm({...drugForm, cost_price: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">หมดอายุหลังผสม (Mix)</label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <input type="number" className="form-control text-sm pr-8" value={drugForm.expire_after_mix_days} onChange={e => setDrugForm({...drugForm, expire_after_mix_days: e.target.value})} />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs opacity-50 font-bold">วัน</span>
+                                        </div>
+                                        <div className="relative flex-1">
+                                            <input type="number" className="form-control text-sm pr-8" value={drugForm.expire_after_mix_hours} onChange={e => setDrugForm({...drugForm, expire_after_mix_hours: e.target.value})} />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs opacity-50 font-bold">ชม.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">หมดอายุหลัง Recon.</label>
+                                    <div className="relative">
+                                        <input type="number" className="form-control text-sm pr-8" value={drugForm.expire_after_recon_days} onChange={e => setDrugForm({...drugForm, expire_after_recon_days: e.target.value})} />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs opacity-50 font-bold">วัน</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">อัตราเร็วในการให้ยา (Infusion Rate)</label>
+                                    <input type="text" className="form-control text-sm" value={drugForm.infusion_rate} onChange={e => setDrugForm({...drugForm, infusion_rate: e.target.value})} />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">แจ้งเตือน Cumulative dose</label>
+                                    <div className="flex gap-2">
+                                        <input type="number" step="0.01" className="form-control text-sm flex-1" value={drugForm.alert_cumulative_dose} onChange={e => setDrugForm({...drugForm, alert_cumulative_dose: e.target.value})} />
+                                        <select className="form-control text-sm flex-1" value={drugForm.alert_cumulative_dose_unit} onChange={e => setDrugForm({...drugForm, alert_cumulative_dose_unit: e.target.value})}>
+                                            <option value="">(หน่วย)</option>
+                                            <option value="mg">mg</option>
+                                            <option value="mg/m2">mg/m2</option>
+                                            <option value="g">g</option>
+                                            <option value="g/m2">g/m2</option>
+                                            <option value="Units">Units</option>
+                                            <option value="Units/m2">Units/m2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">แจ้งเตือนความเข้มข้น &gt; (mg/ml.)</label>
+                                    <input type="number" step="0.01" className="form-control text-sm" value={drugForm.alert_concentration_max} onChange={e => setDrugForm({...drugForm, alert_concentration_max: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ยาที่ห้ามผสมร่วมกัน (Incompat.)</label>
+                                    <input type="text" className="form-control text-sm" value={drugForm.diluent_incompat} onChange={e => setDrugForm({...drugForm, diluent_incompat: e.target.value})} />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">คำเตือน (WARNING)</label>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="เช่น ระวังแพ้ยา" value={drugForm.warning_msg} onChange={e => setDrugForm({...drugForm, warning_msg: e.target.value})}></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-sky-600 dark:text-sky-400">การเก็บรักษา (STORAGE)</label>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="เช่น เก็บในตู้เย็น 2-8 องศา" value={drugForm.storage_instruction} onChange={e => setDrugForm({...drugForm, storage_instruction: e.target.value})}></textarea>
+                                </div>
+                            </div>
+
+                            {/* Clinical Info Section */}
+                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                                <Stethoscope size={16} className="text-purple-500" />
+                                ข้อมูลทางคลินิก (Clinical Information)
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ภาวะกดไขกระดูก (Myelosuppression)</label>
+                                    <input type="text" className="form-control text-sm" placeholder="e.g. Mild, Moderate, Severe" value={drugForm.myelosuppression} onChange={e => setDrugForm({...drugForm, myelosuppression: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ผลข้างเคียง (Side effect)</label>
+                                    <textarea className="form-control text-sm min-h-[40px]" placeholder="e.g. Anaphylaxis, Alopecia" value={drugForm.side_effect_info} onChange={e => setDrugForm({...drugForm, side_effect_info: e.target.value})}></textarea>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ความคงตัว (Stability & Reconstitution)</label>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="e.g. reconstitute with NSS for I.M.; stable for 7 days at RT" value={drugForm.stability_info} onChange={e => setDrugForm({...drugForm, stability_info: e.target.value})}></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ปฏิกิริยาระหว่างยา (Drug interactions)</label>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="e.g. - Decreased effect: Methotrexate" value={drugForm.drug_interactions} onChange={e => setDrugForm({...drugForm, drug_interactions: e.target.value})}></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ขนาดยาปกติ (Usual dosage)</label>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="e.g. 6000 IU/m2 every other day for 3-4 weeks" value={drugForm.usual_dosage} onChange={e => setDrugForm({...drugForm, usual_dosage: e.target.value})}></textarea>
+                                </div>
+                            </div>
+
+                            {/* Inventory Section */}
+                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                                <Package size={16} className="text-emerald-500" />
+                                ข้อมูลบรรจุภัณฑ์ (Package Information)
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ภาชนะบรรจุ</label>
+                                    <input type="text" className="form-control text-sm" placeholder="เช่น Vial, Ampoule" value={drugForm.package_type} onChange={e => setDrugForm({...drugForm, package_type: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ขนาดยา / ภาชนะบรรจุ</label>
+                                    <div className="flex">
+                                        <input 
+                                            type="number" 
+                                            step="0.01" 
+                                            className="form-control text-sm rounded-r-none border-r-0 focus:z-10" 
+                                            placeholder="เช่น 50" 
+                                            value={drugForm.dose_per_pack} 
+                                            onChange={e => setDrugForm({...drugForm, dose_per_pack: e.target.value})} 
+                                        />
+                                        <select 
+                                            className="form-control text-sm rounded-l-none w-24 bg-slate-50 dark:bg-slate-800 focus:z-10 cursor-pointer"
+                                            value={drugForm.dose_per_pack_unit || 'mg'}
+                                            onChange={e => setDrugForm({...drugForm, dose_per_pack_unit: e.target.value})}
+                                        >
+                                            <option value="ml">ML</option>
+                                            <option value="mg">MG</option>
+                                            <option value="g">G</option>
+                                            <option value="mcg">MCG</option>
+                                            <option value="IU">IU</option>
+                                            <option value="หน่วย">หน่วย</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/50 mt-6">
@@ -762,6 +1070,105 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         </form>
                     </div>
                 </div>
+                </div>
+            )}
+
+            {/* Drug Info View Modal */}
+            {viewingDrugInfo && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                    <div className="premium-card max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/30">
+                            <h3 className="font-black text-lg flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                                <Stethoscope size={20} />
+                                ข้อมูลยา : {viewingDrugInfo.drug_name}
+                            </h3>
+                            <button
+                                onClick={() => setViewingDrugInfo(null)}
+                                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 flex-1 space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                            
+                            <div className="flex gap-2 font-bold mb-2">
+                                <span className="text-slate-500">ภาวะกดไขกระดูก :</span> 
+                                <span className={viewingDrugInfo.myelosuppression?.toLowerCase().includes('severe') ? 'text-rose-500' : 'text-slate-800 dark:text-slate-200'}>
+                                    {viewingDrugInfo.myelosuppression || '-'}
+                                </span>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                                <span className="font-bold text-slate-500 whitespace-nowrap">ผลข้างเคียง :</span> 
+                                <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.side_effect_info || '-'}</span>
+                            </div>
+
+                            {viewingDrugInfo.stability_info && (
+                                <div className="mt-2">
+                                    <span className="font-bold text-slate-500 block mb-1">ความคงตัว :</span>
+                                    <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-indigo-200 dark:border-indigo-900/50">
+                                        {viewingDrugInfo.stability_info}
+                                    </div>
+                                </div>
+                            )}
+
+                            {viewingDrugInfo.drug_interactions && (
+                                <div className="mt-2">
+                                    <span className="font-bold text-slate-500 block mb-1">ปฏิกิริยาระหว่างยา :</span>
+                                    <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-rose-200 dark:border-rose-900/50">
+                                        {viewingDrugInfo.drug_interactions}
+                                    </div>
+                                </div>
+                            )}
+
+                            {viewingDrugInfo.usual_dosage && (
+                                <div className="mt-2">
+                                    <span className="font-bold text-slate-500 block mb-1">ขนาดยาปกติ :</span>
+                                    <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 bg-slate-200/50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-300 dark:border-slate-700">
+                                        {viewingDrugInfo.usual_dosage}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {(viewingDrugInfo.prep_instructions) && (
+                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                                    <span className="font-bold text-slate-500 block mb-1 text-xs uppercase">ข้อมูลทั่วไป</span>
+                                    <div className="text-xs">
+                                        <span className="opacity-70">การเตรียมยา:</span> {viewingDrugInfo.prep_instructions}
+                                    </div>
+                                </div>
+                            )}
+
+                            {(viewingDrugInfo.warning_msg || viewingDrugInfo.storage_instruction) && (
+                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {viewingDrugInfo.warning_msg && (
+                                        <div>
+                                            <span className="font-bold text-rose-500 block mb-1 text-xs uppercase flex items-center gap-1">
+                                                <AlertTriangle size={14} /> คำเตือน (Warning)
+                                            </span>
+                                            <div className="text-xs text-rose-600 dark:text-rose-400 whitespace-pre-wrap">
+                                                {viewingDrugInfo.warning_msg}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {viewingDrugInfo.storage_instruction && (
+                                        <div>
+                                            <span className="font-bold text-sky-500 block mb-1 text-xs uppercase flex items-center gap-1">
+                                                <Thermometer size={14} /> การเก็บรักษา (Storage)
+                                            </span>
+                                            <div className="text-xs text-sky-600 dark:text-sky-400 whitespace-pre-wrap">
+                                                {viewingDrugInfo.storage_instruction}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -801,7 +1208,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
 
 
 
-        </div>
+            <DrugRulesManager isOpen={showRulesManager} onClose={() => setShowRulesManager(false)} isDark={isDark} />
+        </>
     );
 };
 

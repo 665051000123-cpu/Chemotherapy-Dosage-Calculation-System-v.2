@@ -1,0 +1,2 @@
+10px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Pill size={10}/> สูตรยาที่ใช้ (Regimen)</p>
+                                                                                <p className="font-black text-sky-600 dark:text-sky-400 uppercase text-sm leading-snug">

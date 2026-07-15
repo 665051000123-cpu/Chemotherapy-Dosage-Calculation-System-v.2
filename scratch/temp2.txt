@@ -1,0 +1,8 @@
+                                     <div className="flex flex-col sm:flex-row gap-3 sm:items-start justify-between">
+                                                                            <div>
+                                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Pill size={10}/> สูตรยาที่ใช้ (Regimen)</p>
+                                                                                <p className="font-black text-sky-600 dark:text-sky-400 uppercase text-sm leading-snug">{log.drugs_used || '-'}</p>
+                                                                            </div>
+                                                                            <div className="text-left sm:text-right mt-1 sm:mt-0">
+                                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">วิธีการคำนวณ</p>
+                                                                                <p className="text-[9px] font-bold text-slate-500 bg-slate-200/50 dark:bg-slate-700/50 px-1.5 py-0

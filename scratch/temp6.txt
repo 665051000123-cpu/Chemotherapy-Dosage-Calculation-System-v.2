@@ -1,0 +1,26 @@
+                                    ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                                                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm'
+                                            }`}
+                                    >
+                                        <Filter size={15} /> {showFilterPanel ? 'ปิดตัวกรอง' : 'ตัวกรอง (Filters)'}
+                                    </button>
+                                    <input
+                                        type="text"
+                                        placeholder="ค้นหา H.N. / ชื่อคนไข้..."
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        className="form-control py-2 px-4 text-sm rounded-xl border border-slate-700/30 font-bold focus:border-sky-500 w-[240px]"
+                                    />
+                                    <button onClick={printHistory} className="no-print bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold py-2 px-4 rounded-xl border border-slate-700 flex items-center gap-2 text-xs transition-all active:scale-95 shadow-lg whitespace-nowrap">
+                                        <Printer size={14} /> พิมพ์รายงาน
+                                    </button>
+                                </div>
+                            </div>
+
+                            {showFilterPanel && (
+                                <div className={`no-print p-5 rounded-2xl border mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 animate-pop ${theme === 'dark'
+                                    ? 'bg-slate-900/60 border-slate-800'
+                                    : 'bg-slate-50 border-slate-200 shadow-inner'
+                                    }`}>
+                                    <div>
+                                        <label className="block text-xs
