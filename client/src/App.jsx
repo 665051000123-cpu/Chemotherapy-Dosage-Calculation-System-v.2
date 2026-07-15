@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useCalculations } from './utils/useCalculations';
-import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock } from 'lucide-react';
+import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock, Activity } from 'lucide-react';
 import axios from 'axios';
 import Login from './components/Login';
 import Notification from './components/Notification';
@@ -413,6 +413,7 @@ function App() {
     }, [step]);
 
     const [allOrderLogs, setAllOrderLogs] = useState([]);
+    const [cumulativeDoses, setCumulativeDoses] = useState({});
     
     const fetchAllOrderLogs = async () => {
         try {
@@ -467,6 +468,21 @@ function App() {
         }
         return 'ไม่มีประวัติรอบก่อน';
     };
+
+    // Fetch Cumulative Dose history
+    useEffect(() => {
+        if (!patient.hn) {
+            setCumulativeDoses({});
+            return;
+        }
+        axios.get(`${API_BASE}/cumulative-dose/${patient.hn}`)
+            .then(res => {
+                if (res.data && res.data.success) {
+                    setCumulativeDoses(res.data.data);
+                }
+            })
+            .catch(err => console.error("Failed to fetch cumulative doses", err));
+    }, [patient.hn]);
 
     // Auto-fill when typing an existing H.N.
     useEffect(() => {
@@ -954,6 +970,31 @@ function App() {
                     }
                 }
 
+                let tvText = '';
+                let dvNum = parseFloat(r.drugVolume) || 0;
+                
+                if (dvNum === 0 && r.dose && r.drugName) {
+                    const parsedDose = parseFloat((r.dose.toString().match(/[\d.]+/) || ['0'])[0]);
+                    if (parsedDose > 0) {
+                        const dInfo = drugsInfo.find(d => d.name.toLowerCase() === r.drugName.toLowerCase() || d.id.toLowerCase() === r.drugName.toLowerCase());
+                        if (dInfo && dInfo.raw && parseFloat(dInfo.raw.concentration_per_ml) > 0) {
+                            dvNum = parsedDose / parseFloat(dInfo.raw.concentration_per_ml);
+                        } else {
+                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === r.drugName.toLowerCase());
+                            if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].concentration > 0) {
+                                dvNum = parsedDose / DRUG_CONCENTRATION_DATA[drugKey].concentration;
+                            }
+                        }
+                    }
+                }
+
+                const ivNum = parseFloat(r.volume) || 0;
+                if (dvNum > 0 || ivNum > 0) {
+                    let tv = (dvNum + ivNum).toFixed(2);
+                    if (tv.endsWith('.00')) tv = tv.replace('.00', '');
+                    tvText = ` (รวมสุทธิ ${tv} ml)`;
+                }
+
                 return `
                 <div class="sticker">
                     <div class="row">
@@ -962,7 +1003,7 @@ function App() {
                     </div>
                     <div class="row drug-title">
                         <span>ยา: <span class="drug-name-u">${r.drugName || '-'}</span></span>
-                        <span>${r.dose || '--'} in ${r.solvent || '--'} ${r.volume ? r.volume + ' ml.' : ''}</span>
+                        <span>${r.dose || '--'} in ${r.solvent || '--'} ${r.volume ? r.volume + ' ml' : ''}${tvText}</span>
                     </div>
                     <div class="row">
                         <div class="row-left-gap">
@@ -1090,27 +1131,35 @@ function App() {
                     }
                 }
                 
-                let volPerPack = 0;
-                if (concentration > 0 && dosePerPack > 0) {
-                    volPerPack = dosePerPack / concentration;
-                    printDrugVolume = volPerPack.toFixed(2);
+                let numVal = 0;
+                if (row.dose) {
+                    numVal = parseFloat(row.dose.toString().replace(/[^\d.]/g, ''));
+                }
+
+                if (concentration > 0 && numVal > 0) {
+                    const calculatedDrugVol = numVal / concentration;
+                    printDrugVolume = calculatedDrugVol.toFixed(2);
                     if (printDrugVolume.endsWith('.00')) printDrugVolume = printDrugVolume.replace('.00', '');
-                } else {
-                    // Fallback to volPerPack directly if concentration is 0 (e.g. powder with known reconstitution volume)
+                } else if (concentration === 0) {
                     const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
                     if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].volPerPack > 0) {
                         printDrugVolume = DRUG_CONCENTRATION_DATA[drugKey].volPerPack.toString();
-                        dosePerPack = DRUG_CONCENTRATION_DATA[drugKey].dosePerPack || 0;
+                        dosePerPack = DRUG_CONCENTRATION_DATA[drugKey].dosePerPack || dosePerPack;
                     }
                 }
                 
-                if (!printVials && row.dose) {
-                    const numVal = parseFloat(row.dose.toString().replace(/[^\d.]/g, ''));
-                    if (!isNaN(numVal) && dosePerPack > 0) {
-                        printVials = Math.ceil(numVal / dosePerPack);
-                    }
+                if (!printVials && numVal > 0 && dosePerPack > 0) {
+                    printVials = Math.ceil(numVal / dosePerPack);
                 }
             }
+
+                let printTotalVol = '';
+                const dvNum = parseFloat(printDrugVolume) || 0;
+                const ivNum = parseFloat(row.volume) || 0;
+                if (dvNum > 0 || ivNum > 0) {
+                    printTotalVol = (dvNum + ivNum).toFixed(2);
+                    if (printTotalVol.endsWith('.00')) printTotalVol = printTotalVol.replace('.00', '');
+                }
 
             drugBlocks += `
                 <div class="drug-block">
@@ -1123,19 +1172,22 @@ function App() {
                         <div>Dose</div>
                         <div class="line-input" style="width: 90px; text-align: center; margin-left: 5px;">${row.dose || ''}</div>
                     </div>
-                    <div style="display: flex; align-items: flex-end; margin-left: 20px; margin-bottom: 6px;">
-                        <div style="white-space: nowrap; margin-right: 5px;">สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution)</div>
-                        <div class="line-input" style="flex: 1;">${finalPrepInstructions}</div>
+                    <div style="display: flex; align-items: flex-start; margin-left: 20px; margin-bottom: 6px;">
+                        <div style="white-space: nowrap; margin-right: 5px; margin-top: 2px;">สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution)</div>
+                        <div class="line-input" style="flex: 1; text-align: left; line-height: 1.5;">${finalPrepInstructions}</div>
                     </div>
                     <div style="display: flex; align-items: flex-end; margin-left: 20px; margin-bottom: 6px;">
                         <div style="white-space: nowrap; margin-right: 5px;">ปริมาตรยาที่เตรียม</div>
-                        <div class="line-input" style="width: 80px; text-align: center; font-weight: bold;">${printDrugVolume}</div>
+                        <div class="line-input" style="width: 70px; text-align: center; font-weight: bold;">${printDrugVolume}</div>
                         <div style="white-space: nowrap; margin-left: 5px;">ml ${printVials ? `(ใช้ ${printVials} ขวด)` : ''}</div>
-                        <div style="white-space: nowrap; margin-left: 15px; margin-right: 5px;">(Add ลงใน Diluent</div>
+                        <div style="white-space: nowrap; margin-left: 10px; margin-right: 5px;">(Add ลงใน Diluent</div>
                         <div class="line-input" style="flex: 1;">${row.solvent || ''}</div>
                         <div style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ปริมาตร</div>
-                        <div class="line-input" style="width: 80px; text-align: center;">${row.volume || ''}</div>
+                        <div class="line-input" style="width: 50px; text-align: center;">${row.volume || ''}</div>
                         <div style="white-space: nowrap; margin-left: 5px;">ml)</div>
+                        <div style="white-space: nowrap; margin-left: 15px; font-weight: bold;">ปริมาตรสุทธิ:</div>
+                        <div class="line-input" style="width: 60px; text-align: center; font-weight: bold; font-size: 1.1em; color: #e11d48;">${printTotalVol || '-'}</div>
+                        <div style="white-space: nowrap; margin-left: 5px;">ml</div>
                     </div>
                     <div class="qc-section" style="margin-left: 20px;">
                         <div class="qc-title">การตรวจสอบคุณภาพยาเคมีบำบัดที่ผสมเสร็จ</div>
@@ -1252,11 +1304,11 @@ function App() {
                 ผู้เตรียมยา <span class="line-input" style="width: 250px;">${user.name || user.username || ''}</span>
             </div>
             
-            <div class="row" style="display: flex; gap: 10px;">
-                <div>HN. <span class="line-input" style="width: 100px;">${patient.hn || ''}</span></div>
-                <div>ชื่อ-สกุล <span class="line-input" style="width: 250px;">${patient.title || ''}${patient.name || ''}</span></div>
-                <div>อายุ <span class="line-input" style="width: 50px; text-align: center;">${patient.age || ''}</span> ปี</div>
-                <div>เพศ <span class="line-input" style="width: 80px; text-align: center;">${patient.gender === 'male' ? 'ชาย' : patient.gender === 'female' ? 'หญิง' : ''}</span></div>
+            <div class="row">
+                HN. <span class="line-input" style="width: 100px;">${patient.hn || ''}</span>
+                ชื่อ-สกุล <span class="line-input" style="width: 250px;">${patient.title || ''}${patient.name || ''}</span>
+                อายุ <span class="line-input" style="width: 50px; text-align: center;">${patient.age || ''}</span> ปี
+                เพศ <span class="line-input" style="width: 80px; text-align: center;">${patient.gender === 'male' ? 'ชาย' : patient.gender === 'female' ? 'หญิง' : ''}</span>
             </div>
             
             <div class="row">
@@ -1604,6 +1656,36 @@ function App() {
                 });
             }
         }
+
+        // Cumulative Dose warnings
+        activeDrugs.forEach(drugId => {
+            const drugInfo = drugsInfo.find(d => d.id === drugId);
+            if (drugInfo && drugInfo.raw && drugInfo.raw.alert_cumulative_dose > 0) {
+                const limit = parseFloat(drugInfo.raw.alert_cumulative_dose);
+                const dName = drugId.toUpperCase();
+                const pastDose = cumulativeDoses[dName] || 0;
+                
+                // Find current dose from singleDrugResults
+                const currentResult = singleDrugResults.find(r => r.id === drugId);
+                const currentDose = currentResult && currentResult.dose ? parseFloat(currentResult.dose.toString().replace(/[^\d.]/g, '')) || 0 : 0;
+                
+                const totalDose = pastDose + currentDose;
+                const unit = drugInfo.raw.alert_cumulative_dose_unit || 'mg';
+                
+                if (totalDose >= limit) {
+                    alerts.push({
+                        type: 'danger',
+                        message: `🚨 อันตราย: ขนาดยาสะสมของ ${dName} (${totalDose} ${unit}) ถึง/เกินขีดจำกัดวิกฤตที่ ${limit} ${unit} (ประวัติเดิม: ${pastDose} ${unit} + รอบนี้: ${currentDose} ${unit})`
+                    });
+                } else if (pastDose > 0) {
+                     // Just an info message if past dose exists but not exceeding
+                     alerts.push({
+                        type: 'warning',
+                        message: `ℹ️ ข้อมูล: ${dName} ขนาดยาสะสมรวมรอบนี้ ${totalDose} ${unit} (จำกัดสูงสุด ${limit} ${unit})`
+                    });
+                }
+            }
+        });
 
         // 1. Check Hematologic parameters (ANC, Platelets)
         if (!isNaN(ancVal)) {
@@ -3889,6 +3971,7 @@ function App() {
                                                     <th className="px-3 py-2.5">วิธีให้ยา</th>
                                                     <th className="px-3 py-2.5">ตัวทำละลาย</th>
                                                     <th className="px-3 py-2.5">Vol (ml)</th>
+                                                    <th className="px-3 py-2.5 w-24 text-center text-rose-400">Total Vol</th>
                                                     <th className="px-3 py-2.5">วันที่เริ่ม</th>
                                                     <th className="px-3 py-2.5">วันที่สิ้นสุด</th>
                                                     <th className="px-3 py-2.5">อัตราเร็ว</th>
@@ -4169,6 +4252,32 @@ function App() {
                                                                 placeholder="เช่น 500 ml"
                                                                 className={`form-control py-1.5 px-3 text-xs rounded-lg min-w-[80px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
                                                             />
+                                                        </td>
+                                                        <td className="px-3 py-2.5">
+                                                            <div className="flex flex-col justify-center h-full">
+                                                                {(() => {
+                                                                    let dv = parseFloat(row.drugVolume) || 0;
+                                                                    if (dv === 0 && row.dose && row.drugName) {
+                                                                        const parsedDose = parseFloat((row.dose.toString().match(/[\d.]+/) || ['0'])[0]);
+                                                                        if (parsedDose > 0) {
+                                                                            const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
+                                                                            if (dInfo && dInfo.raw && parseFloat(dInfo.raw.concentration_per_ml) > 0) {
+                                                                                dv = parsedDose / parseFloat(dInfo.raw.concentration_per_ml);
+                                                                            } else {
+                                                                                const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
+                                                                                if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].concentration > 0) {
+                                                                                    dv = parsedDose / DRUG_CONCENTRATION_DATA[drugKey].concentration;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    const iv = parseFloat(row.volume) || 0;
+                                                                    if (dv === 0 && iv === 0) return <span className="text-slate-400 text-center text-xs">-</span>;
+                                                                    let tv = (dv + iv).toFixed(2);
+                                                                    if (tv.endsWith('.00')) tv = tv.replace('.00', '');
+                                                                    return <span className="font-bold text-rose-500 dark:text-rose-400 text-center text-xs bg-rose-50 dark:bg-rose-900/30 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800" title={`ปริมาตรยา (${dv.toFixed(1)} ml) + น้ำเกลือ (${iv.toFixed(1)} ml)`}>{tv}</span>;
+                                                                })()}
+                                                            </div>
                                                         </td>
                                                         <td className="px-3 py-2.5">
                                                             <div className="flex flex-col gap-1.5">

@@ -1253,6 +1253,41 @@ app.put('/api/order-logs/:id', async (req, res) => {
     }
 });
 
+// 🩺 API: คำนวณ Cumulative Dose ของผู้ป่วย
+app.get('/api/cumulative-dose/:hn', async (req, res) => {
+    try {
+        const { hn } = req.params;
+        const logs = await OrderLog.findAll({ where: { hn } });
+        
+        const cumulativeDoses = {};
+        
+        for (const log of logs) {
+            if (!log.order_details) continue;
+            let details = [];
+            try {
+                details = typeof log.order_details === 'string' ? JSON.parse(log.order_details) : log.order_details;
+            } catch (e) {
+                continue;
+            }
+            
+            for (const item of details) {
+                if (!item.drugName || !item.dose) continue;
+                
+                const numVal = parseFloat(item.dose.toString().replace(/[^\d.]/g, ''));
+                if (!isNaN(numVal) && numVal > 0) {
+                    const dName = item.drugName.toUpperCase();
+                    cumulativeDoses[dName] = (cumulativeDoses[dName] || 0) + numVal;
+                }
+            }
+        }
+        
+        res.json({ success: true, data: cumulativeDoses });
+    } catch (err) {
+        console.error('❌ Cumulative dose error:', err);
+        res.status(500).json({ success: false, message: 'Database Error: ' + err.message });
+    }
+});
+
 // 👤 API: ดึงข้อมูลคนไข้ทั้งหมด
 app.get('/api/patients', async (req, res) => {
     try {
