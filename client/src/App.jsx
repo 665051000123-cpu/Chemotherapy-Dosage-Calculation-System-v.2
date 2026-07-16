@@ -2601,6 +2601,12 @@ function App() {
                                             />
                                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium pointer-events-none">kg</span>
                                         </div>
+                                        {prevStats.weight && patient.weight && parseFloat(patient.weight) !== parseFloat(prevStats.weight) && (
+                                            <div className="mt-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 flex items-center gap-1.5 leading-none">
+                                                <AlertCircle size={12} className="flex-shrink-0" />
+                                                เปลี่ยนไป {(((parseFloat(patient.weight) - parseFloat(prevStats.weight)) / parseFloat(prevStats.weight)) * 100) > 0 ? '+' : ''}{(((parseFloat(patient.weight) - parseFloat(prevStats.weight)) / parseFloat(prevStats.weight)) * 100).toFixed(1)}% จากครั้งก่อน ({prevStats.weight} kg)
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-xs font-bold text-slate-500 ml-1">เพศ (Gender)</label>
