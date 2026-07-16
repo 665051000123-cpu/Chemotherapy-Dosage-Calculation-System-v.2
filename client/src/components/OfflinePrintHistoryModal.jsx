@@ -57,7 +57,7 @@ const OfflinePrintHistoryModal = ({ show, onClose, user, showNotification }) => 
                         </div>
                         <div>
                             <h2 className="text-xl font-black text-slate-800">ประวัติการพิมพ์ออฟไลน์ (ล่าสุด)</h2>
-                            <p className="text-sm font-medium text-slate-500">เก็บข้อมูล 20 รายการล่าสุดในเครื่องนี้</p>
+                            <p className="text-sm font-medium text-slate-500">มีประวัติการพิมพ์ {history.length} รายการในเครื่องนี้</p>
                         </div>
                     </div>
                     <button 

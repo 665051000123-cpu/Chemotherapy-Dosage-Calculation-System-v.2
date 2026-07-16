@@ -967,7 +967,13 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ยาที่ห้ามผสมร่วมกัน (Incompat.)</label>
-                                    <input type="text" className="form-control text-sm" value={drugForm.diluent_incompat} onChange={e => setDrugForm({...drugForm, diluent_incompat: e.target.value})} />
+                                    <select className="form-control text-sm" value={drugForm.diluent_incompat || ''} onChange={e => setDrugForm({...drugForm, diluent_incompat: e.target.value})}>
+                                        <option value="">-- ไม่ระบุ (Empty) --</option>
+                                        <option value="Dextrose Incompatibility">Dextrose Incompatibility</option>
+                                        <option value="NaCl Incompatibility">NaCl Incompatibility</option>
+                                        <option value="NaCl Inclusive">NaCl Inclusive</option>
+                                        <option value="Dextrose Inclusive">Dextrose Inclusive</option>
+                                    </select>
                                 </div>
                             </div>
 

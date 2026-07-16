@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useCalculations } from './utils/useCalculations';
-import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock, Activity } from 'lucide-react';
+import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock, Activity, FileText } from 'lucide-react';
 import axios from 'axios';
 import Login from './components/Login';
 import Notification from './components/Notification';
@@ -12,6 +12,8 @@ import { DRUG_SOLVENT_RULES } from './drugRules';
 import { DRUG_CONCENTRATION_DATA } from './drugData';
 import PrinterSettings from './components/PrinterSettings';
 import PrintPreviewModal from './components/PrintPreviewModal';
+import OfflinePrintHistoryModal from './components/OfflinePrintHistoryModal';
+import { addOfflinePrintHistory } from './utils/offlinePrintHistory';
 
 import InventoryManagement from './components/InventoryManagement';
 
@@ -94,6 +96,8 @@ function App() {
     const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
     const [timeoutCountdown, setTimeoutCountdown] = useState(30);
     const [showPrinterSettings, setShowPrinterSettings] = useState(false);
+    const [showOfflinePrintHistory, setShowOfflinePrintHistory] = useState(false);
+    const [isUserMenuExpanded, setIsUserMenuExpanded] = useState(false);
     const [previewData, setPreviewData] = useState({
         isOpen: false,
         htmlContent: '',
@@ -112,6 +116,26 @@ function App() {
         const dName = drugName.toLowerCase();
         const sName = solvent.toLowerCase();
         if (sName === 'ระบุเอง') return;
+
+        // Check dynamic diluent_incompat from drugs master
+        if (drugsList && drugsList.length > 0) {
+            const drugInfo = drugsList.find(d => d.drug_name.toLowerCase() === dName || (d.trade_name && d.trade_name.toLowerCase() === dName));
+            if (drugInfo && drugInfo.diluent_incompat) {
+                const incompat = drugInfo.diluent_incompat;
+                const isDextrose = sName.includes('d5w') || sName.includes('dextrose') || sName.includes('d5') || sName.includes('5% d/w');
+                const isNaCl = sName.includes('nss') || sName.includes('nacl') || sName.includes('0.9%') || sName.includes('sodium chloride');
+                
+                if (incompat === 'Dextrose Incompatibility' && isDextrose) {
+                    showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้เข้ากันไม่ได้กับสารน้ำ Dextrose (ห้ามผสม D5W)`, 'error', 0);
+                } else if (incompat === 'NaCl Incompatibility' && isNaCl) {
+                    showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้เข้ากันไม่ได้กับสารน้ำ NaCl (ห้ามผสม NSS)`, 'error', 0);
+                } else if (incompat === 'NaCl Inclusive' && !isNaCl && solvent.trim() !== '') {
+                    showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้ต้องใช้กับสารน้ำ NaCl/NSS เท่านั้น`, 'error', 0);
+                } else if (incompat === 'Dextrose Inclusive' && !isDextrose && solvent.trim() !== '') {
+                    showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้ต้องใช้กับสารน้ำ Dextrose/D5W เท่านั้น`, 'error', 0);
+                }
+            }
+        }
 
         const rule = DRUG_SOLVENT_RULES.find(r => dName.includes(r.drugName.toLowerCase()));
         if (rule) {
@@ -1048,6 +1072,7 @@ function App() {
                             
                             if (res.data.success) {
                                 showNotification(`สั่งปริ้นไปยัง ${user.default_printer} สำเร็จ`, 'success');
+                                addOfflinePrintHistory({ htmlContent, printerName: user.default_printer, paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
                             }
                         } catch (err) {
                             console.error('Local Print Server error', err);
@@ -1082,6 +1107,7 @@ function App() {
 
             printWindow.document.write(fallbackHtml);
             printWindow.document.close();
+            addOfflinePrintHistory({ htmlContent, printerName: 'Local Browser', paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
         };
 
         printStickersAsync();
@@ -1349,6 +1375,7 @@ function App() {
 
             printWindow.document.write(fallbackHtml);
             printWindow.document.close();
+            addOfflinePrintHistory({ htmlContent, printerName: 'Local Browser', paperSize: 'A4', isA4: true, title: 'ใบเตรียมยา (Working Formula): ' + (patient.hn || '') });
         };
 
         setPreviewData({
@@ -1369,6 +1396,7 @@ function App() {
                         });
                         if (res.data.success) {
                             showNotification(`ส่งคำสั่งพิมพ์ไปที่ ${user.working_formula_printer} แล้ว`, 'success');
+                            addOfflinePrintHistory({ htmlContent, printerName: user.working_formula_printer, paperSize: 'A4', isA4: true, title: 'ใบเตรียมยา (Working Formula): ' + (patient.hn || '') });
                         }
                     } catch (err) {
                         console.error("Local Print Server error", err);
@@ -2323,59 +2351,76 @@ function App() {
     return (
         <div className="p-4 md:p-8 print:p-0 min-h-screen flex flex-col justify-between relative">
             {user && user.must_change_password !== 1 && (
-                <div className="absolute top-6 left-6 flex items-center gap-5 premium-card p-5 px-8 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.3)] z-50 animate-row-in no-print backdrop-blur-xl border-sky-500/50">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-600 to-sky-400 flex items-center justify-center shadow-lg border border-white/20">
+                <div 
+                    className="absolute top-6 left-6 flex items-center gap-5 premium-card p-5 px-8 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.3)] z-50 animate-row-in no-print backdrop-blur-xl border-sky-500/50 cursor-pointer hover:shadow-lg transition-all duration-300"
+                    onClick={() => setIsUserMenuExpanded(!isUserMenuExpanded)}
+                >
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-600 to-sky-400 flex items-center justify-center shadow-lg border border-white/20 shrink-0">
                         <User size={32} className="text-white" />
                     </div>
                     <div className="flex flex-col">
                         <span className={`text-xs font-black uppercase tracking-widest block mb-1 ${theme === 'dark' ? 'text-sky-400' : 'text-sky-600'}`}>บัญชีผู้ใช้</span>
-                        <p className={`text-2xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{user.name || user.username}</p>
-                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                            <button
-                                onClick={() => setShowPrinterSettings(true)}
-                                className="flex items-center gap-1.5 text-xs font-black text-sky-500 hover:text-sky-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-r border-slate-700/50 pr-3 whitespace-nowrap"
-                            >
-                                <Printer size={14} /> ตั้งค่าเครื่องพิมพ์
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center gap-1.5 text-xs font-black text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest text-left cursor-pointer whitespace-nowrap"
-                            >
-                                <LogOut size={14} /> ออกจากระบบ
-                            </button>
-                            {step !== 'drugs-info' && (
-                                <button
-                                    onClick={() => setStep('drugs-info')}
-                                    className="flex items-center gap-1.5 text-xs font-black text-emerald-500 hover:emerald-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
-                                >
-                                    <Pill size={14} /> ข้อมูลยา (Drugs)
-                                </button>
-                            )}
-                            {step !== 'calculation-history' && (
-                                <button
-                                    onClick={() => setStep('calculation-history')}
-                                    className="flex items-center gap-1.5 text-xs font-black text-indigo-500 hover:text-indigo-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
-                                >
-                                    <History size={14} /> ประวัติการคำนวณ (History)
-                                </button>
-                            )}
-                            {step !== 'admin-order-history' && (
-                                <button
-                                    onClick={() => setStep('admin-order-history')}
-                                    className="flex items-center gap-1.5 text-xs font-black text-rose-500 hover:text-rose-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
-                                >
-                                    <ClipboardList size={14} /> บันทึกการสั่งยา (Orders)
-                                </button>
-                            )}
-                            {user.role?.toUpperCase() === 'ADMIN' && step !== 'admin-users' && (
-                                <button
-                                    onClick={() => setStep('admin-users')}
-                                    className="flex items-center gap-1.5 text-xs font-black text-sky-500 hover:text-sky-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
-                                >
-                                    <Settings size={14} /> จัดการผู้ใช้ (Admin)
-                                </button>
-                            )}
+                        <div className="flex items-center gap-3">
+                            <p className={`text-2xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{user.name || user.username}</p>
+                            <div className={`text-slate-400 transition-transform duration-300 ${isUserMenuExpanded ? 'rotate-180' : ''}`}>
+                                <ChevronDown size={20} />
+                            </div>
                         </div>
+                        
+                        {isUserMenuExpanded && (
+                            <div className="flex items-center gap-3 mt-3 flex-wrap animate-fade-in" onClick={e => e.stopPropagation()}>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-1.5 text-xs font-black text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-r border-slate-700/50 pr-3 whitespace-nowrap"
+                                >
+                                    <LogOut size={14} /> ออกจากระบบ
+                                </button>
+                                <button
+                                    onClick={() => setShowPrinterSettings(true)}
+                                    className="flex items-center gap-1.5 text-xs font-black text-sky-500 hover:text-sky-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-r border-slate-700/50 pr-3 whitespace-nowrap"
+                                >
+                                    <Printer size={14} /> ตั้งค่าเครื่องพิมพ์
+                                </button>
+                                <button
+                                    onClick={() => setShowOfflinePrintHistory(true)}
+                                    className="flex items-center gap-1.5 text-xs font-black text-violet-500 hover:text-violet-400 transition-colors uppercase tracking-widest text-left cursor-pointer whitespace-nowrap"
+                                >
+                                    <FileText size={14} /> ประวัติการปริ้น
+                                </button>
+                                {step !== 'drugs-info' && (
+                                    <button
+                                        onClick={() => setStep('drugs-info')}
+                                        className="flex items-center gap-1.5 text-xs font-black text-emerald-500 hover:emerald-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
+                                    >
+                                        <Pill size={14} /> ข้อมูลยา (Drugs)
+                                    </button>
+                                )}
+                                {step !== 'calculation-history' && (
+                                    <button
+                                        onClick={() => setStep('calculation-history')}
+                                        className="flex items-center gap-1.5 text-xs font-black text-indigo-500 hover:text-indigo-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
+                                    >
+                                        <History size={14} /> ประวัติการคำนวณ (History)
+                                    </button>
+                                )}
+                                {step !== 'admin-order-history' && (
+                                    <button
+                                        onClick={() => setStep('admin-order-history')}
+                                        className="flex items-center gap-1.5 text-xs font-black text-rose-500 hover:text-rose-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
+                                    >
+                                        <ClipboardList size={14} /> บันทึกการสั่งยา (Orders)
+                                    </button>
+                                )}
+                                {user.role?.toUpperCase() === 'ADMIN' && step !== 'admin-users' && (
+                                    <button
+                                        onClick={() => setStep('admin-users')}
+                                        className="flex items-center gap-1.5 text-xs font-black text-sky-500 hover:text-sky-400 transition-colors uppercase tracking-widest text-left cursor-pointer border-l border-slate-700/50 pl-3 whitespace-nowrap"
+                                    >
+                                        <Settings size={14} /> จัดการผู้ใช้ (Admin)
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -4606,6 +4651,14 @@ function App() {
                         </div>
                     </div>
                 </div>
+            )}
+            {showOfflinePrintHistory && (
+                <OfflinePrintHistoryModal 
+                    show={showOfflinePrintHistory} 
+                    onClose={() => setShowOfflinePrintHistory(false)} 
+                    user={user} 
+                    showNotification={showNotification} 
+                />
             )}
         </div>
     );
