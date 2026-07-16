@@ -292,15 +292,15 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         const rows = filteredDrugs.map(d => [
             d.drug_code || '-',
             d.drug_name || '-',
-            d.group_name || '-',
+            d.drug_category || '-',
             d.calculation_type || '-',
-            d.standard_dose || '-',
+            d.standard_dose_value !== null ? parseFloat(d.standard_dose_value).toFixed(2) : '-',
             d.standard_dose_unit || '-',
-            d.dose_cap_mg || 'ไม่มี',
-            d.max_crcl ? `${d.max_crcl} ml/min` : 'ไม่มี',
-            d.is_active ? 'Active' : 'Inactive',
-            d.vol_per_pack ? `${d.vol_per_pack} ml` : '-',
-            d.dose_per_pack ? `${d.dose_per_pack} ${d.dose_per_pack_unit || 'mg'}` : '-'
+            d.max_dose_cap !== null ? parseFloat(d.max_dose_cap).toFixed(2) + ' mg' : 'ไม่มี',
+            d.max_gfr_cap !== null ? `${d.max_gfr_cap} ml/min` : 'ไม่มี',
+            (d.is_active === 1 || d.is_active === true || d.is_active === '1') ? 'Active' : 'Inactive',
+            d.vol_per_pack !== null && d.vol_per_pack !== undefined ? `${d.vol_per_pack} ml` : '-',
+            d.dose_per_pack !== null && d.dose_per_pack !== undefined ? `${d.dose_per_pack} ${d.dose_per_pack_unit || 'mg'}` : '-'
         ]);
 
         const csvContent = "\uFEFF" + 
