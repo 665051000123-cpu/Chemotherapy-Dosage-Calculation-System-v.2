@@ -1340,7 +1340,7 @@ function App() {
             <div class="row">
                 น้ำหนัก <span class="line-input" style="width: 60px; text-align: center;">${patient.weight || ''}</span> kg 
                 ส่วนสูง <span class="line-input" style="width: 60px; text-align: center;">${patient.height || ''}</span> cm. 
-                BSA = Square root of [(Weight(kg) x Height(cm)) / 3600] = <span class="line-input" style="width: 80px; text-align: center;">${bsa ? Number(bsa).toFixed(4) : ''}</span> m²
+                BSA = <span class="line-input" style="width: 80px; text-align: center;">${bsa ? Number(bsa).toFixed(4) : ''}</span> m²
             </div>
 
 
