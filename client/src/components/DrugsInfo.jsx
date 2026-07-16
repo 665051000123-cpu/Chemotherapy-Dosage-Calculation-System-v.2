@@ -31,6 +31,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         is_active: 1,
         dose_per_pack: '',
         dose_per_pack_unit: 'mg',
+        vol_per_pack: '',
+        vol_per_pack_unit: 'ml',
         package_type: '',
         inventory_qty: '',
         inventory_min: '',
@@ -94,6 +96,9 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_gfr_cap: '',
             is_active: 1,
             dose_per_pack: '',
+            dose_per_pack_unit: 'mg',
+            vol_per_pack: '',
+            vol_per_pack_unit: 'ml',
             package_type: '',
             inventory_qty: '',
             inventory_min: '',
@@ -140,6 +145,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             is_active: drug.is_active !== undefined ? drug.is_active : 1,
             dose_per_pack: drug.dose_per_pack !== null && drug.dose_per_pack !== undefined ? drug.dose_per_pack.toString() : '',
             dose_per_pack_unit: drug.dose_per_pack_unit || 'mg',
+            vol_per_pack: drug.vol_per_pack !== null && drug.vol_per_pack !== undefined ? drug.vol_per_pack.toString() : '',
+            vol_per_pack_unit: drug.vol_per_pack_unit || 'ml',
             package_type: drug.package_type || '',
             inventory_qty: drug.inventory_qty !== null && drug.inventory_qty !== undefined ? drug.inventory_qty.toString() : '',
             inventory_min: drug.inventory_min !== null && drug.inventory_min !== undefined ? drug.inventory_min.toString() : '',
@@ -1050,6 +1057,27 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                             <option value="mcg">MCG</option>
                                             <option value="IU">IU</option>
                                             <option value="หน่วย">หน่วย</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ปริมาตร / ภาชนะบรรจุ</label>
+                                    <div className="flex">
+                                        <input 
+                                            type="number" 
+                                            step="0.01" 
+                                            className="form-control text-sm rounded-r-none border-r-0 focus:z-10" 
+                                            placeholder="เช่น 1" 
+                                            value={drugForm.vol_per_pack} 
+                                            onChange={e => setDrugForm({...drugForm, vol_per_pack: e.target.value})} 
+                                        />
+                                        <select 
+                                            className="form-control text-sm rounded-l-none w-24 bg-slate-50 dark:bg-slate-800 focus:z-10 cursor-pointer"
+                                            value={drugForm.vol_per_pack_unit || 'ml'}
+                                            onChange={e => setDrugForm({...drugForm, vol_per_pack_unit: e.target.value})}
+                                        >
+                                            <option value="ml">ML</option>
+                                            <option value="l">L</option>
                                         </select>
                                     </div>
                                 </div>

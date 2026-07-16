@@ -252,6 +252,15 @@ const Drug = sequelize.define('Drug', {
         allowNull: true,
         defaultValue: 'mg'
     },
+    vol_per_pack: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    vol_per_pack_unit: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        defaultValue: 'ml'
+    },
     inventory_qty: {
         type: DataTypes.DECIMAL(10, 2),
         defaultValue: 0
@@ -1454,7 +1463,7 @@ app.put('/api/drugs/:id/inventory', requireHeadOrAdmin, async (req, res) => {
 // 👥 Admin Drug Management APIs
 app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
     try {
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1473,7 +1482,9 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
             max_bsa_cap: max_bsa_cap === '' ? null : max_bsa_cap,
             max_gfr_cap: max_gfr_cap === '' ? null : max_gfr_cap,
             is_active: is_active !== undefined ? is_active : 1,
-            dose_per_pack_unit
+            dose_per_pack_unit,
+            vol_per_pack: vol_per_pack === '' ? null : vol_per_pack,
+            vol_per_pack_unit
         });
 
         logActivity(employeeId, 'CREATE_DRUG', `เพิ่มยาใหม่: ${drug_name} (${calculation_type})`);
@@ -1490,7 +1501,7 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
 app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
     try {
         const drugId = req.params.id;
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1509,7 +1520,9 @@ app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
             max_bsa_cap: max_bsa_cap === '' ? null : max_bsa_cap,
             max_gfr_cap: max_gfr_cap === '' ? null : max_gfr_cap,
             is_active,
-            dose_per_pack_unit
+            dose_per_pack_unit,
+            vol_per_pack: vol_per_pack === '' ? null : vol_per_pack,
+            vol_per_pack_unit
         }, { where: { drug_id: drugId } });
 
         logActivity(employeeId, 'UPDATE_DRUG', `แก้ไขยา ID ${drugId}: name=${drug_name}, type=${calculation_type}`);
