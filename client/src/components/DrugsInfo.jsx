@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope, Download } from 'lucide-react';
 import axios from 'axios';
 import DrugRulesManager from './DrugRulesManager';
 
@@ -278,6 +278,45 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         );
     });
 
+    const exportToExcel = () => {
+        if (!filteredDrugs || filteredDrugs.length === 0) {
+            if (showNotification) showNotification('ไม่มีข้อมูลยาสำหรับส่งออก', 'warning');
+            return;
+        }
+
+        const headers = [
+            "CODE", "ชื่อยา", "กลุ่มยา", "ประเภทการคำนวณ", "ขนาดยามาตรฐาน", "หน่วย",
+            "จำกัดปริมาณยาสูงสุด (DOSE CAP)", "จำกัดค่าไต (CRCL CAP)", "สถานะ", "ปริมาตร/ขวด", "ขนาดยา/ขวด"
+        ];
+
+        const rows = filteredDrugs.map(d => [
+            d.drug_code || '-',
+            d.drug_name || '-',
+            d.group_name || '-',
+            d.calculation_type || '-',
+            d.standard_dose || '-',
+            d.standard_dose_unit || '-',
+            d.dose_cap_mg || 'ไม่มี',
+            d.max_crcl ? `${d.max_crcl} ml/min` : 'ไม่มี',
+            d.is_active ? 'Active' : 'Inactive',
+            d.vol_per_pack ? `${d.vol_per_pack} ml` : '-',
+            d.dose_per_pack ? `${d.dose_per_pack} ${d.dose_per_pack_unit || 'mg'}` : '-'
+        ]);
+
+        const csvContent = "\uFEFF" + 
+            headers.join(",") + "\n" + 
+            rows.map(e => e.map(item => `"${item}"`).join(",")).join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `ข้อมูลยา_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const printAllDrugs = async () => {
         if (!filteredDrugs || filteredDrugs.length === 0) {
             if (showNotification) showNotification('ไม่มีข้อมูลยาสำหรับพิมพ์', 'warning');
@@ -514,6 +553,13 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         title="พิมพ์ข้อมูลยาทั้งหมด"
                     >
                         <Printer size={16} /> พิมพ์
+                    </button>
+                    <button
+                        onClick={exportToExcel}
+                        className={`text-sm py-2 px-4 rounded-xl border flex items-center gap-2 cursor-pointer shrink-0 shadow-sm transition-colors text-white bg-green-600 hover:bg-green-700 border-green-600`}
+                        title="ส่งออกข้อมูลเป็น Excel"
+                    >
+                        <Download size={16} /> Excel
                     </button>
                     {isAdmin && (
                         <>
