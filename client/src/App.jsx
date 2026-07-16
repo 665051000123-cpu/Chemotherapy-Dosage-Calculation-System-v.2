@@ -1211,9 +1211,6 @@ function App() {
                         <div style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ปริมาตร</div>
                         <div class="line-input" style="width: 50px; text-align: center;">${row.volume || ''}</div>
                         <div style="white-space: nowrap; margin-left: 5px;">ml)</div>
-                        <div style="white-space: nowrap; margin-left: 15px; font-weight: bold;">ปริมาตรสุทธิ:</div>
-                        <div class="line-input" style="width: 60px; text-align: center; font-weight: bold; font-size: 1.1em; color: #e11d48;">${printTotalVol || '-'}</div>
-                        <div style="white-space: nowrap; margin-left: 5px;">ml</div>
                     </div>
                     <div class="qc-section" style="margin-left: 20px;">
                         <div class="qc-title">การตรวจสอบคุณภาพยาเคมีบำบัดที่ผสมเสร็จ</div>
