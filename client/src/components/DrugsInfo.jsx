@@ -30,7 +30,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         max_gfr_cap: '125',
         is_active: 1,
         dose_per_pack: '',
-        dose_per_pack_unit: 'mg',
+        dose_per_pack_unit: 'ml',
         vol_per_pack: '',
         vol_per_pack_unit: 'ml',
         package_type: '',
@@ -96,7 +96,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_gfr_cap: '',
             is_active: 1,
             dose_per_pack: '',
-            dose_per_pack_unit: 'mg',
+            dose_per_pack_unit: 'ml',
             vol_per_pack: '',
             vol_per_pack_unit: 'ml',
             package_type: '',
@@ -144,7 +144,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_gfr_cap: drug.max_gfr_cap !== null && drug.max_gfr_cap !== undefined ? drug.max_gfr_cap.toString() : '',
             is_active: drug.is_active !== undefined ? drug.is_active : 1,
             dose_per_pack: drug.dose_per_pack !== null && drug.dose_per_pack !== undefined ? drug.dose_per_pack.toString() : '',
-            dose_per_pack_unit: drug.dose_per_pack_unit || 'mg',
+            dose_per_pack_unit: drug.dose_per_pack_unit || 'ml',
             vol_per_pack: drug.vol_per_pack !== null && drug.vol_per_pack !== undefined ? drug.vol_per_pack.toString() : '',
             vol_per_pack_unit: drug.vol_per_pack_unit || 'ml',
             package_type: drug.package_type || '',
@@ -1048,7 +1048,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                         />
                                         <select 
                                             className="form-control text-sm rounded-l-none w-24 bg-slate-50 dark:bg-slate-800 focus:z-10 cursor-pointer"
-                                            value={drugForm.dose_per_pack_unit || 'mg'}
+                                            value={drugForm.dose_per_pack_unit || 'ml'}
                                             onChange={e => setDrugForm({...drugForm, dose_per_pack_unit: e.target.value})}
                                         >
                                             <option value="ml">ML</option>
