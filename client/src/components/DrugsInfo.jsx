@@ -914,11 +914,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                                <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ความเข้มข้น/ปริมาตร (Per ml.)</label>
-                                    <input type="number" step="0.01" className="form-control text-sm" value={drugForm.concentration_per_ml} onChange={e => setDrugForm({...drugForm, concentration_per_ml: e.target.value})} />
-                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                                 <div>
                                     <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ราคาทุน (บาท)</label>
                                     <input type="number" step="0.01" className="form-control text-sm" value={drugForm.cost_price} onChange={e => setDrugForm({...drugForm, cost_price: e.target.value})} />
@@ -969,7 +965,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">แจ้งเตือนความเข้มข้น &gt; (mg/ml.)</label>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">แจ้งเตือนความเข้มข้นสูงสุด (MAX mg/ml.)</label>
                                     <input type="number" step="0.01" className="form-control text-sm" value={drugForm.alert_concentration_max} onChange={e => setDrugForm({...drugForm, alert_concentration_max: e.target.value})} />
                                 </div>
                                 <div>
