@@ -157,6 +157,25 @@ const OrderLog = sequelize.define('OrderLog', {
     timestamps: false
 });
 
+const PrintLog = sequelize.define('PrintLog', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    hn: DataTypes.STRING(20),
+    patient_name: DataTypes.STRING(255),
+    title: DataTypes.STRING(255),
+    printer_name: DataTypes.STRING(255),
+    paper_size: DataTypes.STRING(50),
+    is_a4: DataTypes.BOOLEAN,
+    html_content: DataTypes.TEXT('long'),
+    printed_by: DataTypes.STRING(100)
+}, {
+    tableName: 'print_logs',
+    timestamps: true // adds createdAt and updatedAt
+});
+
 const ActivityLog = sequelize.define('ActivityLog', {
     id: {
         type: DataTypes.INTEGER,
@@ -1147,6 +1166,33 @@ app.delete('/api/admin/logs/:id', requireAdmin, async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error('❌ Delete log error:', err);
+        res.status(500).json({ success: false, message: 'Database Error: ' + err.message });
+    }
+});
+
+// ---------------- Print Logs API ---------------- //
+app.get('/api/print-logs', async (req, res) => {
+    try {
+        const logs = await PrintLog.findAll({
+            order: [['createdAt', 'DESC']],
+            limit: 100 // return last 100 prints
+        });
+        res.json({ success: true, logs });
+    } catch (err) {
+        console.error('❌ Fetch print logs error:', err);
+        res.status(500).json({ success: false, message: 'Database Error: ' + err.message });
+    }
+});
+
+app.post('/api/print-logs', async (req, res) => {
+    try {
+        const { hn, patient_name, title, printer_name, paper_size, is_a4, html_content, printed_by } = req.body;
+        const newLog = await PrintLog.create({
+            hn, patient_name, title, printer_name, paper_size, is_a4, html_content, printed_by
+        });
+        res.json({ success: true, log: newLog });
+    } catch (err) {
+        console.error('❌ Create print log error:', err);
         res.status(500).json({ success: false, message: 'Database Error: ' + err.message });
     }
 });

@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Data Ecosystem - Database Blueprint</title>
+    <title>Clinical Data Ecosystem - Database Schema Blueprint</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- นำเข้า LeaderLine อัจฉริยะสำหรับวาดเส้นหลบตาราง -->
+    <script src="https://cdn.jsdelivr.net/npm/leader-line-new@1.1.9/leader-line.min.js"></script>
+
     <style>
         :root {
-            --bg-main: #f0f4f8;
+            --bg-main: #f8fafc;
             --bg-canvas: #ffffff;
             --bg-card: #ffffff;
             --border-color: #cbd5e1;
             
-            --color-text-main: #0f172a;
+            --color-text-main: #1e293b;
             --color-text-muted: #64748b;
             
-            --theme-purple: #5c3bc6;
-            --theme-blue: #1d5ec9;
-            --theme-cyan: #0284c7;
+            --theme-blue: #4f46e5;
+            --theme-slate: #475569;
+            --theme-purple: #8b5cf6;
             
-            --pk-color: #ba68c8;
-            --fk-color: #4db6ac;
+            --pk-color: #db2777;
+            --fk-color: #059669;
         }
 
         * {
@@ -35,189 +38,106 @@
         body {
             background-color: var(--bg-main);
             margin: 0;
-            padding: 20px;
+            padding: 24px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            color: var(--color-text-main);
         }
 
-        /* ปรับปรุงตรงนี้: รองรับหน้าจอทุกขนาดและจัดกึ่งกลางได้อย่างสมบูรณ์ */
         .blueprint-canvas {
-            width: 100%;
-            max-width: 1280px;
-            height: 900px;
+            width: 1400px;
             background-color: var(--bg-canvas);
-            border-radius: 24px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
             position: relative;
-            overflow: auto; /* เปลี่ยนจาก hidden เป็น auto เผื่อหน้าจอเล็กเกินไปจะยังเลื่อนดูได้ */
-            padding: 25px 30px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            gap: 24px;
         }
 
         .header-section {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 12px;
-            z-index: 10;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .header-title-group {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 16px;
         }
 
         .number-badge {
-            background: var(--theme-purple);
+            background: #1e293b;
             color: #ffffff;
-            font-size: 32px;
-            font-weight: 700;
-            width: 55px;
-            height: 55px;
-            border-radius: 16px;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
         }
 
         .title-text h1 {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: #0f172a;
             margin: 0;
         }
 
         .title-text p {
-            font-size: 13px;
-            color: var(--theme-purple);
-            margin: 4px 0 0 0;
-            font-weight: 600;
-        }
-
-        .header-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .system-badge {
-            background: #eef2ff;
-            border: 1px solid #c7d2fe;
-            color: #4338ca;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .version-badge {
-            background: var(--theme-purple);
-            color: #ffffff;
-            padding: 5px 12px;
-            border-radius: 20px;
             font-size: 11px;
-            font-weight: 600;
+            color: var(--color-text-muted);
+            margin: 2px 0 0 0;
         }
 
-        .legend-card {
-            position: absolute;
-            top: 730px;
-            left: 50px; 
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 8px 12px;
-            width: 235px;
-            z-index: 20;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            font-size: 11px;
-            color: var(--color-text-main);
-        }
-
-        .key-badge {
-            width: 28px;
-            height: 18px;
-            font-size: 9px;
-            font-weight: 700;
-            color: #ffffff;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-        }
-
-        .key-badge.pk { background: var(--pk-color); }
-        .key-badge.fk { background: var(--fk-color); }
-
-        .rel-icon {
-            font-size: 13px;
-            font-weight: 700;
-            color: #000000;
-            width: 28px;
-            text-align: center;
-            margin-right: 12px;
-        }
-
+        /* ปรับระดับความสูงของพื้นที่วาดเขียนให้เพียงพอกับตารางที่จัดคอลัมน์ใหม่ */
         .diagram-workspace {
-            flex-grow: 1;
             position: relative;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            z-index: 5;
+            width: 100%;
+            height: 940px;
         }
 
         .table-card {
             position: absolute;
             background: var(--bg-card);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            width: 235px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            width: 280px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            transition: all 0.25s ease;
-            z-index: 10;
         }
 
-        .table-card.purple-theme .table-header { background: var(--theme-purple); }
-        .table-card.blue-theme .table-header { background: var(--theme-blue); }
-        .table-card.cyan-theme .table-header { background: var(--theme-cyan); }
+        /* ตกแต่งธีมตามกลุ่มชนิดข้อมูล */
+        .table-card.blue-theme { border-top: 4px solid var(--theme-blue); }
+        .table-card.slate-theme { border-top: 4px solid var(--theme-slate); }
+        .table-card.purple-theme { border-top: 4px solid var(--theme-purple); }
 
         .table-header {
-            padding: 6px 12px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            color: #ffffff;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .table-title {
-            font-size: 11.5px;
+            font-size: 13px;
             font-weight: 700;
-            flex-grow: 1;
+            font-family: 'JetBrains Mono', monospace;
+            color: #0f172a;
             margin-left: 8px;
         }
 
         .table-body {
-            padding: 2px 0;
+            padding: 4px 0;
             background: #ffffff;
         }
 
@@ -225,14 +145,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4.5px 12px;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 5px 12px;
             font-size: 11px;
-            color: var(--color-text-main);
-            height: 23px; 
+            color: #334155;
+            position: relative;
         }
 
-        .field-row:last-child { border-bottom: none; }
+        .field-row:hover {
+            background-color: #f1f5f9;
+        }
 
         .field-name {
             font-weight: 500;
@@ -245,55 +166,82 @@
             color: #94a3b8;
             font-family: 'JetBrains Mono', monospace;
             font-size: 9px;
+            font-weight: 500;
         }
 
-        /* --- พิกัดตารางแบบ 3 คอลัมน์ --- */
-        #table-activity-logs   { top: 15px;  left: 50px;  }
-        #table-dose-logs       { top: 290px; left: 50px;  }
-        
-        #table-login           { top: 15px;  left: 490px; } /* ขยับเข้ามาให้สมดุล */
-        #table-users           { top: 245px; left: 490px; } 
-        #table-patient-history { top: 430px; left: 490px; } 
-
-        #table-drugs-info      { top: 15px;  left: 950px; width: 245px; } /* ขยับเข้ามาให้สมดุล */
-        #table-dosage-logs     { top: 435px; left: 950px; } 
-
-        .svg-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .relationship-line {
-            fill: none;
-            stroke: #475569;
-            stroke-width: 1.5;
-            transition: all 0.2s ease;
-        }
-
-        .relationship-line.active-cyan,
-        .relationship-line.active-purple,
-        .relationship-line.active-orange {
-            stroke-width: 2.5;
-            stroke: #0f172a;
-        }
-
-        .relation-label {
-            position: absolute;
-            background: #ffffff;
-            border: 1px solid #475569;
+        .table-footer-index {
+            background: #f8fafc;
+            padding: 6px 12px;
+            border-top: 1px solid #e2e8f0;
             font-size: 9px;
-            font-weight: 700;
-            padding: 1px 4px;
-            border-radius: 4px;
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            color: #0f172a;
+            color: var(--color-text-muted);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
+        .key-badge {
+            font-size: 8px;
+            font-weight: 800;
+            color: #ffffff;
+            border-radius: 4px;
+            padding: 1px 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .key-badge.pk { background: var(--pk-color); }
+        .key-badge.fk { background: var(--fk-color); }
+
+        /* ================= จัดพิกัดคอลัมน์ใหม่ลื่นไหล ไร้เส้นไขว้ทับกัน (Planar Grid) ================= */
+        
+        /* COLUMN 1: SYSTEM & AUDIT SECURITY */
+        #table-login          { top: 20px;  left: 30px; }
+        #table-users          { top: 310px; left: 30px; }
+        #table-activity-logs  { top: 530px; left: 30px; }
+        
+        /* COLUMN 2: CLINICAL TRANSACTION LOGS */
+        #table-order-logs     { top: 20px;  left: 370px; }
+        #table-dose-logs      { top: 400px; left: 370px; }
+        #table-print-logs     { top: 680px; left: 370px; }
+
+        /* COLUMN 3: PATIENT CORES */
+        #table-patients       { top: 20px;  left: 710px; }
+        #table-patients-sub   { top: 400px; left: 710px; }
+
+        /* COLUMN 4: DRUGS CATALOG */
+        #table-drugs          { top: 20px;  left: 1050px; }
+        #table-drugs-details  { top: 550px; left: 1050px; }
+
+        /* Legend แถบอธิบายด้านล่างสุด */
+        .legend-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .legend-group {
+            display: flex;
+            gap: 24px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .legend-item span { margin-left: 8px; }
+        .line-legend { font-weight: bold; color: #0f172a; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -302,166 +250,296 @@
         
         <div class="header-section">
             <div class="header-title-group">
-                <div class="number-badge">2.</div>
+                <div class="number-badge">2</div>
                 <div class="title-text">
-                    <h1>Database Schema</h1>
-                    <p>โครงสร้างฐานข้อมูลระบบคำนวณขนาดยาเคมีบำบัด</p>
+                    <h1>2. Database Schema (Optimized Blueprint)</h1>
+                    <p>ระบบโครงสร้างฐานข้อมูลที่มีการเคลียร์ตำแหน่งจัดกลุ่ม และจัดวางเส้นเชื่อมโยงอย่างไร้รอยต่อ (Anti-Crossing Schema)</p>
                 </div>
             </div>
-                   </div>
+        </div>
 
         <div class="diagram-workspace" id="workspace">
-            
-            <svg class="svg-canvas">
-                <path d="M 490 300 L 450 300 L 450 90 L 490 90" class="relationship-line" id="line-users-login"></path>
-                <path d="M 490 300 L 450 300 L 450 115 L 285 115" class="relationship-line" id="line-users-activity"></path>
-                <path d="M 725 323 L 760 323 L 760 618 L 950 618" class="relationship-line" id="line-users-dosage"></path>
-                <path d="M 950 503 L 420 503 L 420 360 L 285 360" class="relationship-line" id="line-dosage-dose"></path>
-                <path d="M 725 453 L 910 453 L 910 503 L 950 503" class="relationship-line" id="line-patient-dosage"></path>
-                <path d="M 950 40 L 910 40 L 910 641 L 950 641" class="relationship-line" id="line-drugs-dosage"></path>
-            </svg>
 
-            <div class="relation-label" style="top: 300px; left: 475px;">1</div>
-            <div class="relation-label" style="top: 90px; left: 475px;">1</div>
-
-            <div class="relation-label" style="top: 300px; left: 435px;">1</div>
-            <div class="relation-label" style="top: 115px; left: 305px;">∞</div>
-
-            <div class="relation-label" style="top: 323px; left: 745px;">1</div>
-            <div class="relation-label" style="top: 618px; left: 930px;">∞</div>
-
-            <div class="relation-label" style="top: 503px; left: 925px;">1</div>
-            <div class="relation-label" style="top: 360px; left: 305px;">1</div>
-
-            <div class="relation-label" style="top: 453px; left: 745px;">1</div>
-            <div class="relation-label" style="top: 503px; left: 935px;">∞</div>
-
-            <div class="relation-label" style="top: 40px; left: 925px;">1</div>
-            <div class="relation-label" style="top: 641px; left: 935px;">∞</div>
-
-            <div class="table-card purple-theme" id="table-users">
-                <div class="table-header">
-                    <i class="fa-solid fa-address-card"></i>
-                    <div class="table-title">users</div>
-                </div>
-                <div class="table-body">
-                    <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name"><span class="key-badge fk">FK</span>employee_id</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">username</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">password</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name">role</div><div class="field-type">VARCHAR(20)</div></div>
-                </div>
-            </div>
-
+            <!-- ================= COLUMN 1: SECURITY ================= -->
             <div class="table-card purple-theme" id="table-login">
                 <div class="table-header">
-                    <i class="fa-solid fa-user-shield"></i>
+                    <i class="fa-solid fa-shield-halved" style="color: var(--theme-purple);"></i>
                     <div class="table-title">login</div>
                 </div>
                 <div class="table-body">
-                    <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name">username</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name"><span class="key-badge fk">FK</span>employee_id</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">password</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name">role</div><div class="field-type">VARCHAR(20)</div></div>
-                    <div class="field-row"><div class="field-name">must_change_password</div><div class="field-type">TINYINT</div></div>
+                    <div class="field-row" id="row-login-id"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
+                    <div class="field-row"><div class="field-name">username</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row" id="row-login-empid"><div class="field-name"><span class="key-badge fk">FK</span>employee_id</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">password</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">role</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">must_change_pwd</div><div class="field-type">TINYINT</div></div>
+                    <div class="field-row"><div class="field-name">is_active</div><div class="field-type">TINYINT</div></div>
+                    <div class="field-row"><div class="field-name">default_printer</div><div class="field-type">VARCHAR</div></div>
                 </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
+            </div>
+
+            <div class="table-card purple-theme" id="table-users">
+                <div class="table-header">
+                    <i class="fa-solid fa-users-gear" style="color: var(--theme-purple);"></i>
+                    <div class="table-title">users</div>
+                </div>
+                <div class="table-body">
+                    <div class="field-row" id="row-users-id"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
+                    <div class="field-row" id="row-users-empid"><div class="field-name"><span class="key-badge fk">FK</span>employee_id</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">username</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">password</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">role</div><div class="field-type">VARCHAR</div></div>
+                </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
             </div>
 
             <div class="table-card blue-theme" id="table-activity-logs">
                 <div class="table-header">
-                    <i class="fa-solid fa-list-check"></i>
+                    <i class="fa-solid fa-clock-rotate-left" style="color: var(--theme-blue);"></i>
                     <div class="table-title">activity_logs</div>
                 </div>
                 <div class="table-body">
-                    <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name">timestamp</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name"><span class="key-badge fk">FK</span>employee_id</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">username</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">action_type</div><div class="field-type">VARCHAR(50)</div></div>
+                    <div class="field-row" id="row-act-id"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
+                    <div class="field-row"><div class="field-name">timestamp</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row" id="row-act-empid"><div class="field-name"><span class="key-badge fk">FK</span>employee_id</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">username</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">action_type</div><div class="field-type">VARCHAR</div></div>
                     <div class="field-row"><div class="field-name">details</div><div class="field-type">TEXT</div></div>
                 </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
             </div>
 
-            <div class="table-card cyan-theme" id="table-dosage-logs">
+            <!-- ================= COLUMN 2: CLINICAL LOGS ================= -->
+            <div class="table-card blue-theme" id="table-order-logs">
                 <div class="table-header">
-                    <i class="fa-solid fa-capsules"></i>
-                    <div class="table-title">dosage_logs</div>
+                    <i class="fa-solid fa-receipt" style="color: var(--theme-blue);"></i>
+                    <div class="table-title">order_logs</div>
                 </div>
                 <div class="table-body">
                     <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name">timestamp</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name"><span class="key-badge fk">FK</span>hn</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">patient_name</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name">calculated_bsa</div><div class="field-type">VARCHAR(20)</div></div>
-                    <div class="field-row"><div class="field-name">formula_used</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name">prescribed_dose</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name"><span class="key-badge fk">FK</span>user_name</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name"><span class="key-badge fk">FK</span>drug_id</div><div class="field-type">INT</div></div>
+                    <div class="field-row"><div class="field-name">timestamp</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row" id="row-order-hn"><div class="field-name"><span class="key-badge fk">FK</span>hn</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">patient_name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">ward</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">user_name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">doctor</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">order_details</div><div class="field-type">LONGTEXT</div></div>
+                    <div class="field-row"><div class="field-name">is_date_unlocked</div><div class="field-type">TINYINT</div></div>
+                    <div class="field-row"><div class="field-name">cycle</div><div class="field-type">VARCHAR</div></div>
                 </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
             </div>
 
-            <div class="table-card cyan-theme" id="table-dose-logs">
+            <div class="table-card slate-theme" id="table-dose-logs">
                 <div class="table-header">
-                    <i class="fa-solid fa-square-poll-horizontal"></i>
+                    <i class="fa-solid fa-prescription-bottle-medical" style="color: var(--theme-slate);"></i>
                     <div class="table-title">dose_logs</div>
                 </div>
                 <div class="table-body">
                     <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name">timestamp</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">hn</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">patient_name</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name">calculated_bsa</div><div class="field-type">DECIMAL(7,4)</div></div>
-                    <div class="field-row"><div class="field-name">formula_used</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">prescribed_dose</div><div class="field-type">VARCHAR(50)</div></div>
+                    <div class="field-row"><div class="field-name">timestamp</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row" id="row-dose-hn"><div class="field-name"><span class="key-badge fk">FK</span>hn</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">patient_name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">calculated_bsa</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">formula_used</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">prescribed_dose</div><div class="field-type">VARCHAR</div></div>
                     <div class="field-row"><div class="field-name">clinical_note</div><div class="field-type">TEXT</div></div>
                 </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
             </div>
 
-            <div class="table-card blue-theme" id="table-patient-history">
+            <div class="table-card slate-theme" id="table-print-logs">
                 <div class="table-header">
-                    <i class="fa-solid fa-hospital-user"></i>
-                    <div class="table-title">ประวัติคนไข้</div>
+                    <i class="fa-solid fa-print" style="color: var(--theme-slate);"></i>
+                    <div class="table-title">print_logs</div>
                 </div>
                 <div class="table-body">
-                    <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>hn</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">name</div><div class="field-type">VARCHAR(255)</div></div>
-                    <div class="field-row"><div class="field-name">gender</div><div class="field-type">VARCHAR(20)</div></div>
-                    <div class="field-row"><div class="field-name">age</div><div class="field-type">INT</div></div>
+                    <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>id</div><div class="field-type">INT</div></div>
+                    <div class="field-row" id="row-print-hn"><div class="field-name"><span class="key-badge fk">FK</span>hn</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">patient_name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">title</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">printer_name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">paper_size</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">is_a4</div><div class="field-type">TINYINT</div></div>
+                    <div class="field-row"><div class="field-name">html_content</div><div class="field-type">LONGTEXT</div></div>
+                    <div class="field-row"><div class="field-name">printed_by</div><div class="field-type">VARCHAR</div></div>
                 </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
             </div>
 
-            <div class="table-card cyan-theme" id="table-drugs-info">
+            <!-- ================= COLUMN 3: PATIENT MASTER ================= -->
+            <div class="table-card blue-theme" id="table-patients">
                 <div class="table-header">
-                    <i class="fa-solid fa-pills"></i>
+                    <i class="fa-solid fa-hospital-user" style="color: var(--theme-blue);"></i>
+                    <div class="table-title">patients</div>
+                </div>
+                <div class="table-body">
+                    <div class="field-row" id="row-pat-hn"><div class="field-name"><span class="key-badge pk">PK</span>hn</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">gender</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">age</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">height</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">weight</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">title</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">allergies</div><div class="field-type">TEXT</div></div>
+                    <div class="field-row"><div class="field-name">ward</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">doctor</div><div class="field-type">VARCHAR</div></div>
+                </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
+            </div>
+
+            <div class="table-card blue-theme" id="table-patients-sub">
+                <div class="table-header">
+                    <i class="fa-solid fa-id-card" style="color: var(--theme-blue);"></i>
+                    <div class="table-title">patients_sub</div>
+                </div>
+                <div class="table-body">
+                    <div class="field-row" id="row-sub-hn"><div class="field-name"><span class="key-badge pk">PK</span>hn</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">gender</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">age</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">height</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">weight</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">title</div><div class="field-type">VARCHAR</div></div>
+                </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
+            </div>
+
+            <!-- ================= COLUMN 4: DRUGS CATALOG ================= -->
+            <div class="table-card slate-theme" id="table-drugs">
+                <div class="table-header">
+                    <i class="fa-solid fa-pills" style="color: var(--theme-slate);"></i>
                     <div class="table-title">drugs</div>
                 </div>
                 <div class="table-body">
-                    <div class="field-row"><div class="field-name"><span class="key-badge pk">PK</span>drug_id</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name">◇ drug_code</div><div class="field-type">VARCHAR(50)</div></div>
-                    <div class="field-row"><div class="field-name">◇ drug_name</div><div class="field-type">VARCHAR(100)</div></div>
-                    <div class="field-row"><div class="field-name">◇ calculation_type</div><div class="field-type">ENUM(...)</div></div>
-                    <div class="field-row"><div class="field-name">◇ default_weight_type</div><div class="field-type">ENUM(...)</div></div>
-                    <div class="field-row"><div class="field-name">Standard_value</div><div class="field-type">DECIMAL(10,2)</div></div>
-                    <div class="field-row"><div class="field-name">Standard_unit</div><div class="field-type">VARCHAR(20)</div></div>
-                    <div class="field-row"><div class="field-name">◇ max_dose_cap</div><div class="field-type">DECIMAL(10,2)</div></div>
-                    <div class="field-row"><div class="field-name">◇ max_bsa_cap</div><div class="field-type">DECIMAL(4,2)</div></div>
-                    <div class="field-row"><div class="field-name">◇ max_gfr_cap</div><div class="field-type">INT</div></div>
-                    <div class="field-row"><div class="field-name">◇ is_active</div><div class="field-type">TINYINT</div></div>
-                    <div class="field-row"><div class="field-name">◇ created_at</div><div class="field-type">TIMESTAMP</div></div>
+                    <div class="field-row" id="row-drugs-id"><div class="field-name"><span class="key-badge pk">PK</span>drug_id</div><div class="field-type">INT</div></div>
+                    <div class="field-row"><div class="field-name">drug_code</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">drug_name</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">drug_category</div><div class="field-type">ENUM</div></div>
+                    <div class="field-row"><div class="field-name">calculation_type</div><div class="field-type">ENUM</div></div>
+                    <div class="field-row"><div class="field-name">default_weight_type</div><div class="field-type">ENUM</div></div>
+                    <div class="field-row"><div class="field-name">standard_dose_val</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">standard_dose_unit</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">max_dose_cap</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">max_bsa_cap</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">max_gfr_cap</div><div class="field-type">INT</div></div>
+                    <div class="field-row"><div class="field-name">is_active</div><div class="field-type">TINYINT</div></div>
+                    <div class="field-row"><div class="field-name">created_at</div><div class="field-type">TIMESTAMP</div></div>
+                    <div class="field-row"><div class="field-name">dose_per_pack</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">package_type</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">inventory_qty</div><div class="field-type">DECIMAL</div></div>
                 </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
+            </div>
+
+            <div class="table-card slate-theme" id="table-drugs-details">
+                <div class="table-header">
+                    <i class="fa-solid fa-circle-info" style="color: var(--theme-slate);"></i>
+                    <div class="table-title">drugs_details</div>
+                </div>
+                <div class="table-body">
+                    <div class="field-row" id="row-details-warning"><div class="field-name">warning_msg</div><div class="field-type">TEXT</div></div>
+                    <div class="field-row"><div class="field-name">infusion_rate</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">alert_cum_dose</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">alert_concentration</div><div class="field-type">DECIMAL</div></div>
+                    <div class="field-row"><div class="field-name">diluent_incompat</div><div class="field-type">TEXT</div></div>
+                    <div class="field-row"><div class="field-name">stability_info</div><div class="field-type">TEXT</div></div>
+                    <div class="field-row"><div class="field-name">drug_interactions</div><div class="field-type">TEXT</div></div>
+                    <div class="field-row"><div class="field-name">usual_dosage</div><div class="field-type">TEXT</div></div>
+                    <div class="field-row"><div class="field-name">admin_route</div><div class="field-type">VARCHAR</div></div>
+                    <div class="field-row"><div class="field-name">expire_after_mix</div><div class="field-type">INT</div></div>
+                </div>
+                <div class="table-footer-index"><i class="fa-solid fa-fingerprint"></i> Indexes</div>
             </div>
 
         </div>
 
         <div class="legend-card">
-            <div class="legend-item"><span class="key-badge pk">PK</span><span>= คีย์หลัก (Primary Key)</span></div>
-            <div class="legend-item"><span class="key-badge fk">FK</span><span>= คีย์นอก (Foreign Key)</span></div>
-            <div class="legend-item"><span class="rel-icon">1</span><span>= หนึ่ง (One)</span></div>
-            <div class="legend-item"><span class="rel-icon">∞</span><span>= หลาย (Many)</span></div>
+            <div class="legend-group">
+                <div class="legend-item"><span class="key-badge pk">PK</span><span>Primary Key</span></div>
+                <div class="legend-item"><span class="key-badge fk">FK</span><span>Foreign Key</span></div>
+            </div>
+            <div class="legend-group">
+                <div class="legend-item"><span class="line-legend">1</span><span>&nbsp;= One (ฝั่งต้นทางเดี่ยว)</span></div>
+                <div class="legend-item"><span class="line-legend">∞</span><span>&nbsp;= Many (ฝั่งปลายทางที่มีหลายรายการ)</span></div>
+            </div>
         </div>
 
     </div>
 
+    <script>
+        window.onload = function() {
+            // หน่วงเวลา 200ms เพื่อให้แน่ใจว่า layout วาดกล่องทั้งหมดและได้พิกัดคงที่แล้ว
+            setTimeout(() => {
+                
+                // รูปแบบสไตล์เส้น Schema ดั้งเดิมแบบคลีน
+                const baseLineStyle = {
+                    path: 'grid',               // ลายเส้นหักมุม 90 องศาแบบพิมพ์เขียว
+                    size: 2,                    // เส้นบางไม่บดบังดีเทลกล่อง
+                    color: '#475569',           // สี Slate grey สุภาพ สว่างตา
+                    outline: true,              // เส้นขาวคลุมทับป้องกันเวลาลากตัดกัน
+                    outlineColor: '#ffffff',
+                    outlineSize: 2,
+                    
+                    // สัญลักษณ์หัวเส้นระบุความสัมพันธ์ 1-to-Many
+                    startPlug: 'disc',          // ปลายกลมแทนฝั่ง 1 (One)
+                    startPlugSize: 1.2,
+                    endPlug: 'arrow',           // ปลายหัวลูกศรแทนฝั่ง Many (หรือตารางคู่สัมพันธ์)
+                    endPlugSize: 1.2
+                };
+
+                // --- 1. กลุ่มระบบผู้ป่วย (Patients: Column 3 -> 2) ---
+                // ลากออกจากซ้าย (Left) ของ Patients ไปเข้าทางขวา (Right) ของตารางบันทึกผลต่าง ๆ
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-pat-hn'), {x: '0%', y: '50%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-order-hn'), {x: '100%', y: '50%'}),
+                    { ...baseLineStyle, startSocket: 'left', endSocket: 'right' }
+                );
+
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-pat-hn'), {x: '0%', y: '50%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-dose-hn'), {x: '100%', y: '50%'}),
+                    { ...baseLineStyle, startSocket: 'left', endSocket: 'right' }
+                );
+
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-pat-hn'), {x: '0%', y: '50%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-print-hn'), {x: '100%', y: '50%'}),
+                    { ...baseLineStyle, startSocket: 'left', endSocket: 'right' }
+                );
+
+                // Patients -> Patients Sub (ความสัมพันธ์ภายใน Column 3 แนวตั้งดิ่งตรงเป๊ะๆ)
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-pat-hn'), {x: '50%', y: '100%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-sub-hn'), {x: '50%', y: '0%'}),
+                    { ...baseLineStyle, startSocket: 'bottom', endSocket: 'top' }
+                );
+
+                // --- 2. กลุ่มความปลอดภัยผู้ใช้งาน (Users: Column 1 แนวตั้งเป๊ะๆ) ---
+                // ลากขึ้นบนหา Login และลากลงล่างหา Activity Logs ทำให้ 3 ตารางล็อกแนวราบ สะอาดสะอ้าน
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-users-empid'), {x: '50%', y: '0%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-login-empid'), {x: '50%', y: '100%'}),
+                    { ...baseLineStyle, startSocket: 'top', endSocket: 'bottom' }
+                );
+
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-users-empid'), {x: '50%', y: '100%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-act-empid'), {x: '50%', y: '0%'}),
+                    { ...baseLineStyle, startSocket: 'bottom', endSocket: 'top' }
+                );
+
+                // --- 3. กลุ่มข้อมูลยา (Drugs: Column 4 แนวตั้ง) ---
+                // ลากดิ่งลงตรงๆ จากตาราง Drugs ลงมาหา Drugs Details ปิดงานความสวยงาม
+                new LeaderLine(
+                    LeaderLine.pointAnchor(document.getElementById('row-drugs-id'), {x: '50%', y: '100%'}),
+                    LeaderLine.pointAnchor(document.getElementById('row-details-warning'), {x: '50%', y: '0%'}),
+                    { ...baseLineStyle, startSocket: 'bottom', endSocket: 'top' }
+                );
+
+            }, 200);
+        };
+    </script>
 </body>
 </html>

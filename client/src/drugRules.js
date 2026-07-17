@@ -70,7 +70,7 @@ export const DRUG_SOLVENT_RULES = [
         "drugName": "Carboplatin",
         "keywords": [],
         "title": "คำเตือนการให้ยา: Carboplatin",
-        "desc": "❌ ควรระวังเป็นพิเศษ\n⚠️ ห้ามใช้เข็มหรืออุปกรณ์ที่มีอลูมิเนียม (Aluminum) ยาจะดำและตกตะกอน"
+        "desc": "❌ ควรระวังเป็นพิเศษ\n⚠️ ห้ามใช้เข็มหรืออุปกรณ์ที่มีอลูมิเนียม (Aluminum)\nยาจะดำและตกตะกอน"
     },
     {
         "drugName": "CCNU",
@@ -88,7 +88,7 @@ export const DRUG_SOLVENT_RULES = [
             "d5"
         ],
         "title": "คำเตือนการให้ยา: Cisplatin",
-        "desc": "❌ ห้ามใช้ D5W เพียวๆ\n⚠️ ต้องมี Chloride ในสารน้ำเสมอ ไม่งั้นจะเกิดพิษต่อไตสูงมาก ห้ามใช้อุปกรณ์อลูมิเนียม"
+        "desc": "❌ ห้ามใช้ D5W เพียวๆ\n⚠️ ต้องมี Chloride ในสารน้ำเสมอ ไม่งั้นจะเกิดพิษต่อไตสูงมาก\nห้ามใช้อุปกรณ์อลูมิเนียม"
     },
     {
         "drugName": "Cotrimoxazole",
@@ -118,7 +118,7 @@ export const DRUG_SOLVENT_RULES = [
         "drugName": "Docetaxel",
         "keywords": [],
         "title": "คำเตือนการให้ยา: Docetaxel",
-        "desc": "❌ ห้ามใช้ถุง/สายพลาสติก PVC\n⚠️ ยาจะกัดพลาสติก PVC ต้องใช้ขวดแก้ว หรือถุง Non-PVC"
+        "desc": "❌ ห้ามใช้ถุง/สายพลาสติก PVC\n⚠️ ยาจะกัดพลาสติก PVC\nต้องใช้ขวดแก้ว หรือถุง Non-PVC"
     },
     {
         "drugName": "Docetaxel (Taxotere)",
@@ -154,7 +154,7 @@ export const DRUG_SOLVENT_RULES = [
         "drugName": "Etoposide",
         "keywords": [],
         "title": "คำเตือนการให้ยา: Etoposide",
-        "desc": "❌ ควรระวังเป็นพิเศษ\n⚠️ ยาตกตะกอนง่ายมาก ห้ามผสมเข้มข้นเกินไป และควรหลีกเลี่ยง PVC"
+        "desc": "❌ ควรระวังเป็นพิเศษ\n⚠️ ยาตกตะกอนง่ายมาก\nห้ามผสมเข้มข้นเกินไป และควรหลีกเลี่ยง PVC"
     },
     {
         "drugName": "FLUDARABINE",
@@ -230,7 +230,7 @@ export const DRUG_SOLVENT_RULES = [
             "d5"
         ],
         "title": "คำเตือนการให้ยา: Mitomycin C",
-        "desc": "❌ ไม่แนะนำให้ใช้ D5W\n⚠️ ยาสลายตัวง่ายมากในสภาวะเป็นกรด (D5W เป็นกรดอ่อนๆ) ควรใช้ NSS"
+        "desc": "❌ ไม่แนะนำให้ใช้ D5W\n⚠️ ยาสลายตัวง่ายมากในสภาวะเป็นกรด (D5W เป็นกรดอ่อนๆ)\nควรใช้ NSS"
     },
     {
         "drugName": "Mitoxantrone",
@@ -254,13 +254,13 @@ export const DRUG_SOLVENT_RULES = [
             "0.9"
         ],
         "title": "คำเตือนการให้ยา: Oxaliplatin",
-        "desc": "❌ ห้ามใช้ NSS หรือสารที่มี Chloride เด็ดขาด\n⚠️ ยาจะตกตะกอนและเสื่อมสภาพทันที ต้องใช้ D5W เท่านั้น"
+        "desc": "❌ ห้ามใช้ NSS หรือสารที่มี Chloride เด็ดขาด\n⚠️ ยาจะตกตะกอนและเสื่อมสภาพทันที\nต้องใช้ D5W เท่านั้น"
     },
     {
         "drugName": "Paclitaxel (Taxol)",
         "keywords": [],
         "title": "คำเตือนการให้ยา: Paclitaxel (Taxol)",
-        "desc": "❌ ห้ามใช้ถุง/สายพลาสติก PVC\n⚠️ ยาจะกัดพลาสติกและปล่อยสารพิษ ต้องใช้ขวดแก้ว หรือถุง Non-PVC และต้องมี Inline filter"
+        "desc": "❌ ห้ามใช้ถุง/สายพลาสติก PVC\n⚠️ ยาจะกัดพลาสติกและปล่อยสารพิษ\nต้องใช้ขวดแก้ว หรือถุง Non-PVC และต้องมี Inline filter"
     },
     {
         "drugName": "Pamidronate disodium",

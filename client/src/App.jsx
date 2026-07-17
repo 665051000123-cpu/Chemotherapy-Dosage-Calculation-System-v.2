@@ -13,7 +13,7 @@ import { DRUG_CONCENTRATION_DATA } from './drugData';
 import PrinterSettings from './components/PrinterSettings';
 import PrintPreviewModal from './components/PrintPreviewModal';
 import OfflinePrintHistoryModal from './components/OfflinePrintHistoryModal';
-import { addOfflinePrintHistory } from './utils/offlinePrintHistory';
+
 
 import InventoryManagement from './components/InventoryManagement';
 
@@ -79,8 +79,16 @@ const SOLVENT_OPTIONS = [
 
 function App() {
     const [theme, setTheme] = useState(localStorage.getItem('appThemeMode') || 'light');
-    const [step, setStep] = useState('auth'); // 'auth', 'login' (patient check-in), 'workspace'
-    const [user, setUser] = useState(null);
+    const [step, setStep] = useState(() => {
+        return localStorage.getItem('app_current_step') || 'auth'; // 'auth', 'login', 'workspace'
+    });
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('oncology_user');
+        if (savedUser) {
+            try { return JSON.parse(savedUser); } catch(e) { return null; }
+        }
+        return null;
+    });
     const [loginData, setLoginData] = useState({ username: '', password: '' });
     const [patient, setPatient] = useState({ hn: '', title: '', name: '', height: '', weight: '', gender: '', age: '', allergies: '', ward: '', doctor: '', cycle: '' });
     const [isDateEditable, setIsDateEditable] = useState(false);
@@ -90,7 +98,7 @@ function App() {
     const [drugSearchTerm, setDrugSearchTerm] = useState('');
     const [patients, setPatients] = useState([]);
     const [patientSearch, setPatientSearch] = useState('');
-    const lastAutofilledHnRef = useRef('');
+    const lastAutofilledHnRef = useRef(patient.hn);
     const [prevStats, setPrevStats] = useState({ height: '', weight: '', ward: '', doctor: '' });
     const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
     const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
@@ -156,20 +164,38 @@ function App() {
         }
     };
 
-    // Check for persisted session
+    // Check for persisted session routing
     useEffect(() => {
-        const savedUser = localStorage.getItem('oncology_user');
-        if (savedUser) {
-            try {
-                const parsedUser = JSON.parse(savedUser);
-                setUser(parsedUser);
+        if (user) {
+            const currentStep = localStorage.getItem('app_current_step');
+            if (!currentStep || currentStep === 'auth') {
                 setStep('login');
-            } catch (e) {
-                console.error("Failed to parse saved user", e);
-                localStorage.removeItem('oncology_user');
             }
         }
     }, []);
+
+    // Persist current step
+    useEffect(() => {
+        localStorage.setItem('app_current_step', step);
+    }, [step]);
+
+    // Debug: Notify if workspace data was loaded on refresh
+    useEffect(() => {
+        const currentStep = localStorage.getItem('app_current_step');
+        if (currentStep === 'workspace') {
+            const saved = localStorage.getItem('workspace_form_data');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Object.keys(parsed).length > 0) {
+                        showNotification("กู้คืนข้อมูลหน้าคำนวณที่กรอกค้างไว้สำเร็จ", "success");
+                    }
+                } catch(e) {}
+            }
+        }
+    }, []);
+
+
 
     // HTML5 History API integration for browser back/forward buttons
     useEffect(() => {
@@ -201,44 +227,68 @@ function App() {
         calculateBSA, calculateDose, calculateWeights
     } = useCalculations();
 
-    const [formula, setFormula] = useState('mosteller');
-    const [selectedDrugs, setSelectedDrugs] = useState([]);
-    const [singleDrugResults, setSingleDrugResults] = useState([]);
-    const [drugParams, setDrugParams] = useState({ auc: 5, gfr: '' });
-    const [amputation, setAmputation] = useState('none');
+    const savePrintLog = async ({ htmlContent, printerName, paperSize, isA4, title }) => {
+        try {
+            await axios.post(`${API_BASE}/print-logs`, {
+                hn: patient.hn || '-',
+                patient_name: patient.name || '-',
+                title,
+                printer_name: printerName,
+                paper_size: paperSize,
+                is_a4: isA4,
+                html_content: htmlContent,
+                printed_by: user ? user.username || user.name || user.employee_id : 'Unknown'
+            });
+        } catch (e) {
+            console.error("Failed to save print log online", e);
+        }
+    };
+
+    const savedWorkspace = useMemo(() => {
+        try {
+            const saved = localStorage.getItem('workspace_form_data');
+            return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+    }, []);
+
+    const [formula, setFormula] = useState(savedWorkspace.formula || 'mosteller');
+    const [selectedDrugs, setSelectedDrugs] = useState(savedWorkspace.selectedDrugs || []);
+    const [singleDrugResults, setSingleDrugResults] = useState(savedWorkspace.singleDrugResults || []);
+    const [drugParams, setDrugParams] = useState(savedWorkspace.drugParams || { auc: 5, gfr: '' });
+    const [amputation, setAmputation] = useState(savedWorkspace.amputation || 'none');
     const [isAmputationExpanded, setIsAmputationExpanded] = useState(false);
-    const [ampDetails, setAmpDetails] = useState({ level: 'below_knee', method: 'weight_method' });
+    const [ampDetails, setAmpDetails] = useState(savedWorkspace.ampDetails || { level: 'below_knee', method: 'weight_method' });
     const [showDrugInfo, setShowDrugInfo] = useState(false);
     const [showBsaInfo, setShowBsaInfo] = useState(false);
     const [lockOldHistory, setlockOldHistory] = useState(true);
     const [showAmpInfo, setShowAmpInfo] = useState(false);
-    const [selectedRegimen, setSelectedRegimen] = useState('custom'); // 'custom', 'cv', 'bc'
-    const [useAutoGfr, setUseAutoGfr] = useState(true);
-    const [patientScr, setPatientScr] = useState('');
+    const [selectedRegimen, setSelectedRegimen] = useState(savedWorkspace.selectedRegimen || 'custom'); // 'custom', 'cv', 'bc'
+    const [useAutoGfr, setUseAutoGfr] = useState(savedWorkspace.useAutoGfr !== undefined ? savedWorkspace.useAutoGfr : true);
+    const [patientScr, setPatientScr] = useState(savedWorkspace.patientScr || '');
     const [drugsList, setDrugsList] = useState([]);
-    const [wbc, setWbc] = useState('');
-    const [neutrophils, setNeutrophils] = useState('');
-    const [bands, setBands] = useState('');
-    const [adminRows, setAdminRows] = useState([
+    const [wbc, setWbc] = useState(savedWorkspace.wbc || '');
+    const [neutrophils, setNeutrophils] = useState(savedWorkspace.neutrophils || '');
+    const [bands, setBands] = useState(savedWorkspace.bands || '');
+    const [adminRows, setAdminRows] = useState(savedWorkspace.adminRows || [
         { id: Date.now(), drugName: '', route: '', solvent: '', startDate: '', startTime: '', endDate: '', endTime: '', rate: '', order: 1, skipped: false, dose: '', calculatedDose: '', volume: '', storage: '', warning: '' }
     ]);
 
 
     const [showDiffModal, setShowDiffModal] = useState(false);
     const [diffWarningsData, setDiffWarningsData] = useState([]);
-    const [anc, setAnc] = useState('');
-    const [plt, setPlt] = useState('');
-    const [tbili, setTbili] = useState('');
-    const [ast, setAst] = useState('');
-    const [alt, setAlt] = useState('');
-    const [alp, setAlp] = useState('');
-    const [multipleDoses, setMultipleDoses] = useState([]);
-    const [enableHematology, setEnableHematology] = useState(true);
-    const [enableLiver, setEnableLiver] = useState(true);
+    const [anc, setAnc] = useState(savedWorkspace.anc || '');
+    const [plt, setPlt] = useState(savedWorkspace.plt || '');
+    const [tbili, setTbili] = useState(savedWorkspace.tbili || '');
+    const [ast, setAst] = useState(savedWorkspace.ast || '');
+    const [alt, setAlt] = useState(savedWorkspace.alt || '');
+    const [alp, setAlp] = useState(savedWorkspace.alp || '');
+    const [multipleDoses, setMultipleDoses] = useState(savedWorkspace.multipleDoses || []);
+    const [enableHematology, setEnableHematology] = useState(savedWorkspace.enableHematology !== undefined ? savedWorkspace.enableHematology : true);
+    const [enableLiver, setEnableLiver] = useState(savedWorkspace.enableLiver !== undefined ? savedWorkspace.enableLiver : true);
     const [showLiverInfo, setShowLiverInfo] = useState(false);
-    const [enableTbili, setEnableTbili] = useState(false);
-    const [enableRenal, setEnableRenal] = useState(true);
-    const [autoGfrValue, setAutoGfrValue] = useState(null);
+    const [enableTbili, setEnableTbili] = useState(savedWorkspace.enableTbili !== undefined ? savedWorkspace.enableTbili : false);
+    const [enableRenal, setEnableRenal] = useState(savedWorkspace.enableRenal !== undefined ? savedWorkspace.enableRenal : true);
+    const [autoGfrValue, setAutoGfrValue] = useState(savedWorkspace.autoGfrValue || null);
     const [formulaFilter, setFormulaFilter] = useState('all');
     const [pharmacistFilter, setPharmacistFilter] = useState('all');
     const [sortConfig, setSortConfig] = useState({ key: 'timestamp', direction: 'desc' });
@@ -278,6 +328,26 @@ function App() {
     });
 
     const [selectedHnDetail, setSelectedHnDetail] = useState(null);
+
+    // Auto-save workspace form data
+    useEffect(() => {
+        const workspaceData = {
+            formula, selectedDrugs, singleDrugResults, drugParams, amputation, ampDetails,
+            selectedRegimen, useAutoGfr, patientScr, wbc, neutrophils, bands, adminRows,
+            anc, plt, tbili, ast, alt, alp, multipleDoses, enableHematology, enableLiver,
+            enableTbili, enableRenal, autoGfrValue
+        };
+        const timeoutId = setTimeout(() => {
+            localStorage.setItem('workspace_form_data', JSON.stringify(workspaceData));
+        }, 500); // 500ms debounce
+        return () => clearTimeout(timeoutId);
+    }, [
+        formula, selectedDrugs, singleDrugResults, drugParams, amputation, ampDetails,
+        selectedRegimen, useAutoGfr, patientScr, wbc, neutrophils, bands, adminRows,
+        anc, plt, tbili, ast, alt, alp, multipleDoses, enableHematology, enableLiver,
+        enableTbili, enableRenal, autoGfrValue
+    ]);
+
     const drugDropdownRef = useRef(null);
     const drugsInfo = useMemo(() => {
         const defaultList = [
@@ -516,8 +586,8 @@ function App() {
             return;
         }
 
-        const matched = patients.find(p => p.hn.trim().toLowerCase() === patient.hn.trim().toLowerCase());
-        if (matched && matched.hn !== lastAutofilledHnRef.current) {
+        const matched = patients.find(p => p.hn && patient.hn && String(p.hn).trim().toLowerCase() === String(patient.hn).trim().toLowerCase());
+        if (matched && String(matched.hn).trim().toLowerCase() !== String(lastAutofilledHnRef.current || '').trim().toLowerCase()) {
             setPatient({
                 hn: matched.hn,
                 title: matched.title || '',
@@ -1072,7 +1142,7 @@ function App() {
                             
                             if (res.data.success) {
                                 showNotification(`สั่งปริ้นไปยัง ${user.default_printer} สำเร็จ`, 'success');
-                                addOfflinePrintHistory({ htmlContent, printerName: user.default_printer, paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
+                                savePrintLog({ htmlContent, printerName: user.default_printer, paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
                             }
                         } catch (err) {
                             console.error('Local Print Server error', err);
@@ -1107,7 +1177,7 @@ function App() {
 
             printWindow.document.write(fallbackHtml);
             printWindow.document.close();
-            addOfflinePrintHistory({ htmlContent, printerName: 'Local Browser', paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
+            savePrintLog({ htmlContent, printerName: 'Local Browser', paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
         };
 
         printStickersAsync();
@@ -1372,7 +1442,7 @@ function App() {
 
             printWindow.document.write(fallbackHtml);
             printWindow.document.close();
-            addOfflinePrintHistory({ htmlContent, printerName: 'Local Browser', paperSize: 'A4', isA4: true, title: 'ใบเตรียมยา (Working Formula): ' + (patient.hn || '') });
+            savePrintLog({ htmlContent, printerName: 'Local Browser', paperSize: 'A4', isA4: true, title: 'ใบเตรียมยา (Working Formula): ' + (patient.hn || '') });
         };
 
         setPreviewData({
@@ -1393,7 +1463,7 @@ function App() {
                         });
                         if (res.data.success) {
                             showNotification(`ส่งคำสั่งพิมพ์ไปที่ ${user.working_formula_printer} แล้ว`, 'success');
-                            addOfflinePrintHistory({ htmlContent, printerName: user.working_formula_printer, paperSize: 'A4', isA4: true, title: 'ใบเตรียมยา (Working Formula): ' + (patient.hn || '') });
+                            savePrintLog({ htmlContent, printerName: user.working_formula_printer, paperSize: 'A4', isA4: true, title: 'ใบเตรียมยา (Working Formula): ' + (patient.hn || '') });
                         }
                     } catch (err) {
                         console.error("Local Print Server error", err);
@@ -2378,12 +2448,14 @@ function App() {
                                 >
                                     <Printer size={14} /> ตั้งค่าเครื่องพิมพ์
                                 </button>
-                                <button
-                                    onClick={() => setShowOfflinePrintHistory(true)}
-                                    className="flex items-center gap-1.5 text-xs font-black text-violet-500 hover:text-violet-400 transition-colors uppercase tracking-widest text-left cursor-pointer whitespace-nowrap"
-                                >
-                                    <FileText size={14} /> ประวัติการปริ้น
-                                </button>
+                                {step === 'workspace' && (
+                                    <button
+                                        onClick={() => setShowOfflinePrintHistory(true)}
+                                        className="flex items-center gap-1.5 text-xs font-black text-violet-500 hover:text-violet-400 transition-colors uppercase tracking-widest text-left cursor-pointer whitespace-nowrap"
+                                    >
+                                        <FileText size={14} /> ประวัติการปริ้น
+                                    </button>
+                                )}
                                 {step !== 'drugs-info' && (
                                     <button
                                         onClick={() => setStep('drugs-info')}
@@ -3198,23 +3270,25 @@ function App() {
                                     )}
                                 </div>
                                 <button onClick={() => {
+                                    localStorage.removeItem('workspace_form_data');
                                     setPatient({ hn: '', title: '', name: '', height: '', weight: '', gender: '', age: '', allergies: '', ward: '', doctor: '', cycle: '' });
                                     setPrevStats({ height: '', weight: '', ward: '', doctor: '' });
                                     setPatientScr('');
                                     setUseAutoGfr(true);
-                                    setAmputation('');
+                                    setAmputation('none');
                                     setFormula('mosteller');
                                     setSelectedDrugs([]);
                                     setWbc('');
                                     setNeutrophils('');
                                     setBands('');
-                                    setAdminRows([{ id: Date.now(), drugName: '', route: '', solvent: '', startDate: '', endDate: '', rate: '', order: 1, skipped: false, dose: '', calculatedDose: '', volume: '', storage: '', warning: '' }]);
+                                    setAdminRows([{ id: Date.now(), drugName: '', route: '', solvent: '', startDate: '', startTime: '', endDate: '', endTime: '', rate: '', order: 1, skipped: false, dose: '', calculatedDose: '', volume: '', storage: '', warning: '' }]);
                                     setAnc('');
                                     setPlt('');
                                     setTbili('');
                                     setAst('');
                                     setAlt('');
                                     setAlp('');
+                                    setMultipleDoses([]);
                                     setAmpDetails({ level: 'below_knee', method: 'weight_method' });
                                     setStep('login');
                                 }} className="bg-sky-600/10 text-sky-500 hover:bg-sky-600/20 px-4 py-2 rounded-lg border border-sky-500/30 transition-all font-bold cursor-pointer whitespace-nowrap">เปลี่ยนเคสผู้ป่วย</button>
