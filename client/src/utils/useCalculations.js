@@ -227,8 +227,45 @@ export const useCalculations = () => {
             if (!isNaN(concentration) && concentration > 0) {
                 drugVolume = (dose / concentration).toFixed(2);
             }
-            if (!isNaN(dosePerPack) && dosePerPack > 0) {
-                vials = Math.ceil(dose / dosePerPack);
+            let pkgs = [];
+            if (drugObj.packages) {
+                try {
+                    pkgs = typeof drugObj.packages === 'string' ? JSON.parse(drugObj.packages) : drugObj.packages;
+                } catch(e) { pkgs = []; }
+            }
+            if (pkgs.length === 0 && !isNaN(dosePerPack) && dosePerPack > 0) {
+                pkgs = [{ dose: dosePerPack }];
+            }
+
+            if (pkgs.length > 0) {
+                let validPkgs = pkgs.filter(p => !isNaN(parseFloat(p.dose)) && parseFloat(p.dose) > 0)
+                                    .map(p => parseFloat(p.dose))
+                                    .sort((a, b) => b - a);
+
+                if (validPkgs.length > 0) {
+                    let remainingDose = dose;
+                    let result = [];
+                    const dUnit = drugObj.dose_per_pack_unit || 'mg';
+                    
+                    for (let i = 0; i < validPkgs.length; i++) {
+                        const pDose = validPkgs[i];
+                        if (i === validPkgs.length - 1) {
+                            const num = Math.ceil(remainingDose / pDose);
+                            if (num > 0) {
+                                result.push(`${num} ขวด (${pDose}${dUnit})`);
+                            }
+                        } else {
+                            const num = Math.floor(remainingDose / pDose);
+                            if (num > 0) {
+                                result.push(`${num} ขวด (${pDose}${dUnit})`);
+                                remainingDose -= num * pDose;
+                            }
+                        }
+                    }
+                    if (result.length > 0) {
+                        vials = result.join(', ');
+                    }
+                }
             }
         }
 

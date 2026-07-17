@@ -996,18 +996,18 @@ function App() {
             <meta charset="UTF-8">
             <title>พิมพ์สติ๊กเกอร์ยา</title>
             <style>
-                @page { size: 8cm 5cm; margin: 0; }
+                @page { size: 8cm 5.5cm; margin: 0; }
                 body { 
                     font-family: 'Tahoma', 'Leelawadee UI', sans-serif; 
                     margin: 0; 
                     padding: 0;
-                    font-size: 11px;
+                    font-size: 10px;
                     color: #000;
                 }
                 .sticker {
                     width: 8cm;
-                    height: 5cm;
-                    padding: 1.0cm 0.4cm 0.2cm 0.4cm;
+                    height: 5.5cm;
+                    padding: 1.2cm 0.4cm 0.2cm 0.4cm;
                     box-sizing: border-box;
                     display: flex;
                     flex-direction: column;
@@ -1029,7 +1029,7 @@ function App() {
                     gap: 15px;
                 }
                 .drug-title {
-                    font-size: 13px;
+                    font-size: 11px;
                 }
                 .drug-name-u {
                     text-decoration: underline;
@@ -1063,6 +1063,27 @@ function App() {
                         exp = new Date(rDate.getTime() + 3 * 24 * 60 * 60 * 1000);
                     }
                 }
+                
+                if (r.endDate && r.endDate.trim() !== '') {
+                    const parts = r.endDate.split('/');
+                    if (parts.length === 3) {
+                        const edd = parts[0].padStart(2, '0');
+                        const emm = parts[1].padStart(2, '0');
+                        const eyyNum = parseInt(parts[2], 10);
+                        let ehh = '23';
+                        let emin = '59';
+                        if (r.endTime && r.endTime.includes(':')) {
+                            const timeParts = r.endTime.split(':');
+                            ehh = timeParts[0].padStart(2, '0');
+                            emin = timeParts[1].padStart(2, '0');
+                        }
+                        const eGregorianYear = eyyNum > 2400 ? eyyNum - 543 : eyyNum;
+                        const eDate = new Date(`${eGregorianYear}-${emm}-${edd}T${ehh}:${emin}:00`);
+                        if (!isNaN(eDate.getTime())) {
+                            exp = eDate;
+                        }
+                    }
+                }
 
                 let tvText = '';
                 let dvNum = parseFloat(r.drugVolume) || 0;
@@ -1086,7 +1107,7 @@ function App() {
                 if (dvNum > 0 || ivNum > 0) {
                     let tv = (dvNum + ivNum).toFixed(2);
                     if (tv.endsWith('.00')) tv = tv.replace('.00', '');
-                    tvText = ` (รวมสุทธิ ${tv} ml)`;
+                    tvText = ` (รวมสุทธิ ${tv}&nbsp;ml)`;
                 }
 
                 return `
@@ -1096,8 +1117,8 @@ function App() {
                         <span>WARD: ${patient.ward || '-'}</span>
                     </div>
                     <div class="row drug-title">
-                        <span>ยา: <span class="drug-name-u">${r.drugName || '-'}</span></span>
-                        <span>${r.dose || '--'} in ${r.solvent || '--'} ${r.volume ? r.volume + ' ml' : ''}${tvText}</span>
+                        <span style="white-space: nowrap; margin-right: 8px;">ยา: <span class="drug-name-u">${r.drugName || '-'}</span></span>
+                        <span style="text-align: right;">${r.dose || '--'} in ${r.solvent || '--'} ${r.volume ? r.volume + '&nbsp;ml' : ''}${tvText}</span>
                     </div>
                     <div class="row">
                         <div class="row-left-gap">
@@ -1275,7 +1296,7 @@ function App() {
                     <div style="display: flex; align-items: flex-end; margin-left: 20px; margin-bottom: 6px;">
                         <div style="white-space: nowrap; margin-right: 5px;">ปริมาตรยาที่เตรียม</div>
                         <div class="line-input" style="width: 70px; text-align: center; font-weight: bold;">${printDrugVolume}</div>
-                        <div style="white-space: nowrap; margin-left: 5px;">ml ${printVials ? `(ใช้ ${printVials} ขวด)` : ''}</div>
+                        <div style="white-space: nowrap; margin-left: 5px;">ml</div>
                         <div style="white-space: nowrap; margin-left: 10px; margin-right: 5px;">(Add ลงใน Diluent</div>
                         <div class="line-input" style="flex: 1;">${row.solvent || ''}</div>
                         <div style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ปริมาตร</div>
@@ -1291,7 +1312,10 @@ function App() {
                             
                             <div><span class="checkbox-square"></span> ภาชนะบรรจุยาไม่รั่วซึม</div>
                             <div><span class="checkbox-square"></span> ติดฉลากถูกต้อง</div>
-                            <div>เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 150px;"></span></div>
+                            <div>
+                                <div style="margin-bottom: 8px;">เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 150px;"></span></div>
+                                <div>วันที่/เวลา <span class="line-input" style="width: 150px;"></span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4111,7 +4135,41 @@ function App() {
                                                         }`}
                                                     >
                                                         <td className="px-3 py-2.5 text-center font-black text-slate-300 dark:text-slate-600 text-xs">
-                                                            {idx + 1}
+                                                            <div className="flex flex-col items-center justify-center gap-0.5">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        if (idx === 0) return;
+                                                                        setAdminRows(prev => {
+                                                                            const newRows = [...prev];
+                                                                            [newRows[idx - 1], newRows[idx]] = [newRows[idx], newRows[idx - 1]];
+                                                                            return newRows;
+                                                                        });
+                                                                    }}
+                                                                    className={`p-0.5 rounded transition-colors ${idx === 0 ? 'opacity-0 cursor-default' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-500 cursor-pointer'}`}
+                                                                    disabled={idx === 0}
+                                                                    title="เลื่อนขึ้น"
+                                                                >
+                                                                    <ChevronUp size={14} />
+                                                                </button>
+                                                                <span>{idx + 1}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        if (idx === adminRows.length - 1) return;
+                                                                        setAdminRows(prev => {
+                                                                            const newRows = [...prev];
+                                                                            [newRows[idx], newRows[idx + 1]] = [newRows[idx + 1], newRows[idx]];
+                                                                            return newRows;
+                                                                        });
+                                                                    }}
+                                                                    className={`p-0.5 rounded transition-colors ${idx === adminRows.length - 1 ? 'opacity-0 cursor-default' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-500 cursor-pointer'}`}
+                                                                    disabled={idx === adminRows.length - 1}
+                                                                    title="เลื่อนลง"
+                                                                >
+                                                                    <ChevronDown size={14} />
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                         <td className="px-3 py-2.5">
                                                             <div className="flex gap-2 items-center">

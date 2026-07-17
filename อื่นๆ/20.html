@@ -164,4 +164,9 @@ document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
 document.querySelectorAll('#erd svg.erDiagram .row-rect-odd path, #erd svg.erDiagram .row-rect-even path').forEach(p => {
   p.setAttribute('stroke', 'none');
 });
+
+// Fix z-order: raise every text element above its sibling row-background rects
+document.querySelectorAll('#erd svg.erDiagram text').forEach(t => {
+  t.parentNode.appendChild(t);
+});
 </script>

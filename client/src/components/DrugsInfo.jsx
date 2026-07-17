@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope, Download } from 'lucide-react';
 import axios from 'axios';
 import DrugRulesManager from './DrugRulesManager';
@@ -38,6 +38,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         inventory_min: '',
         inventory_max: '',
         is_auto_dispensed: false,
+        packages: [],
         prep_instructions: '',
         solvent: '',
         admin_route: '',
@@ -62,6 +63,21 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
     });
 
     const [deleteConfirmDrug, setDeleteConfirmDrug] = useState(null);
+
+    const [customPackageTypes, setCustomPackageTypes] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('customPackageTypes')) || []; }
+        catch { return []; }
+    });
+
+    const allPackageTypes = useMemo(() => {
+        const types = new Set([...customPackageTypes]);
+        drugs.forEach(d => {
+            if (d.package_type) {
+                types.add(d.package_type);
+            }
+        });
+        return Array.from(types).sort();
+    }, [drugs, customPackageTypes]);
 
     useEffect(() => {
         fetchDrugs();
@@ -104,6 +120,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             inventory_min: '',
             inventory_max: '',
             is_auto_dispensed: false,
+            packages: [{ dose: '', dose_unit: 'mg', vol: '', vol_unit: 'ml' }],
             prep_instructions: '',
             solvent: '',
             admin_route: '',
@@ -151,7 +168,13 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             inventory_qty: drug.inventory_qty !== null && drug.inventory_qty !== undefined ? drug.inventory_qty.toString() : '',
             inventory_min: drug.inventory_min !== null && drug.inventory_min !== undefined ? drug.inventory_min.toString() : '',
             inventory_max: drug.inventory_max !== null && drug.inventory_max !== undefined ? drug.inventory_max.toString() : '',
-            is_auto_dispensed: drug.is_auto_dispensed === 1 || drug.is_auto_dispensed === true,
+            is_auto_dispensed: drug.is_auto_dispensed === 1,
+            packages: drug.packages ? (typeof drug.packages === 'string' ? JSON.parse(drug.packages) : drug.packages) : (drug.dose_per_pack ? [{
+                dose: drug.dose_per_pack,
+                dose_unit: drug.dose_per_pack_unit || 'mg',
+                vol: drug.vol_per_pack || '',
+                vol_unit: drug.vol_per_pack_unit || 'ml'
+            }] : []),
             prep_instructions: drug.prep_instructions || '',
             solvent: drug.solvent || '',
             admin_route: drug.admin_route || '',
@@ -193,12 +216,12 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             max_bsa_cap: drugForm.max_bsa_cap === '' ? null : parseFloat(drugForm.max_bsa_cap),
             max_gfr_cap: drugForm.max_gfr_cap === '' ? null : parseInt(drugForm.max_gfr_cap, 10),
             is_active: parseInt(drugForm.is_active, 10),
-            dose_per_pack: drugForm.dose_per_pack === '' ? null : parseFloat(drugForm.dose_per_pack),
             package_type: drugForm.package_type,
-            inventory_qty: drugForm.inventory_qty === '' ? 0 : parseFloat(drugForm.inventory_qty),
-            inventory_min: drugForm.inventory_min === '' ? 0 : parseFloat(drugForm.inventory_min),
-            inventory_max: drugForm.inventory_max === '' ? 0 : parseFloat(drugForm.inventory_max),
+            inventory_qty: drugForm.inventory_qty === '' ? null : parseFloat(drugForm.inventory_qty),
+            inventory_min: drugForm.inventory_min === '' ? null : parseFloat(drugForm.inventory_min),
+            inventory_max: drugForm.inventory_max === '' ? null : parseFloat(drugForm.inventory_max),
             is_auto_dispensed: drugForm.is_auto_dispensed ? 1 : 0,
+            packages: drugForm.packages,
             prep_instructions: drugForm.prep_instructions,
             solvent: drugForm.solvent,
             admin_route: drugForm.admin_route,
@@ -1068,62 +1091,99 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             </div>
 
                             {/* Inventory Section */}
-                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
-                                <Package size={16} className="text-emerald-500" />
-                                ข้อมูลบรรจุภัณฑ์ (Package Information)
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ภาชนะบรรจุ</label>
-                                    <input type="text" className="form-control text-sm" placeholder="เช่น Vial, Ampoule" value={drugForm.package_type} onChange={e => setDrugForm({...drugForm, package_type: e.target.value})} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ขนาดยา / ภาชนะบรรจุ</label>
-                                    <div className="flex">
-                                        <input 
-                                            type="number" 
-                                            step="0.01" 
-                                            className="form-control text-sm rounded-r-none border-r-0 focus:z-10" 
-                                            placeholder="เช่น 50" 
-                                            value={drugForm.dose_per_pack} 
-                                            onChange={e => setDrugForm({...drugForm, dose_per_pack: e.target.value})} 
-                                        />
-                                        <select 
-                                            className="form-control text-sm rounded-l-none w-24 bg-slate-50 dark:bg-slate-800 focus:z-10 cursor-pointer"
-                                            value={drugForm.dose_per_pack_unit || 'ml'}
-                                            onChange={e => setDrugForm({...drugForm, dose_per_pack_unit: e.target.value})}
+                            <div className="mt-6 mb-3 flex items-center justify-between border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                                <h4 className="font-black text-sm flex items-center gap-2">
+                                    <Package size={16} className="text-emerald-500" />
+                                    ข้อมูลบรรจุภัณฑ์ (Package Information)
+                                </h4>
+                                <button type="button" className="text-xs btn-secondary py-1 px-3 rounded-lg border bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold" onClick={() => setDrugForm({...drugForm, packages: [...(drugForm.packages || []), { dose: '', dose_unit: 'mg', vol: '', vol_unit: 'ml' }]})}>
+                                    + เพิ่มขนาดบรรจุ
+                                </button>
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ภาชนะบรรจุ (รวมทุกขนาด)</label>
+                                <div className="flex gap-1 items-center">
+                                    <input type="text" className="form-control text-sm" placeholder="เช่น Vial, Ampoule" value={drugForm.package_type || ''} onChange={e => setDrugForm({...drugForm, package_type: e.target.value})} list="package-type-list" />
+                                    <datalist id="package-type-list">
+                                        {allPackageTypes.map(pt => (
+                                            <option key={pt} value={pt} />
+                                        ))}
+                                    </datalist>
+                                    {drugForm.package_type && !allPackageTypes.includes(drugForm.package_type) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const val = drugForm.package_type.trim();
+                                                if (!val) return;
+                                                const newCustom = [...customPackageTypes, val];
+                                                setCustomPackageTypes(newCustom);
+                                                localStorage.setItem('customPackageTypes', JSON.stringify(newCustom));
+                                            }}
+                                            className="bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-3 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap animate-in fade-in"
+                                            title="บันทึกภาชนะบรรจุใหม่ไว้ใช้ในอนาคต"
                                         >
-                                            <option value="ml">ML</option>
-                                            <option value="mg">MG</option>
-                                            <option value="g">G</option>
-                                            <option value="mcg">MCG</option>
-                                            <option value="IU">IU</option>
-                                            <option value="หน่วย">หน่วย</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ปริมาตร / ภาชนะบรรจุ</label>
-                                    <div className="flex">
-                                        <input 
-                                            type="number" 
-                                            step="0.01" 
-                                            className="form-control text-sm rounded-r-none border-r-0 focus:z-10" 
-                                            placeholder="เช่น 1" 
-                                            value={drugForm.vol_per_pack} 
-                                            onChange={e => setDrugForm({...drugForm, vol_per_pack: e.target.value})} 
-                                        />
-                                        <select 
-                                            className="form-control text-sm rounded-l-none w-24 bg-slate-50 dark:bg-slate-800 focus:z-10 cursor-pointer"
-                                            value={drugForm.vol_per_pack_unit || 'ml'}
-                                            onChange={e => setDrugForm({...drugForm, vol_per_pack_unit: e.target.value})}
-                                        >
-                                            <option value="ml">ML</option>
-                                            <option value="l">L</option>
-                                        </select>
-                                    </div>
+                                            + บันทึก
+                                        </button>
+                                    )}
                                 </div>
                             </div>
+                            {(!drugForm.packages || drugForm.packages.length === 0) ? (
+                                <div className="text-sm text-slate-500 italic py-4 text-center border border-dashed rounded-xl border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">ไม่มีข้อมูลขนาดบรรจุ กดเพิ่มขนาดบรรจุด้านบน</div>
+                            ) : (
+                                <div className="space-y-4">
+                                {drugForm.packages.map((pkg, idx) => (
+                                    <div key={idx} className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-800 relative shadow-sm border-slate-200 dark:border-slate-700">
+                                        <button type="button" className="absolute top-2 right-2 text-rose-400 hover:text-rose-600 bg-white dark:bg-slate-900 rounded-full p-1 shadow-sm border border-rose-100 dark:border-rose-900" onClick={() => {
+                                            const newPkgs = [...drugForm.packages];
+                                            newPkgs.splice(idx, 1);
+                                            setDrugForm({...drugForm, packages: newPkgs});
+                                        }} title="ลบขนาดบรรจุนี้"><X size={14} /></button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                            <div>
+                                                <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ขนาดยา / ภาชนะบรรจุ</label>
+                                                <div className="flex">
+                                                    <input type="number" step="0.01" className="form-control text-sm rounded-r-none border-r-0 focus:z-10 bg-white" placeholder="เช่น 50" value={pkg.dose} onChange={e => {
+                                                        const newPkgs = [...drugForm.packages];
+                                                        newPkgs[idx].dose = e.target.value;
+                                                        setDrugForm({...drugForm, packages: newPkgs});
+                                                    }} />
+                                                    <select className="form-control text-sm rounded-l-none w-24 bg-slate-100 dark:bg-slate-700 focus:z-10 cursor-pointer font-bold border-l border-slate-200" value={pkg.dose_unit || 'mg'} onChange={e => {
+                                                        const newPkgs = [...drugForm.packages];
+                                                        newPkgs[idx].dose_unit = e.target.value;
+                                                        setDrugForm({...drugForm, packages: newPkgs});
+                                                    }}>
+                                                        <option value="ml">ML</option>
+                                                        <option value="mg">MG</option>
+                                                        <option value="g">G</option>
+                                                        <option value="mcg">MCG</option>
+                                                        <option value="IU">IU</option>
+                                                        <option value="หน่วย">หน่วย</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">ปริมาตร / ภาชนะบรรจุ</label>
+                                                <div className="flex">
+                                                    <input type="number" step="0.01" className="form-control text-sm rounded-r-none border-r-0 focus:z-10 bg-white" placeholder="เช่น 1" value={pkg.vol} onChange={e => {
+                                                        const newPkgs = [...drugForm.packages];
+                                                        newPkgs[idx].vol = e.target.value;
+                                                        setDrugForm({...drugForm, packages: newPkgs});
+                                                    }} />
+                                                    <select className="form-control text-sm rounded-l-none w-24 bg-slate-100 dark:bg-slate-700 focus:z-10 cursor-pointer font-bold border-l border-slate-200" value={pkg.vol_unit || 'ml'} onChange={e => {
+                                                        const newPkgs = [...drugForm.packages];
+                                                        newPkgs[idx].vol_unit = e.target.value;
+                                                        setDrugForm({...drugForm, packages: newPkgs});
+                                                    }}>
+                                                        <option value="ml">ML</option>
+                                                        <option value="l">L</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                </div>
+                            )}
 
                             <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/50 mt-6">
                                 <button
