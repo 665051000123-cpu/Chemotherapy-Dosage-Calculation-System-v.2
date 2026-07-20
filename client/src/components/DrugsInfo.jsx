@@ -537,7 +537,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         <>
         <div className="animate-row-in space-y-6">
             {/* Header */}
-            <div className="w-full premium-card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
+            <div className="w-full premium-card p-5 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 no-print">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={onBack}
@@ -556,7 +556,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         <p className="text-xs opacity-70">รายการยาที่ใช้ในการคำนวณขนาดยาทั้งหมดในระบบ ดึงข้อมูลจากฐานข้อมูล</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto self-stretch md:self-auto justify-end">
+                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto self-stretch xl:self-auto justify-start xl:justify-end">
                     <div className="relative flex-1 md:flex-none">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50" />
                         <input

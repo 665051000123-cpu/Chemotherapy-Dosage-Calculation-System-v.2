@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-// https://vitejs.dev/config/
+
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true,
+    allowedHosts: ['ram2-webapp01.ram2.local'] as any,
     port: 5003,
     proxy: {
       '/api': {

@@ -33,6 +33,16 @@ body.light-mode {
     color: var(--text-color);
     font-family: 'Noto Sans Thai', sans-serif;
   }
+
+  /* Enhance text readability globally in Dark Mode */
+  body:not(.light-mode) .text-slate-400,
+  body:not(.light-mode) .text-slate-500,
+  body:not(.light-mode) .text-slate-600 {
+    color: #cbd5e1 !important; /* Force to slate-300 for clarity against dark bg */
+  }
+  body:not(.light-mode) .opacity-70 {
+    opacity: 0.9 !important;
+  }
 }
 
 @layer components {
@@ -264,41 +274,52 @@ body:not(.light-mode) .gender-text-highlight {
 }
 
 /* Sizing optimization for 1240x1024 screen resolution */
-@media screen and (max-width: 1240px) or (max-height: 1024px) {
+@media screen and (max-width: 1366px), screen and (max-height: 1024px) {
   :root {
-    --card-padding: 1rem;
+    --card-padding: 0.75rem;
   }
   
+  html {
+    font-size: 14px !important;
+  }
+
   body {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.95rem !important; /* Slightly larger base text */
   }
 
   /* Form control tightening */
   .form-control {
-    padding: 0.625rem 0.875rem !important; /* 10px 14px */
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
     font-size: 0.875rem !important;
-    border-radius: 0.75rem !important;
+    border-radius: 0.5rem !important;
   }
 
   /* Buttons tightening */
   .btn-primary {
-    padding: 0.625rem 1rem !important;
+    padding: 0.5rem 0.75rem !important;
     font-size: 0.875rem !important;
-    border-radius: 0.75rem !important;
+    border-radius: 0.5rem !important;
   }
 
   /* Premium card padding reduction */
   .premium-card {
     padding: 1rem !important;
-    border-radius: 1.25rem !important;
+    border-radius: 1rem !important;
   }
 
   /* Tighter margins and spacings */
   .space-y-6 > * + * {
-    margin-top: 1rem !important;
+    margin-top: 0.75rem !important;
+  }
+  .space-y-4 > * + * {
+    margin-top: 0.5rem !important;
   }
   .gap-6 {
-    gap: 1rem !important;
+    gap: 0.75rem !important;
+  }
+  .gap-4 {
+    gap: 0.5rem !important;
   }
   .p-6 {
     padding: 1rem !important;
@@ -309,36 +330,101 @@ body:not(.light-mode) .gender-text-highlight {
 
   /* Scale down header bar items */
   h2 {
-    font-size: 1.125rem !important; /* 18px */
+    font-size: 1.125rem !important; 
   }
   h3 {
-    font-size: 1rem !important; /* 16px */
-  }
-
-  /* Adjust grid gap for compact view */
-  .gap-4 {
-    gap: 0.75rem !important;
+    font-size: 1rem !important;
   }
   
   /* Make lists and tables tighter */
   th, td {
-    padding: 0.625rem 0.75rem !important;
-    font-size: 0.75rem !important; /* 12px */
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.85rem !important;
   }
   
   /* Shrink large values on metrics cards */
   .text-3xl {
-    font-size: 1.5rem !important; /* 24px */
+    font-size: 1.5rem !important;
   }
   
   /* Compact custom dropdowns and selections */
   select.form-control {
-    padding-right: 2rem !important;
+    padding-right: 2rem !important; /* give enough space for caret */
   }
   
-  /* Scrollable table max-height reduction for 768px screen height */
+  /* Scrollable table max-height reduction */
   .scrollable-table-container {
-    max-height: 250px !important;
+    max-height: 350px !important;
+  }
+
+  /* Make sure flex wraps don't break the header on 1024 */
+  .text-lg, .text-xl {
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Extreme Sizing optimization for strict 1024x768 screen resolution */
+@media screen and (max-width: 1024px), screen and (max-height: 768px) {
+  html {
+    font-size: 15px !important; /* Increased from 13px to 15px for much better readability */
+  }
+  
+  /* Force main containers to use 100% width to maximize space */
+  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-screen-xl, .container {
+    max-width: 100% !important;
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Remove the main layout padding */
+  .md\:p-8 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .scrollable-table-container {
+    max-height: 380px !important;
+  }
+  
+  .premium-card {
+    padding: 0.75rem !important;
+  }
+  
+  th, td {
+    padding: 0.35rem 0.4rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .form-control {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+    /* Do not force horizontal padding to preserve icons like search */
+    font-size: 0.9rem !important;
+  }
+  
+  .gap-4, .gap-6 {
+    gap: 0.35rem !important;
+  }
+  
+  /* Ensure inputs in the table are comfortably wide, allowing horizontal scroll */
+  td .form-control {
+    min-width: 110px;
+  }
+  td select.form-control {
+    min-width: 120px; 
+  }
+  
+  /* Make the drug name column (2nd column) specifically wider for long names */
+  td:nth-child(2) .form-control,
+  td:nth-child(2) select.form-control {
+    min-width: 220px !important;
+  }
+  
+  /* Make sure the table itself can expand and scroll properly */
+  .print-table {
+    min-width: 1000px; /* Force table to be wide enough to fit all columns comfortably */
   }
 }
 

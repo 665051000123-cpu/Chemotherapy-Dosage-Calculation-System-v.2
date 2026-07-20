@@ -1,13 +1,71 @@
 <style>
+#wrap { background: #DCEEFA; border: 2px solid #7B4FA6; border-radius: 12px; padding: 0; font-family: "Anthropic Sans", sans-serif; }
+.hdr {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 22px 6px 22px;
+}
+.hdr .num {
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: #12203F;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+}
+.hdr .title { font-weight: 700; font-size: 16px; color: #12203F; margin: 0 0 4px 0; }
+.hdr .subtitle { font-size: 12.5px; color: #3E6FB0; line-height: 1.5; margin: 0; }
+
 #erd svg.erDiagram .divider path { stroke-opacity: 0.5; }
 #erd svg.erDiagram .row-rect-odd path,
 #erd svg.erDiagram .row-rect-odd rect,
 #erd svg.erDiagram .row-rect-even path,
 #erd svg.erDiagram .row-rect-even rect { stroke: none !important; }
-#erd { overflow-x: auto; padding: 12px; background: #DCEEFA; border: 2px solid #7B4FA6; border-radius: 12px; }
+#erd svg.erDiagram .relationshipLine { stroke-width: 1.5px !important; }
+#erd { overflow-x: auto; padding: 10px 16px 16px 16px; }
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(18,32,63,0.15);
+  font-size: 13px;
+  color: #12203F;
+}
+.legend .item { display: flex; align-items: center; gap: 8px; }
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: 0.5px;
+}
+.badge.pk { background: #D6336C; }
+.badge.fk { background: #2F9E44; }
+.legend .sym { font-weight: 700; color: #12203F; }
 </style>
-<h2 class="sr-only">แผนภาพความสัมพันธ์ฐานข้อมูลระบบยา ธีมสีน้ำเงินกรมท่าและม่วง</h2>
-<div id="erd"></div>
+<h2 class="sr-only">แผนภาพความสัมพันธ์ฐานข้อมูลระบบยา พร้อมหัวข้อและคำอธิบายสัญลักษณ์</h2>
+<div id="wrap">
+  <div class="hdr">
+    <div class="num">2</div>
+    <div>
+      <p class="title">2. Database Schema (Optimized Blueprint)</p>
+      <p class="subtitle">ระบบโครงสร้างฐานข้อมูลที่มีการเคลียร์ตำแหน่งจัดกลุ่ม และจัดวางเส้นเชื่อมโยงอย่างไร้รอยต่อ (Anti-Crossing Schema)</p>
+    </div>
+  </div>
+  <div id="erd"></div>
+  <div class="legend">
+    <div class="item"><span class="badge pk">PK</span><span>Primary Key</span></div>
+    <div class="item"><span class="badge fk">FK</span><span>Foreign Key</span></div>
+    <div class="item"><span class="sym">1</span><span>= One (ฝั่งต้นทางเดี่ยว)</span></div>
+    <div class="item"><span class="sym">∞</span><span>= Many (ฝั่งปลายทางที่มีหลายรายการ)</span></div>
+  </div>
+</div>
 <script type="module">
 import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
 await document.fonts.ready;
@@ -15,15 +73,20 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'base',
   fontFamily: '"Anthropic Sans", sans-serif',
+  er: {
+    diagramPadding: 24,
+    entityPadding: 18,
+    minEntityWidth: 120,
+    minEntityHeight: 80,
+    useMaxWidth: false,
+  },
   themeVariables: {
     darkMode: false,
     fontSize: '13px',
     fontFamily: '"Anthropic Sans", sans-serif',
     lineColor: '#7B4FA6',
-    textColor: '#12203F',
     primaryColor: '#5B8FD6',
     primaryBorderColor: '#12203F',
-    primaryTextColor: '#FFFFFF',
     secondaryColor: '#AFD8F5',
     tertiaryColor: '#DCEEFA',
     attributeBackgroundColorOdd: '#EAF4FC',
@@ -33,13 +96,15 @@ mermaid.initialize({
 const src = `erDiagram
   USERS ||--o{ LOGIN : "employee_id"
   USERS ||--o{ ACTIVITY_LOGS : "employee_id"
+
   PATIENTS ||--o{ ORDER_LOGS : "hn"
+  PATIENTS ||--o{ PRINT_LOGS : "hn"
   PATIENTS ||--o{ DOSAGE_LOGS : "hn"
   PATIENTS ||--o{ DOSE_LOGS : "hn"
-  PATIENTS ||--o{ PRINT_LOGS : "hn"
-  DRUGS }o--|| SOLVENTS : "solvent"
+
   DRUGS ||--o{ DOSAGE_LOGS : "drugs_used"
   DRUGS ||--o{ DOSE_LOGS : "drug_id"
+  DRUGS }o--|| SOLVENTS : "solvent"
 
   USERS {
     int id PK
@@ -58,6 +123,14 @@ const src = `erDiagram
     bool is_active
     string default_printer
   }
+  ACTIVITY_LOGS {
+    int id PK
+    string timestamp
+    string employee_id FK
+    string username
+    string action_type
+    text details
+  }
   PATIENTS {
     string hn PK
     string name
@@ -70,31 +143,6 @@ const src = `erDiagram
     string ward
     string doctor
   }
-  DRUGS {
-    int drug_id PK
-    string drug_code
-    string drug_name
-    string drug_category
-    string calculation_type
-    decimal standard_dose_value
-    string solvent FK
-    string admin_route
-    decimal cost_price
-  }
-  SOLVENTS {
-    int solvent_id PK
-    string solvent_name
-    bool is_active
-    datetime created_at
-  }
-  ACTIVITY_LOGS {
-    int id PK
-    string timestamp
-    string employee_id FK
-    string username
-    string action_type
-    text details
-  }
   ORDER_LOGS {
     int id PK
     string timestamp
@@ -105,6 +153,16 @@ const src = `erDiagram
     string doctor
     text order_details
     string cycle
+  }
+  PRINT_LOGS {
+    int id PK
+    string hn FK
+    string patient_name
+    string title
+    string printer_name
+    string paper_size
+    bool is_a4
+    string printed_by
   }
   DOSAGE_LOGS {
     int id PK
@@ -127,20 +185,28 @@ const src = `erDiagram
     string prescribed_dose
     text clinical_note
   }
-  PRINT_LOGS {
-    int id PK
-    string hn FK
-    string patient_name
-    string title
-    string printer_name
-    string paper_size
-    bool is_a4
-    string printed_by
+  DRUGS {
+    int drug_id PK
+    string drug_code
+    string drug_name
+    string drug_category
+    string calculation_type
+    decimal standard_dose_value
+    string solvent FK
+    string admin_route
+    decimal cost_price
+  }
+  SOLVENTS {
+    int solvent_id PK
+    string solvent_name
+    bool is_active
+    datetime created_at
   }
 `;
 const { svg } = await mermaid.render('erd-svg', src);
 document.getElementById('erd').innerHTML = svg;
 
+const headerBoxes = [];
 document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
   const firstPath = node.querySelector('path[d]');
   if (!firstPath) return;
@@ -159,14 +225,37 @@ document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
     if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
   }
   firstPath.replaceWith(rect);
+  headerBoxes.push({ node, y, h });
 });
 
 document.querySelectorAll('#erd svg.erDiagram .row-rect-odd path, #erd svg.erDiagram .row-rect-even path').forEach(p => {
   p.setAttribute('stroke', 'none');
 });
 
-// Fix z-order: raise every text element above its sibling row-background rects
-document.querySelectorAll('#erd svg.erDiagram text').forEach(t => {
+document.querySelectorAll('#erd svg.erDiagram .node text').forEach(t => {
   t.parentNode.appendChild(t);
+});
+
+document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
+  const header = headerBoxes.find(hb => hb.node === node);
+  if (!header) return;
+  node.querySelectorAll('text').forEach(t => {
+    let bbox;
+    try { bbox = t.getBBox(); } catch (e) { return; }
+    const cy = bbox.y + bbox.height / 2;
+    const isHeader = cy >= header.y && cy <= header.y + header.h;
+    const color = isHeader ? '#FFFFFF' : '#000000';
+    t.setAttribute('fill', color);
+    t.style.setProperty('fill', color, 'important');
+    t.querySelectorAll('tspan').forEach(ts => {
+      ts.setAttribute('fill', color);
+      ts.style.setProperty('fill', color, 'important');
+    });
+  });
+});
+
+document.querySelectorAll('#erd svg.erDiagram .relationshipLabelBox text, #erd svg.erDiagram .er.relationshipLabel').forEach(t => {
+  t.setAttribute('fill', '#12203F');
+  t.style.setProperty('fill', '#12203F', 'important');
 });
 </script>

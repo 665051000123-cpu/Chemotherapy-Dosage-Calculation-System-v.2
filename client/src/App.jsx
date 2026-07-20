@@ -2443,9 +2443,16 @@ function App() {
         <div className="p-4 md:p-8 print:p-0 min-h-screen flex flex-col justify-between relative">
             {user && user.must_change_password !== 1 && (
                 <div 
-                    className="absolute top-6 left-6 flex items-center gap-5 premium-card p-5 px-8 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.3)] z-50 animate-row-in no-print backdrop-blur-xl border-sky-500/50 cursor-pointer hover:shadow-lg transition-all duration-300"
+                    className="absolute top-6 left-6 flex items-center gap-5 premium-card p-5 pl-8 pr-14 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.3)] z-50 animate-row-in no-print backdrop-blur-xl border-sky-500/50 cursor-pointer hover:shadow-lg transition-all duration-300"
                     onClick={() => setIsUserMenuExpanded(!isUserMenuExpanded)}
                 >
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setTheme(theme === 'dark' ? 'light' : 'dark'); }}
+                        className="absolute top-4 right-4 p-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center no-print hover:bg-slate-50 dark:hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                        title={theme === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
+                    >
+                        {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-slate-600 dark:text-slate-400" />}
+                    </button>
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-600 to-sky-400 flex items-center justify-center shadow-lg border border-white/20 shrink-0">
                         <User size={32} className="text-white" />
                     </div>
@@ -2517,10 +2524,6 @@ function App() {
                     </div>
                 </div>
             )}
-
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="absolute top-4 right-4 bg-slate-800 text-white dark:bg-white dark:text-slate-900 border-2 border-slate-600 px-5 py-3 rounded-full shadow-lg z-50 font-black flex items-center gap-2 no-print hover:scale-105 active:scale-95 transition-all text-sm cursor-pointer">
-                {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />} {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-            </button>
 
             <div className={`w-full max-w-full mx-auto my-auto print:my-0 print:pt-0 ${user ? 'pt-32 md:pt-36' : 'pt-4 md:pt-12'}`}>
                 {step === 'auth' ? (
@@ -2750,7 +2753,7 @@ function App() {
                     />
                 ) : step === 'calculation-history' ? (
                     <div className="animate-row-in space-y-6">
-                        <div id="history-print-area" className="max-w-7xl mx-auto premium-card p-6 md:p-8 relative bg-white">
+                        <div id="history-print-area" className="max-w-7xl mx-auto premium-card p-6 md:p-8 relative">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-700/10">
                                 <div className="flex items-center gap-3">
                                     <button
@@ -2761,7 +2764,7 @@ function App() {
                                         <ArrowLeft size={20} />
                                     </button>
                                     <div>
-                                        <h1 className="text-3xl font-black flex items-center gap-2 text-slate-800">
+                                        <h1 className="text-3xl font-black flex items-center gap-2 text-slate-800 dark:text-white">
                                             <History size={28} className="text-sky-400 print-hide" /> รายงานบันทึกประวัติการคำนวณ
                                         </h1>
                                         <p className="text-slate-500 font-medium">ประวัติและบันทึกข้อมูลการคำนวณขนาดยาเคมีบำบัดของผู้ป่วย</p>
@@ -2805,7 +2808,7 @@ function App() {
                                                 placeholder="วว/ดด/ปปปป"
                                                 value={startDateFilter}
                                                 onChange={e => handleDateInputChange(e.target.value, startDateFilter, setStartDateFilter)}
-                                                className="form-control py-1.5 px-3 text-xs rounded-xl font-bold w-full"
+                                                className="form-control py-1.5 pl-3 pr-8 text-xs rounded-xl font-bold w-full"
                                                 maxLength={10}
                                             />
                                             <input
@@ -2842,7 +2845,7 @@ function App() {
                                                 placeholder="วว/ดด/ปปปป"
                                                 value={endDateFilter}
                                                 onChange={e => handleDateInputChange(e.target.value, endDateFilter, setEndDateFilter)}
-                                                className="form-control py-1.5 px-3 text-xs rounded-xl font-bold w-full"
+                                                className="form-control py-1.5 pl-3 pr-8 text-xs rounded-xl font-bold w-full"
                                                 maxLength={10}
                                             />
                                             <input
@@ -3569,7 +3572,7 @@ function App() {
                                                             type="number"
                                                             placeholder="ระบุค่า WBC"
                                                             value={wbc}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setWbc(e.target.value)}
                                                         />
                                                     </div>
@@ -3579,7 +3582,7 @@ function App() {
                                                             type="number"
                                                             placeholder="ระบุค่า Platelets"
                                                             value={plt}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setPlt(e.target.value)}
                                                         />
                                                     </div>
@@ -3591,7 +3594,7 @@ function App() {
                                                             type="number"
                                                             placeholder="% N"
                                                             value={neutrophils}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setNeutrophils(e.target.value)}
                                                         />
                                                     </div>
@@ -3601,7 +3604,7 @@ function App() {
                                                             type="number"
                                                             placeholder="% B"
                                                             value={bands}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setBands(e.target.value)}
                                                         />
                                                     </div>
@@ -3612,7 +3615,7 @@ function App() {
                                                         type="number"
                                                         placeholder="คำนวณจากสูตร ANC = WBC × (%N + %B) ÷ 100"
                                                         value={anc}
-                                                        className="form-control text-xs py-1.5 bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed"
+                                                        className="form-control text-xs py-1.5 px-2 bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed"
                                                         readOnly
                                                     />
                                                 </div>
@@ -3681,7 +3684,7 @@ function App() {
                                                             placeholder="ระบุค่า T.Bili"
                                                             step="0.1"
                                                             value={tbili}
-                                                            className="form-control text-xs py-1.5 mt-1 animate-in fade-in slide-in-from-top-1"
+                                                            className="form-control text-xs py-1.5 px-2 mt-1 animate-in fade-in slide-in-from-top-1"
                                                             onChange={e => setTbili(e.target.value)}
                                                         />
                                                     )}
@@ -3693,7 +3696,7 @@ function App() {
                                                             type="number"
                                                             placeholder="AST"
                                                             value={ast}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setAst(e.target.value)}
                                                         />
                                                     </div>
@@ -3703,7 +3706,7 @@ function App() {
                                                             type="number"
                                                             placeholder="ALT"
                                                             value={alt}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setAlt(e.target.value)}
                                                         />
                                                     </div>
@@ -3714,7 +3717,7 @@ function App() {
                                                         type="number"
                                                         placeholder="ระบุค่า ALP"
                                                         value={alp}
-                                                        className="form-control text-xs py-1.5"
+                                                        className="form-control text-xs py-1.5 px-2"
                                                         onChange={e => setAlp(e.target.value)}
                                                     />
                                                 </div>
@@ -3772,13 +3775,13 @@ function App() {
                                                             type="number"
                                                             placeholder="CrCl (ml/min)"
                                                             value={drugParams.gfr}
-                                                            className="form-control text-xs py-1.5"
+                                                            className="form-control text-xs py-1.5 px-2"
                                                             onChange={e => setDrugParams({ ...drugParams, gfr: e.target.value })}
                                                         />
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-2">
-                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                                                        <div className="grid grid-cols-2 xl:grid-cols-4 lg:grid-cols-2 gap-1.5">
                                                             <div>
                                                                 <label className="block text-[9px] font-bold text-slate-500 mb-0.5">อายุ (ปี)</label>
                                                                 <input
@@ -4092,7 +4095,7 @@ function App() {
                                             <button
                                                 type="button"
                                                 onClick={handleSaveOrder}
-                                                className={`btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl border transition-all cursor-pointer font-bold no-print ${editingOrderLogId ? 'bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500 hover:text-white shadow-sm' : 'bg-teal-500/10 text-teal-600 border-teal-500/30 hover:bg-teal-500 hover:text-white shadow-sm'}`}
+                                                className={`btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl border transition-all cursor-pointer font-bold no-print ${editingOrderLogId ? 'bg-amber-500 text-white border-transparent hover:bg-amber-600 shadow-md shadow-amber-500/20' : 'bg-emerald-500 text-white border-transparent hover:bg-emerald-600 shadow-md shadow-emerald-500/20'}`}
                                                 title={editingOrderLogId ? 'บันทึกข้อมูล' : 'บันทึกข้อมูลการสั่งยา'}
                                             >
                                                 {editingOrderLogId ? 'บันทึก' : '+ บันทึก'}
@@ -4118,8 +4121,8 @@ function App() {
                                                     <th className="px-3 py-2.5">ตัวทำละลาย</th>
                                                     <th className="px-3 py-2.5">Vol (ml)</th>
                                                     <th className="px-3 py-2.5 w-24 text-center text-rose-400">Total Vol</th>
-                                                    <th className="px-3 py-2.5">วันที่เริ่ม</th>
-                                                    <th className="px-3 py-2.5">วันที่สิ้นสุด</th>
+                                                    <th className="px-3 py-2.5 min-w-[150px] w-[150px]">วันที่เริ่ม</th>
+                                                    <th className="px-3 py-2.5 min-w-[150px] w-[150px]">วันที่สิ้นสุด</th>
                                                     <th className="px-3 py-2.5">อัตราเร็ว</th>
                                                 </tr>
                                             </thead>
@@ -4360,7 +4363,7 @@ function App() {
                                                                 value={row.route}
                                                                 disabled={isLockedRow}
                                                                 onChange={e => setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, route: e.target.value } : r))}
-                                                                className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[140px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                                className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
                                                             >
                                                                 <option value="">-- เลือกวิธี --</option>
                                                                 <option value="IV drip">IV drip</option>
@@ -4459,7 +4462,7 @@ function App() {
                                                                 })()}
                                                             </div>
                                                         </td>
-                                                        <td className="px-3 py-2.5">
+                                                        <td className="px-3 py-2.5 min-w-max">
                                                             <div className="flex flex-col gap-1.5">
                                                                 <div className="relative flex items-center">
                                                                     <input
@@ -4468,7 +4471,7 @@ function App() {
                                                                         value={row.startDate}
                                                                         disabled={isLockedRow}
                                                                         onChange={e => handleAdminDateChange(e.target.value, row.startDate, idx, 'startDate')}
-                                                                        className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[140px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                                        className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
                                                                         maxLength={10}
                                                                     />
                                                                     {!isLockedRow && (
@@ -4510,7 +4513,7 @@ function App() {
                                                                         value={row.endDate}
                                                                         disabled={isLockedRow}
                                                                         onChange={e => handleAdminDateChange(e.target.value, row.endDate, idx, 'endDate')}
-                                                                        className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[140px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                                        className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
                                                                         maxLength={10}
                                                                     />
                                                                     {!isLockedRow && (
