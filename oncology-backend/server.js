@@ -4,7 +4,10 @@ const { Sequelize, DataTypes, Op } = require('sequelize');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key_patien_system_v2';
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 function getSettings() {
     try {
@@ -583,16 +586,37 @@ app.post('/api/login', async (req, res) => {
     try {
         const { employee_id, password } = req.body;
         const user = await User.findOne({
-            where: { employee_id, password }
+            where: { employee_id }
         });
 
-        if (user) {
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง' });
+        }
+
+        let isMatch = false;
+        // Check if password is a bcrypt hash
+        if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
+            isMatch = await bcrypt.compare(password, user.password);
+        } else {
+            // Fallback for old plain text passwords (ID < 28)
+            isMatch = (password === user.password);
+        }
+
+        if (isMatch) {
             if (user.is_active === 0) {
                 return res.status(403).json({ success: false, message: 'บัญชีผู้ใช้งานนี้ถูกระงับการใช้งานชั่วคราว โปรดติดต่อผู้ดูแลระบบ' });
             }
             // บันทึกกิจกรรมการเข้าสู่ระบบ
             logActivity(employee_id, 'LOGIN', 'เข้าสู่ระบบสำเร็จ');
-            res.json({ success: true, user });
+            
+            // Generate JWT Token
+            const token = jwt.sign(
+                { id: user.id, employee_id: user.employee_id, role: user.role },
+                JWT_SECRET,
+                { expiresIn: '8h' }
+            );
+
+            res.json({ success: true, user, token });
         } else {
             res.status(401).json({ success: false, message: 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง' });
         }
@@ -648,8 +672,10 @@ app.post('/api/change-password', async (req, res) => {
             return res.status(400).json({ success: false, message: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
         }
 
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
         const [affectedCount] = await User.update(
-            { password: new_password, must_change_password: 0 },
+            { password: hashedPassword, must_change_password: 0 },
             { where: { employee_id } }
         );
 
@@ -1086,10 +1112,12 @@ app.post('/api/admin/users', requireAdmin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const newUser = await User.create({
             username,
             employee_id,
-            password,
+            password: hashedPassword,
             role,
             must_change_password: 1
         });
@@ -1117,9 +1145,11 @@ app.put('/api/admin/users/:id', requireAdmin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
         }
 
-        const updateData = password
-            ? { username, employee_id, password, role, must_change_password: 1 }
-            : { username, employee_id, role };
+        let updateData = { username, employee_id, role };
+        if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+            updateData.must_change_password = 1;
+        }
 
         if (is_active !== undefined) {
             updateData.is_active = is_active;
@@ -1177,7 +1207,10 @@ app.delete('/api/admin/logs/:id', requireAdmin, async (req, res) => {
 // ---------------- Print Logs API ---------------- //
 app.get('/api/print-logs', async (req, res) => {
     try {
+        const { hn } = req.query;
+        const whereClause = hn ? { hn } : {};
         const logs = await PrintLog.findAll({
+            where: whereClause,
             order: [['createdAt', 'DESC']],
             limit: 100 // return last 100 prints
         });

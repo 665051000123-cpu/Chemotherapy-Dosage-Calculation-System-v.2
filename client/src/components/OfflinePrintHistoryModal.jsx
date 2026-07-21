@@ -4,7 +4,7 @@ import { X, Clock, Printer, FileText, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 
-const OfflinePrintHistoryModal = ({ show, onClose, user, showNotification }) => {
+const OfflinePrintHistoryModal = ({ show, onClose, user, showNotification, patient }) => {
     const [history, setHistory] = useState([]);
     const [printingId, setPrintingId] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -14,7 +14,9 @@ const OfflinePrintHistoryModal = ({ show, onClose, user, showNotification }) => 
             if (show) {
                 setLoading(true);
                 try {
-                    const res = await axios.get('/api/print-logs');
+                    const res = await axios.get('/api/print-logs', { 
+                        params: patient?.hn ? { hn: patient.hn } : {} 
+                    });
                     if (res.data.success) {
                         setHistory(res.data.logs);
                     }
@@ -27,11 +29,28 @@ const OfflinePrintHistoryModal = ({ show, onClose, user, showNotification }) => 
             }
         };
         fetchHistory();
-    }, [show]);
+    }, [show, patient]);
 
     const handleReprint = async (job) => {
         setPrintingId(job.id);
         try {
+            if (job.printer_name === 'Local Browser') {
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(job.html_content);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 500);
+                } else {
+                    showNotification('ไม่สามารถเปิดหน้าต่างพิมพ์ได้ กรุณาอนุญาต Pop-ups', 'warning');
+                }
+                setPrintingId(null);
+                return;
+            }
+
             const apiUrl = user?.use_local_agent ? 'http://localhost:5005/api/print' : '/api/print';
             
             await axios.post(apiUrl, {
@@ -44,7 +63,8 @@ const OfflinePrintHistoryModal = ({ show, onClose, user, showNotification }) => 
             showNotification('สั่งพิมพ์ซ้ำเรียบร้อยแล้ว', 'success');
         } catch (err) {
             console.error('Reprint error', err);
-            showNotification('เกิดข้อผิดพลาดในการสั่งพิมพ์ซ้ำ: ' + err.message, 'error');
+            const serverMsg = err.response?.data?.message || err.message;
+            showNotification('เกิดข้อผิดพลาดในการสั่งพิมพ์ซ้ำ: ' + serverMsg, 'error');
         } finally {
             setPrintingId(null);
         }

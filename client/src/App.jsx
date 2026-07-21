@@ -2532,7 +2532,7 @@ function App() {
                         setStep('login');
                     }} />
                 ) : step === 'login' ? (
-                    <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 animate-pop animate-row-in">
+                    <div className="w-full px-6 md:px-8 max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 animate-pop animate-row-in">
                         {/* Left column: Patient Search Panel */}
                         <div className="md:col-span-5 premium-card p-6 md:p-8 flex flex-col justify-between">
                             <div>
@@ -4796,6 +4796,7 @@ function App() {
                     onClose={() => setShowOfflinePrintHistory(false)} 
                     user={user} 
                     showNotification={showNotification} 
+                    patient={patient}
                 />
             )}
         </div>

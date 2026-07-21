@@ -678,7 +678,13 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 {filteredDrugs.map((drug, idx) => (
                                     <tr
                                         key={drug.drug_id}
-                                        className={`border-b transition-colors ${isDark
+                                        onDoubleClick={() => {
+                                            if (isAdmin) {
+                                                handleOpenEditModal(drug);
+                                            }
+                                        }}
+                                        title={isAdmin ? "ดับเบิ้ลคลิกเพื่อแก้ไข" : ""}
+                                        className={`border-b transition-colors ${isAdmin ? 'cursor-pointer' : ''} ${isDark
                                             ? 'border-slate-700/30 hover:bg-slate-800/40'
                                             : 'border-slate-100 hover:bg-sky-50/50'
                                             }`}
