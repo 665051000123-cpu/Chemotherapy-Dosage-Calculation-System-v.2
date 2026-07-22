@@ -65,6 +65,12 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
     const [deleteConfirmUser, setDeleteConfirmUser] = useState(null);
     const [statusChangeConfirm, setStatusChangeConfirm] = useState(null);
 
+    // Filter states for Users
+    const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [showUserFilterPanel, setShowUserFilterPanel] = useState(false);
+    const [userRoleFilter, setUserRoleFilter] = useState('all');
+    const [userStatusFilter, setUserStatusFilter] = useState('all');
+
     // Filter states for Login History (logs)
     const [showLogFilterPanel, setShowLogFilterPanel] = useState(false);
     const [logStartDateFilter, setLogStartDateFilter] = useState('');
@@ -497,6 +503,28 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
         }
         return result;
     }, [activities, activitySearchQuery, activityStartDateFilter, activityEndDateFilter, activityActionFilter]);
+
+    // Filtered Users
+    const filteredUsers = useMemo(() => {
+        let result = users;
+        if (userSearchQuery) {
+            const q = userSearchQuery.toLowerCase();
+            result = result.filter(u => 
+                (u.employee_id && u.employee_id.toLowerCase().includes(q)) ||
+                (u.username && u.username.toLowerCase().includes(q)) ||
+                (u.role && u.role.toLowerCase().includes(q))
+            );
+        }
+        if (userRoleFilter !== 'all') {
+            result = result.filter(u => u.role && u.role.toLowerCase() === userRoleFilter);
+        }
+        if (userStatusFilter !== 'all') {
+            const isActive = userStatusFilter === 'active';
+            result = result.filter(u => u.is_active === (isActive ? 1 : 0));
+        }
+        return result;
+    }, [users, userSearchQuery, userRoleFilter, userStatusFilter]);
+
     return (
         <div className="animate-row-in space-y-6">
             {/* Header section */}
@@ -1053,10 +1081,81 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                     {/* Users List Section */}
                     <div className="lg:col-span-2">
                         <div className="premium-card p-6 h-full flex flex-col">
-                            <h3 className="font-black mb-5 uppercase tracking-wider text-sm flex items-center gap-2 opacity-90">
-                                <Shield size={18} className="text-emerald-500 dark:text-emerald-400" />
-                                บัญชีผู้ใช้งานในระบบ ({users.length} บัญชี)
-                            </h3>
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+                                <h3 className="font-black uppercase tracking-wider text-sm flex items-center gap-2 opacity-90">
+                                    <Shield size={18} className="text-emerald-500 dark:text-emerald-400" />
+                                    บัญชีผู้ใช้งานในระบบ ({filteredUsers.length} บัญชี)
+                                </h3>
+                                <div className="flex items-center gap-2.5 w-full md:w-auto">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowUserFilterPanel(!showUserFilterPanel)}
+                                        className={`py-2 px-4 rounded-xl border flex items-center gap-2 text-sm font-bold transition-all duration-300 whitespace-nowrap ${showUserFilterPanel
+                                            ? 'bg-sky-600 border-sky-400 text-white shadow-md'
+                                            : isDark
+                                                ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                                                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm'
+                                            }`}
+                                    >
+                                        <Filter size={16} /> ตัวกรอง (Filters)
+                                    </button>
+                                    <div className="relative w-full md:w-72">
+                                        <input
+                                            type="text"
+                                            placeholder="ค้นหา รหัสพนักงาน / ชื่อผู้ใช้ / บทบาท..."
+                                            value={userSearchQuery}
+                                            onChange={e => setUserSearchQuery(e.target.value)}
+                                            className="form-control pl-10 text-sm py-2"
+                                        />
+                                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {showUserFilterPanel && (
+                                <div className={`mb-5 p-4 rounded-xl border animate-fade-in ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">บทบาท (Role)</label>
+                                            <select
+                                                className="form-control text-sm py-2"
+                                                value={userRoleFilter}
+                                                onChange={e => setUserRoleFilter(e.target.value)}
+                                            >
+                                                <option value="all">ทั้งหมด (All Roles)</option>
+                                                <option value="admin">ADMIN</option>
+                                                <option value="pharmacist">PHARMACIST</option>
+                                                <option value="head">HEAD</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">สถานะ (Status)</label>
+                                            <select
+                                                className="form-control text-sm py-2"
+                                                value={userStatusFilter}
+                                                onChange={e => setUserStatusFilter(e.target.value)}
+                                            >
+                                                <option value="all">ทั้งหมด (All Status)</option>
+                                                <option value="active">ใช้งานปกติ (Active)</option>
+                                                <option value="inactive">ระงับการใช้งาน (Inactive)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setUserRoleFilter('all');
+                                                setUserStatusFilter('all');
+                                                setUserSearchQuery('');
+                                            }}
+                                            className="text-xs font-bold text-sky-500 hover:text-sky-600 transition-colors"
+                                        >
+                                            ล้างตัวกรองทั้งหมด
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="overflow-x-auto rounded-xl border border-slate-700/20 shadow-inner flex-1 scrollable-table-container">
                                 <table className="w-full text-left text-sm">
@@ -1076,8 +1175,8 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                                     กำลังโหลดข้อมูล...
                                                 </td>
                                             </tr>
-                                        ) : users.length > 0 ? (
-                                            users.map(u => (
+                                        ) : filteredUsers.length > 0 ? (
+                                            filteredUsers.map(u => (
                                                 <tr key={u.id} className="border-b border-slate-700/10 hover:bg-sky-600/5 transition-colors">
                                                     <td className="p-4 font-mono font-bold">{u.employee_id}</td>
                                                     <td className="p-4 font-bold">{u.username}</td>

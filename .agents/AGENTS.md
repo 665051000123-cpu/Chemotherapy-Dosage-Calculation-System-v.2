@@ -7,7 +7,7 @@ This file contains custom instructions and rules for the agent, specific to this
 - Provide explanations in Thai when responding.
 - Handle the immediate situation by calculating first.
 - Employee ID : 0000 Password : 123456
-- แกไขระบบ หน้าข้อมูลยา เท่านั้น ห้ามแก้อย่างอื่นที่ไม่เกี่ยวข้อง
+- ห้ามแก้ขอะไรทั้งนั้น นอกจากหน้าข้อมูลยา 
 
 
 

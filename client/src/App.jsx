@@ -846,7 +846,7 @@ function App() {
                 ::-webkit-scrollbar { display: none; }
             </style>
         </head>
-        <body class="bg-white">
+        <body class="bg-white light-mode">
             ${historyContainer.outerHTML}
         </body>
         </html>
@@ -2789,9 +2789,6 @@ function App() {
                                         onChange={e => setSearchQuery(e.target.value)}
                                         className="form-control py-2 px-4 text-sm rounded-xl border border-slate-700/30 font-bold focus:border-sky-500 w-[240px]"
                                     />
-                                    <button onClick={printHistory} className="no-print bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold py-2 px-4 rounded-xl border border-slate-700 flex items-center gap-2 text-xs transition-all active:scale-95 shadow-lg whitespace-nowrap">
-                                        <Printer size={14} /> พิมพ์รายงาน
-                                    </button>
                                 </div>
                             </div>
 
@@ -2928,10 +2925,13 @@ function App() {
                                          <button type="button" onClick={() => setSelectedHnDetail(null)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600/10 text-sky-500 border border-sky-500/20 hover:bg-sky-600/20 font-bold text-sm transition-all cursor-pointer">
                                              ← กลับ
                                          </button>
-                                         <div>
+                                         <div className="flex-1">
                                              <span className="font-black text-xl">H.N. {selectedHnDetail}</span>
                                              <span className="text-slate-400 text-sm ml-2">— {filteredLogs.filter(l => l.hn === selectedHnDetail).length} รายการ</span>
                                          </div>
+                                         <button onClick={printHistory} className="no-print bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold py-2 px-4 rounded-xl border border-slate-700 flex items-center gap-2 text-sm transition-all active:scale-95 shadow-lg whitespace-nowrap">
+                                             <Printer size={16} /> พิมพ์รายงาน
+                                         </button>
                                      </div>
                                      {(() => {
                                          const hnLogs = filteredLogs.filter(l => l.hn === selectedHnDetail);

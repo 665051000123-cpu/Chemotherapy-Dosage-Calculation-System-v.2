@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope, Download } from 'lucide-react';
+import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope, Download, Info, Syringe, HeartPulse, MessageSquare } from 'lucide-react';
 import axios from 'axios';
 import DrugRulesManager from './DrugRulesManager';
 
@@ -1234,78 +1234,236 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         </div>
                         
                         {/* Content */}
-                        <div className="p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 flex-1 space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                        <div className="p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 flex-1 space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                             
-                            <div className="flex gap-2 font-bold mb-2">
-                                <span className="text-slate-500">ภาวะกดไขกระดูก :</span> 
-                                <span className={viewingDrugInfo.myelosuppression?.toLowerCase().includes('severe') ? 'text-rose-500' : 'text-slate-800 dark:text-slate-200'}>
-                                    {viewingDrugInfo.myelosuppression || '-'}
-                                </span>
+                            {/* ข้อมูลพื้นฐาน (General Info) */}
+                            <div>
+                                <h4 className="font-bold text-sky-600 dark:text-sky-400 mb-3 flex items-center gap-2 border-b border-sky-100 dark:border-sky-900/50 pb-2">
+                                    <Info size={16} /> ข้อมูลพื้นฐาน
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-28">รหัสยา:</span>
+                                        <span className="font-mono text-slate-800 dark:text-slate-200">{viewingDrugInfo.drug_code || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-28">กลุ่มยา:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.drug_category || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-28">การคำนวณตั้งต้น:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.calculation_type || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-28">น้ำหนักตั้งต้น:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.default_weight_type === 'ACTUAL' ? 'น้ำหนักจริง (Actual)' : viewingDrugInfo.default_weight_type === 'IDEAL' ? 'น้ำหนักอุดมคติ (Ideal)' : viewingDrugInfo.default_weight_type || '-'}</span>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div className="flex gap-2">
-                                <span className="font-bold text-slate-500 whitespace-nowrap">ผลข้างเคียง :</span> 
-                                <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.side_effect_info || '-'}</span>
+
+                            {/* ขนาดยาและข้อจำกัด (Dosing & Limits) */}
+                            <div>
+                                <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-3 flex items-center gap-2 border-b border-emerald-100 dark:border-emerald-900/50 pb-2">
+                                    <ShieldAlert size={16} /> ขนาดยาและข้อจำกัด
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-40">ขนาดยามาตรฐาน:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.standard_dose_value ? `${viewingDrugInfo.standard_dose_value} ${viewingDrugInfo.standard_dose_unit || ''}` : '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-40">จำกัดขนาดสูงสุดต่อครั้ง:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.max_dose_cap ? `${viewingDrugInfo.max_dose_cap} mg` : '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-40">จำกัดตามพื้นที่ผิว:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.max_bsa_cap ? `${viewingDrugInfo.max_bsa_cap} m²` : '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-40">จำกัดตามค่าการทำงานไต:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.max_gfr_cap ? `${viewingDrugInfo.max_gfr_cap} ml/min` : '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-40">จำกัดขนาดยาสะสม:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.alert_cumulative_dose ? `${viewingDrugInfo.alert_cumulative_dose} ${viewingDrugInfo.alert_cumulative_dose_unit || 'mg'}` : '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-40">ความเข้มข้นสูงสุด:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.alert_concentration_max ? `${viewingDrugInfo.alert_concentration_max} mg/ml` : '-'}</span>
+                                    </div>
+                                </div>
+                                {viewingDrugInfo.usual_dosage && (
+                                    <div className="mt-3">
+                                        <span className="font-semibold text-slate-500 block mb-1">ขนาดยาปกติ (Usual dosage):</span>
+                                        <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 bg-emerald-50 dark:bg-emerald-900/10 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+                                            {viewingDrugInfo.usual_dosage}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {viewingDrugInfo.stability_info && (
-                                <div className="mt-2">
-                                    <span className="font-bold text-slate-500 block mb-1">ความคงตัว :</span>
-                                    <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-indigo-200 dark:border-indigo-900/50">
-                                        {viewingDrugInfo.stability_info}
-                                    </div>
+                            {/* ขนาดยาที่มีในระบบ (Available Packages) */}
+                            <div>
+                                <h4 className="font-bold text-violet-600 dark:text-violet-400 mb-3 flex items-center gap-2 border-b border-violet-100 dark:border-violet-900/50 pb-2">
+                                    <Package size={16} /> ขนาดยาที่มีในระบบ
+                                </h4>
+                                <div className="space-y-2">
+                                    {(() => {
+                                        const packages = typeof viewingDrugInfo.packages === 'string' 
+                                            ? JSON.parse(viewingDrugInfo.packages || '[]') 
+                                            : (viewingDrugInfo.packages || []);
+                                        
+                                        if (packages.length > 0) {
+                                            return packages.map((pkg, i) => (
+                                                <div key={i} className="flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                    <span className="font-bold text-violet-500">ขนาดที่ {i+1}:</span>
+                                                    <span className="text-slate-800 dark:text-slate-200">
+                                                        {pkg.dose} {pkg.dose_unit} {pkg.vol ? ` / ${pkg.vol} ${pkg.vol_unit}` : ''}
+                                                    </span>
+                                                </div>
+                                            ));
+                                        } else if (viewingDrugInfo.dose_per_pack) {
+                                            return (
+                                                <div className="flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                    <span className="font-bold text-violet-500">ขนาด:</span>
+                                                    <span className="text-slate-800 dark:text-slate-200">
+                                                        {viewingDrugInfo.dose_per_pack} {viewingDrugInfo.dose_per_pack_unit} {viewingDrugInfo.vol_per_pack ? ` / ${viewingDrugInfo.vol_per_pack} ${viewingDrugInfo.vol_per_pack_unit}` : ''}
+                                                    </span>
+                                                </div>
+                                            );
+                                        }
+                                        return <span className="text-slate-400 italic">ไม่มีข้อมูลขนาดยาในระบบ</span>;
+                                    })()}
                                 </div>
-                            )}
+                            </div>
 
-                            {viewingDrugInfo.drug_interactions && (
-                                <div className="mt-2">
-                                    <span className="font-bold text-slate-500 block mb-1">ปฏิกิริยาระหว่างยา :</span>
-                                    <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-rose-200 dark:border-rose-900/50">
-                                        {viewingDrugInfo.drug_interactions}
+                            {/* การบริหารยาและการเตรียมยา (Administration & Preparation) */}
+                            <div>
+                                <h4 className="font-bold text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-2 border-b border-amber-100 dark:border-amber-900/50 pb-2">
+                                    <Syringe size={16} /> การเตรียมและการให้ยา
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 mb-3">
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36">ช่องทางการให้ยา:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.admin_route || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36">สารละลายที่แนะนำ:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.solvent || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36">ความเข้มข้น:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.concentration_per_ml || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36">อัตราการให้ยา:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.infusion_rate || '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2 sm:col-span-2">
+                                        <span className="font-semibold text-rose-500 w-36">สารน้ำที่ห้ามใช้ร่วม:</span>
+                                        <span className="text-rose-600 dark:text-rose-400">{viewingDrugInfo.diluent_incompat || '-'}</span>
                                     </div>
                                 </div>
-                            )}
+                                {viewingDrugInfo.prep_instructions && (
+                                    <div>
+                                        <span className="font-semibold text-slate-500 block mb-1">การเตรียมยา (Prep instructions):</span>
+                                        <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-amber-200 dark:border-amber-900/50">
+                                            {viewingDrugInfo.prep_instructions}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
-                            {viewingDrugInfo.usual_dosage && (
-                                <div className="mt-2">
-                                    <span className="font-bold text-slate-500 block mb-1">ขนาดยาปกติ :</span>
-                                    <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 bg-slate-200/50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-300 dark:border-slate-700">
-                                        {viewingDrugInfo.usual_dosage}
+                            {/* อายุยาและการเก็บรักษา (Expiration & Storage) */}
+                            <div>
+                                <h4 className="font-bold text-teal-600 dark:text-teal-400 mb-3 flex items-center gap-2 border-b border-teal-100 dark:border-teal-900/50 pb-2">
+                                    <Thermometer size={16} /> อายุยาและการเก็บรักษา
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 mb-3">
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36">อายุหลังละลาย:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.expire_after_recon_days ? `${viewingDrugInfo.expire_after_recon_days} วัน` : '-'}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36">อายุหลังผสม:</span>
+                                        <span className="text-slate-800 dark:text-slate-200">
+                                            {viewingDrugInfo.expire_after_mix_days ? `${viewingDrugInfo.expire_after_mix_days} วัน ` : ''}
+                                            {viewingDrugInfo.expire_after_mix_hours ? `${viewingDrugInfo.expire_after_mix_hours} ชม.` : ''}
+                                            {!viewingDrugInfo.expire_after_mix_days && !viewingDrugInfo.expire_after_mix_hours ? '-' : ''}
+                                        </span>
                                     </div>
                                 </div>
-                            )}
-                            
-                            {(viewingDrugInfo.prep_instructions) && (
-                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
-                                    <span className="font-bold text-slate-500 block mb-1 text-xs uppercase">ข้อมูลทั่วไป</span>
-                                    <div className="text-xs">
-                                        <span className="opacity-70">การเตรียมยา:</span> {viewingDrugInfo.prep_instructions}
+                                {viewingDrugInfo.storage_instruction && (
+                                    <div>
+                                        <span className="font-semibold text-slate-500 block mb-1">การเก็บรักษา (Storage):</span>
+                                        <div className="pl-4 whitespace-pre-wrap text-teal-700 dark:text-teal-300 border-l-2 border-teal-200 dark:border-teal-900/50">
+                                            {viewingDrugInfo.storage_instruction}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
 
-                            {(viewingDrugInfo.warning_msg || viewingDrugInfo.storage_instruction) && (
-                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {viewingDrugInfo.warning_msg && (
+                            {/* ข้อมูลเชิงการแพทย์ (Medical Info) */}
+                            <div>
+                                <h4 className="font-bold text-rose-600 dark:text-rose-400 mb-3 flex items-center gap-2 border-b border-rose-100 dark:border-rose-900/50 pb-2">
+                                    <HeartPulse size={16} /> ข้อมูลเชิงการแพทย์
+                                </h4>
+                                <div className="space-y-3">
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36 shrink-0">ภาวะกดไขกระดูก:</span> 
+                                        <span className={viewingDrugInfo.myelosuppression?.toLowerCase().includes('severe') ? 'text-rose-500 font-bold' : 'text-slate-800 dark:text-slate-200'}>
+                                            {viewingDrugInfo.myelosuppression || '-'}
+                                        </span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-semibold text-slate-500 w-36 shrink-0">ผลข้างเคียง:</span> 
+                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.side_effect_info || '-'}</span>
+                                    </div>
+                                    {viewingDrugInfo.stability_info && (
                                         <div>
-                                            <span className="font-bold text-rose-500 block mb-1 text-xs uppercase flex items-center gap-1">
-                                                <AlertTriangle size={14} /> คำเตือน (Warning)
-                                            </span>
-                                            <div className="text-xs text-rose-600 dark:text-rose-400 whitespace-pre-wrap">
-                                                {viewingDrugInfo.warning_msg}
+                                            <span className="font-semibold text-slate-500 block mb-1">ความคงตัว:</span>
+                                            <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-slate-300 dark:border-slate-600">
+                                                {viewingDrugInfo.stability_info}
                                             </div>
                                         </div>
                                     )}
-                                    {viewingDrugInfo.storage_instruction && (
+                                    {viewingDrugInfo.drug_interactions && (
                                         <div>
-                                            <span className="font-bold text-sky-500 block mb-1 text-xs uppercase flex items-center gap-1">
-                                                <Thermometer size={14} /> การเก็บรักษา (Storage)
-                                            </span>
-                                            <div className="text-xs text-sky-600 dark:text-sky-400 whitespace-pre-wrap">
-                                                {viewingDrugInfo.storage_instruction}
+                                            <span className="font-semibold text-slate-500 block mb-1">ปฏิกิริยาระหว่างยา:</span>
+                                            <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-rose-300 dark:border-rose-600">
+                                                {viewingDrugInfo.drug_interactions}
                                             </div>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+
+                            {/* หมายเหตุและคำเตือน (Note & Warning) */}
+                            {(viewingDrugInfo.warning_msg || viewingDrugInfo.note) && (
+                                <div>
+                                    <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                        <MessageSquare size={16} /> หมายเหตุและคำเตือน
+                                    </h4>
+                                    <div className="space-y-3">
+                                        {viewingDrugInfo.warning_msg && (
+                                            <div className="bg-rose-50 dark:bg-rose-900/10 p-3 rounded-xl border border-rose-200 dark:border-rose-900/50">
+                                                <span className="font-bold text-rose-600 dark:text-rose-400 block mb-1 flex items-center gap-1">
+                                                    <AlertTriangle size={14} /> คำเตือน (Warning)
+                                                </span>
+                                                <div className="text-rose-700 dark:text-rose-300 whitespace-pre-wrap">
+                                                    {viewingDrugInfo.warning_msg}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {viewingDrugInfo.note && (
+                                            <div>
+                                                <span className="font-semibold text-slate-500 block mb-1">หมายเหตุ:</span>
+                                                <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-slate-300 dark:border-slate-600">
+                                                    {viewingDrugInfo.note}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                             
