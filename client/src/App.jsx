@@ -1310,7 +1310,8 @@ function App() {
                             <div><span class="checkbox-square"></span> ภาชนะบรรจุยาไม่รั่วซึม</div>
                             <div><span class="checkbox-square"></span> ติดฉลากถูกต้อง</div>
                             <div>
-                                เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px;"></span>
+                                <div style="margin-bottom: 5px;">เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px;"></span></div>
+                                <div>วันที่/เวลา <span class="line-input" style="width: 195px;"></span></div>
                             </div>
                         </div>
                     </div>
