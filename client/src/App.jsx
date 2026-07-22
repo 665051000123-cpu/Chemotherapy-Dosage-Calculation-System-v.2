@@ -784,6 +784,7 @@ function App() {
             user_name: user?.username || 'Guest',
             doctor: patient.doctor || '-',
             cycle: patient.cycle || '',
+            other_lab: patient.otherLab || '',
             order_details: JSON.stringify(activeRows)
         };
 
@@ -978,7 +979,8 @@ function App() {
             name: log.patient_name !== '-' ? log.patient_name : '',
             ward: log.ward !== '-' ? log.ward : '',
             doctor: log.doctor !== '-' ? log.doctor : '',
-            cycle: log.cycle || ''
+            cycle: log.cycle || '',
+            otherLab: log.other_lab || ''
         }));
         
         setIsDateEditable(log.is_date_unlocked || false);

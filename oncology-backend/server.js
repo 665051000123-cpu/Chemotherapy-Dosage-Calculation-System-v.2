@@ -150,6 +150,7 @@ const OrderLog = sequelize.define('OrderLog', {
     user_name: DataTypes.STRING(255),
     doctor: DataTypes.STRING(255),
     cycle: DataTypes.STRING(50),
+    other_lab: DataTypes.STRING(255),
     order_details: DataTypes.TEXT('long'), // Stores adminRows JSON
     is_date_unlocked: {
         type: DataTypes.BOOLEAN,
@@ -451,6 +452,21 @@ async function initializeDatabase() {
             }
         } catch(e) {
             console.log('Table order_logs may not exist yet, skipping alter column check for cycle.');
+        }
+
+        // Check if other_lab column exists in order_logs table, if not add it
+        try {
+            const orderLogTableInfo = await queryInterface.describeTable('order_logs');
+            if (orderLogTableInfo && !orderLogTableInfo.other_lab) {
+                console.log('Adding other_lab column to order_logs table...');
+                await queryInterface.addColumn('order_logs', 'other_lab', {
+                    type: DataTypes.STRING(255),
+                    allowNull: true
+                });
+                console.log('✅ Column other_lab added successfully to order_logs table.');
+            }
+        } catch(e) {
+            console.log('Table order_logs may not exist yet, skipping alter column check for other_lab.');
         }
 
         // Check if is_date_unlocked column exists in order_logs table, if not add it
@@ -1350,10 +1366,10 @@ app.put('/api/order-logs/:id', async (req, res) => {
             }
         }
 
-        const { hn, patient_name, ward, doctor, cycle, order_details } = req.body;
+        const { hn, patient_name, ward, doctor, cycle, other_lab, order_details } = req.body;
         
         await orderLog.update({
-            hn, patient_name, ward, doctor, cycle, order_details
+            hn, patient_name, ward, doctor, cycle, other_lab, order_details
         });
 
         logActivity(employeeId, 'EDIT_ORDER_LOG', `แก้ไขบันทึกการสั่งยา ID ${logId}`);
