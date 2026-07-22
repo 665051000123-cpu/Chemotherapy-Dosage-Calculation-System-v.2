@@ -1069,7 +1069,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             {/* Clinical Info Section */}
                             <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
                                 <Stethoscope size={16} className="text-purple-500" />
-                                ข้อมูลทางคลินิก (Clinical Information)
+                                ข้อมูลเชิงการแพทย์
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -1403,10 +1403,10 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 )}
                             </div>
 
-                            {/* ข้อมูลทางคลินิก (Clinical Information) */}
+                            {/* ข้อมูลเชิงการแพทย์ */}
                             <div>
                                 <h4 className="font-bold text-rose-600 dark:text-rose-400 mb-3 flex items-center gap-2 border-b border-rose-100 dark:border-rose-900/50 pb-2">
-                                    <Stethoscope size={16} /> ข้อมูลทางคลินิก (Clinical Information)
+                                    <Stethoscope size={16} /> ข้อมูลเชิงการแพทย์
                                 </h4>
                                 <div className="space-y-3">
                                     <div className="flex gap-2">
