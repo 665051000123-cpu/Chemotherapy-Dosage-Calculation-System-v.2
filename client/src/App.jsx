@@ -1329,7 +1329,7 @@ function App() {
                 body { 
                     font-family: 'Sarabun', sans-serif; 
                     margin: 0; 
-                    padding: 0;
+                    padding: 2cm 2.5cm; /* Added padding to ensure margins when printing */
                     font-size: 13px;
                     color: #000;
                     line-height: 1.6;
