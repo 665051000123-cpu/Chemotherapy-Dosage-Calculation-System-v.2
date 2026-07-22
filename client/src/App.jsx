@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useCalculations } from './utils/useCalculations';
-import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock, Activity, FileText } from 'lucide-react';
+import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock, Activity, FileText, Edit2 } from 'lucide-react';
 import axios from 'axios';
 import Login from './components/Login';
 import Notification from './components/Notification';
@@ -101,8 +101,6 @@ function App() {
     const lastAutofilledHnRef = useRef(patient.hn);
     const [prevStats, setPrevStats] = useState({ height: '', weight: '', ward: '', doctor: '' });
     const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
-    const [customPreparer, setCustomPreparer] = useState('');
-    const [customChecker, setCustomChecker] = useState('');
     const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
     const [timeoutCountdown, setTimeoutCountdown] = useState(30);
     const [showPrinterSettings, setShowPrinterSettings] = useState(false);
@@ -946,6 +944,24 @@ function App() {
         }
     };
 
+    const handleUpdatePatientName = async (hn, currentName) => {
+        const newName = window.prompt("แก้ไขชื่อ-นามสกุลผู้ป่วย:", currentName);
+        if (newName && newName.trim() !== currentName) {
+            try {
+                const response = await axios.put(`${API_BASE}/admin/logs/hn/${hn}/name`, { patient_name: newName.trim() }, {
+                    headers: { 'x-employee-id': user?.employee_id || '' }
+                });
+                if (response.data.success) {
+                    showNotification('อัปเดตชื่อผู้ป่วยสำเร็จ', 'success');
+                    fetchLogs();
+                }
+            } catch (err) {
+                console.error(err);
+                showNotification('ไม่สามารถอัปเดตชื่อผู้ป่วยได้ หรือคุณไม่มีสิทธิ์', 'error');
+            }
+        }
+    };
+
     const handleEditOrder = (log) => {
         setEditingOrderLogId(log.id);
         setPatient(prev => ({
@@ -1312,7 +1328,7 @@ function App() {
                             <div><span class="checkbox-square"></span> ภาชนะบรรจุยาไม่รั่วซึม</div>
                             <div><span class="checkbox-square"></span> ติดฉลากถูกต้อง</div>
                             <div>
-                                <div style="margin-bottom: 5px;">เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px; text-align: center;">${customChecker || ''}</span></div>
+                                <div style="margin-bottom: 5px;">เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px; text-align: center;"></span></div>
                                 <div>วันที่/เวลา <span class="line-input" style="width: 195px;"></span></div>
                             </div>
                         </div>
@@ -1417,7 +1433,7 @@ function App() {
 
             <div class="row">
                 วันที่เตรียมยา <span class="line-input" style="width: 150px; text-align: center;">${producedTime}</span>
-                <span style="margin-left: 30px;">ผู้เตรียมยา</span> <span class="line-input" style="width: 250px; text-align: center;">${customPreparer || user?.name || user?.username || ''}</span>
+                <span style="margin-left: 30px;">ผู้เตรียมยา</span> <span class="line-input" style="width: 250px; text-align: center;">${user?.name || user?.username || ''}</span>
             </div>
             
             <div class="row">
@@ -2960,9 +2976,22 @@ function App() {
                                                     }`}>
                                                         {latestLog.gender === 'female' ? '♀' : '♂'}
                                                     </div>
-                                                    <div className="relative z-10">
+                                                    <div className="relative z-10 flex items-center gap-3">
                                                         <p className="font-black text-xl uppercase tracking-tight text-slate-800 dark:text-white mb-0.5">{latestLog.patient_name || '-'}</p>
-                                                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2">
+                                                        {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleUpdatePatientName(latestLog.hn, latestLog.patient_name);
+                                                                }}
+                                                                className="text-slate-400 hover:text-sky-500 transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                                title="แก้ไขชื่อผู้ป่วย"
+                                                            >
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2">
                                                             <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.gender === 'female' ? 'หญิง' : latestLog.gender === 'male' ? 'ชาย' : '-'}</span>
                                                             {latestLog.age && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.age} ปี</span>}
                                                             {latestLog.ward && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.ward}</span>}
@@ -4146,36 +4175,6 @@ function App() {
                                                 </button>
                                         </div>
                                     </div>
-
-                                    {/* Admin / Head Pharmacist Print Options */}
-                                    {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
-                                        <div className="flex flex-col sm:flex-row gap-4 mb-4 p-4 rounded-xl border border-sky-200 bg-sky-50 dark:bg-sky-900/20 dark:border-sky-800 animate-fade-in no-print w-full">
-                                            <div className="flex-1">
-                                                <label className="text-xs font-black text-sky-700 dark:text-sky-300 mb-1.5 uppercase block">
-                                                    แก้ไขชื่อผู้เตรียมยา (ก่อนพิมพ์)
-                                                </label>
-                                                <input 
-                                                    type="text" 
-                                                    value={customPreparer} 
-                                                    onChange={e => setCustomPreparer(e.target.value)} 
-                                                    placeholder={user?.name || user?.username || 'กรอกชื่อผู้เตรียมยา'}
-                                                    className="form-control text-sm py-2 px-3 bg-white dark:bg-slate-800 w-full" 
-                                                />
-                                            </div>
-                                            <div className="flex-1">
-                                                <label className="text-xs font-black text-sky-700 dark:text-sky-300 mb-1.5 uppercase block">
-                                                    ชื่อเภสัชกรผู้ตรวจสอบ (ก่อนพิมพ์)
-                                                </label>
-                                                <input 
-                                                    type="text" 
-                                                    value={customChecker} 
-                                                    onChange={e => setCustomChecker(e.target.value)} 
-                                                    placeholder="เว้นว่างไว้หากยังไม่มีผู้ตรวจสอบ"
-                                                    className="form-control text-sm py-2 px-3 bg-white dark:bg-slate-800 w-full" 
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
 
                                     <div className="overflow-x-auto min-h-[300px] pb-16">
                                         <table className="w-full text-left border-collapse">

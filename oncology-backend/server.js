@@ -820,6 +820,26 @@ app.get('/api/admin/logs', requireAdmin, async (req, res) => {
     }
 });
 
+// Update patient name globally by HN (Admin/Head only)
+app.put('/api/admin/logs/hn/:hn/name', requireHeadOrAdmin, async (req, res) => {
+    try {
+        const { hn } = req.params;
+        const { patient_name } = req.body;
+        
+        if (!hn || !patient_name) {
+            return res.status(400).json({ success: false, message: 'Missing hn or patient_name' });
+        }
+
+        await DosageLog.update({ patient_name }, { where: { hn } });
+        await OrderLog.update({ patient_name }, { where: { hn } });
+        
+        res.json({ success: true, message: 'อัปเดตชื่อผู้ป่วยสำเร็จ' });
+    } catch (err) {
+        console.error('❌ Error updating patient name:', err);
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการอัปเดตชื่อ: ' + err.message });
+    }
+});
+
 // Existing public logs endpoint (kept for non‑admin users if needed)
 app.get('/api/logs', async (req, res) => {
     try {
