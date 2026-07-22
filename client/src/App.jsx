@@ -101,6 +101,8 @@ function App() {
     const lastAutofilledHnRef = useRef(patient.hn);
     const [prevStats, setPrevStats] = useState({ height: '', weight: '', ward: '', doctor: '' });
     const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
+    const [customPreparer, setCustomPreparer] = useState('');
+    const [customChecker, setCustomChecker] = useState('');
     const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
     const [timeoutCountdown, setTimeoutCountdown] = useState(30);
     const [showPrinterSettings, setShowPrinterSettings] = useState(false);
@@ -1310,7 +1312,7 @@ function App() {
                             <div><span class="checkbox-square"></span> ภาชนะบรรจุยาไม่รั่วซึม</div>
                             <div><span class="checkbox-square"></span> ติดฉลากถูกต้อง</div>
                             <div>
-                                <div style="margin-bottom: 5px;">เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px;"></span></div>
+                                <div style="margin-bottom: 5px;">เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px; text-align: center;">${customChecker || ''}</span></div>
                                 <div>วันที่/เวลา <span class="line-input" style="width: 195px;"></span></div>
                             </div>
                         </div>
@@ -1326,11 +1328,11 @@ function App() {
             <title>ใบบันทึกการเตรียมยาเคมีบำบัด</title>
             <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
             <style>
-                @page { size: A4; margin: 1cm 1.5cm; }
+                @page { size: A4; margin: 1cm; }
                 body { 
                     font-family: 'Sarabun', sans-serif; 
                     margin: 0; 
-                    padding: 1cm 1.5cm; /* Restored to original */
+                    padding: 0;
                     font-size: 13px;
                     color: #000;
                     line-height: 1.6;
@@ -1415,7 +1417,7 @@ function App() {
 
             <div class="row">
                 วันที่เตรียมยา <span class="line-input" style="width: 150px; text-align: center;">${producedTime}</span>
-                <span style="margin-left: 30px;">ผู้เตรียมยา</span> <span class="line-input" style="width: 250px; text-align: center;">${user.name || user.username || ''}</span>
+                <span style="margin-left: 30px;">ผู้เตรียมยา</span> <span class="line-input" style="width: 250px; text-align: center;">${customPreparer || user?.name || user?.username || ''}</span>
             </div>
             
             <div class="row">
@@ -1428,12 +1430,12 @@ function App() {
             <div class="row">
                 น้ำหนัก <span class="line-input" style="width: 60px; text-align: center;">${patient.weight || ''}</span> kg 
                 <span style="margin-left: 10px;">ส่วนสูง</span> <span class="line-input" style="width: 60px; text-align: center;">${patient.height || ''}</span> cm. 
-                <span style="margin-left: 10px;">BSA = Square root of [(Weight(kg) x Height(cm)) / 3600] = </span>
+                <span style="margin-left: 10px;">BSA = </span>
                 <span class="line-input" style="width: 80px; text-align: center;">${bsa ? Number(bsa).toFixed(4) : ''}</span> m²
             </div>
 
             <div class="lab-row">
-                <div><span class="checkbox-square"></span> ANC > 1,500 cell/mm³ <span class="text-xs">[ANC= [(%Neutrophils+%Band)xWBC/100].</span></div>
+                <div><span class="checkbox-square"></span> ANC > 1,500 cell/mm³ <span class="text-xs">[ANC = ${patient.anc ? Math.floor(patient.anc).toLocaleString() : ''}]</span></div>
                 <div><span class="checkbox-square"></span> Hb > 10 g/dl and <span class="checkbox-square" style="margin-left: 5px;"></span> Plt > 100,000 /mm³</div>
             </div>
 
@@ -4144,6 +4146,36 @@ function App() {
                                                 </button>
                                         </div>
                                     </div>
+
+                                    {/* Admin / Head Pharmacist Print Options */}
+                                    {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
+                                        <div className="flex flex-col sm:flex-row gap-4 mb-4 p-4 rounded-xl border border-sky-200 bg-sky-50 dark:bg-sky-900/20 dark:border-sky-800 animate-fade-in no-print w-full">
+                                            <div className="flex-1">
+                                                <label className="text-xs font-black text-sky-700 dark:text-sky-300 mb-1.5 uppercase block">
+                                                    แก้ไขชื่อผู้เตรียมยา (ก่อนพิมพ์)
+                                                </label>
+                                                <input 
+                                                    type="text" 
+                                                    value={customPreparer} 
+                                                    onChange={e => setCustomPreparer(e.target.value)} 
+                                                    placeholder={user?.name || user?.username || 'กรอกชื่อผู้เตรียมยา'}
+                                                    className="form-control text-sm py-2 px-3 bg-white dark:bg-slate-800 w-full" 
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <label className="text-xs font-black text-sky-700 dark:text-sky-300 mb-1.5 uppercase block">
+                                                    ชื่อเภสัชกรผู้ตรวจสอบ (ก่อนพิมพ์)
+                                                </label>
+                                                <input 
+                                                    type="text" 
+                                                    value={customChecker} 
+                                                    onChange={e => setCustomChecker(e.target.value)} 
+                                                    placeholder="เว้นว่างไว้หากยังไม่มีผู้ตรวจสอบ"
+                                                    className="form-control text-sm py-2 px-3 bg-white dark:bg-slate-800 w-full" 
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="overflow-x-auto min-h-[300px] pb-16">
                                         <table className="w-full text-left border-collapse">
