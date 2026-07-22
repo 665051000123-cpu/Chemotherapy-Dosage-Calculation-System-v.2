@@ -1403,10 +1403,10 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 )}
                             </div>
 
-                            {/* ข้อมูลเชิงการแพทย์ (Medical Info) */}
+                            {/* ข้อมูลทางคลินิก (Clinical Information) */}
                             <div>
                                 <h4 className="font-bold text-rose-600 dark:text-rose-400 mb-3 flex items-center gap-2 border-b border-rose-100 dark:border-rose-900/50 pb-2">
-                                    <HeartPulse size={16} /> ข้อมูลเชิงการแพทย์
+                                    <Stethoscope size={16} /> ข้อมูลทางคลินิก (Clinical Information)
                                 </h4>
                                 <div className="space-y-3">
                                     <div className="flex gap-2">
