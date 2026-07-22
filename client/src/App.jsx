@@ -101,6 +101,7 @@ function App() {
     const lastAutofilledHnRef = useRef(patient.hn);
     const [prevStats, setPrevStats] = useState({ height: '', weight: '', ward: '', doctor: '' });
     const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
+    const [editPatientNameData, setEditPatientNameData] = useState(null);
     const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
     const [timeoutCountdown, setTimeoutCountdown] = useState(30);
     const [showPrinterSettings, setShowPrinterSettings] = useState(false);
@@ -944,8 +945,14 @@ function App() {
         }
     };
 
-    const handleUpdatePatientName = async (hn, currentName) => {
-        const newName = window.prompt("แก้ไขชื่อ-นามสกุลผู้ป่วย:", currentName);
+    const handleUpdatePatientName = (hn, currentName) => {
+        setEditPatientNameData({ hn, currentName, newName: currentName });
+    };
+
+    const submitUpdatePatientName = async () => {
+        if (!editPatientNameData) return;
+        const { hn, currentName, newName } = editPatientNameData;
+        
         if (newName && newName.trim() !== currentName) {
             try {
                 const response = await axios.put(`${API_BASE}/admin/logs/hn/${hn}/name`, { patient_name: newName.trim() }, {
@@ -960,6 +967,7 @@ function App() {
                 showNotification('ไม่สามารถอัปเดตชื่อผู้ป่วยได้ หรือคุณไม่มีสิทธิ์', 'error');
             }
         }
+        setEditPatientNameData(null);
     };
 
     const handleEditOrder = (log) => {
@@ -4814,6 +4822,57 @@ function App() {
                     </div>
                 </div>
             )}
+            
+            {/* Edit Patient Name Modal */}
+            {editPatientNameData && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
+                    <div className="premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-sky-500/30">
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-sky-400/20 rounded-full blur-3xl pointer-events-none"></div>
+                        <h3 className="font-black text-xl mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-3 text-sky-500">
+                            <Edit2 size={20} />
+                            แก้ไขชื่อผู้ป่วย
+                        </h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-2 font-medium">
+                            H.N.: <span className="font-bold text-sky-600 dark:text-sky-400">{editPatientNameData.hn}</span>
+                        </p>
+                        <div className="mb-6">
+                            <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">ชื่อ-นามสกุลใหม่</label>
+                            <input 
+                                type="text"
+                                value={editPatientNameData.newName}
+                                onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newName: e.target.value })}
+                                className="form-control text-sm py-3 px-4 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
+                                placeholder="กรอกชื่อ-นามสกุล..."
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') submitUpdatePatientName();
+                                    if (e.key === 'Escape') setEditPatientNameData(null);
+                                }}
+                            />
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setEditPatientNameData(null)}
+                                className={`w-1/2 py-3 px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 cursor-pointer text-center ${theme === 'dark'
+                                    ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
+                                    : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
+                                    }`}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                type="button"
+                                onClick={submitUpdatePatientName}
+                                className="w-1/2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-black py-3 px-4 rounded-xl active:scale-95 cursor-pointer text-center transition-all shadow-md shadow-sky-500/20"
+                            >
+                                บันทึก
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {showTimeoutWarning && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
                     <div className="premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-amber-500/30 shadow-[0_20px_50px_rgba(245,158,11,0.15)] text-center">
