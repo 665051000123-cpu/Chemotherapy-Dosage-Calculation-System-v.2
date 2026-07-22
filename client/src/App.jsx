@@ -4032,8 +4032,15 @@ function App() {
                                                             title="เปลี่ยนหน่วย"
                                                         >
                                                             <option value="mg">mg</option>
+                                                            <option value="g">g</option>
+                                                            <option value="mcg">mcg</option>
                                                             <option value="ml">ml</option>
+                                                            <option value="L">L</option>
                                                             <option value="units">units</option>
+                                                            <option value="IU">IU</option>
+                                                            <option value="mEq">mEq</option>
+                                                            <option value="mmol">mmol</option>
+                                                            <option value="AUC">AUC</option>
                                                         </select>
                                                     </span>
                                                 </div>
@@ -4358,8 +4365,12 @@ function App() {
                                                                     <option value="mg">mg</option>
                                                                     <option value="g">g</option>
                                                                     <option value="mcg">mcg</option>
-                                                                    <option value="units">units</option>
                                                                     <option value="ml">ml</option>
+                                                                    <option value="L">L</option>
+                                                                    <option value="units">units</option>
+                                                                    <option value="IU">IU</option>
+                                                                    <option value="mEq">mEq</option>
+                                                                    <option value="mmol">mmol</option>
                                                                     <option value="AUC">AUC</option>
                                                                 </select>
                                                             </div>
