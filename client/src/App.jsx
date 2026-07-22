@@ -1316,15 +1316,15 @@ function App() {
                         <span class="line-input" style="width: 90px; text-align: center; margin: 0 5px;">${row.dose || ''}</span>
                         <span>mg</span>
                     </div>
-                    <div style="margin-left: 20px; margin-bottom: 6px;">
+                    <div style="margin-left: 20px; margin-bottom: 6px; display: flex; align-items: baseline;">
                         <span style="white-space: nowrap; margin-right: 5px;">สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution)</span>
-                        <span class="line-input" style="width: 380px; text-align: left;">${finalPrepInstructions}</span>
+                        <span class="line-input" style="flex: 1; text-align: center;">${finalPrepInstructions}</span>
                     </div>
-                    <div style="margin-left: 20px; margin-bottom: 6px;">
+                    <div style="margin-left: 20px; margin-bottom: 6px; display: flex; align-items: baseline;">
                         <span style="white-space: nowrap; margin-right: 5px;">ปริมาตรยาที่เตรียม</span>
                         <span class="line-input" style="width: 150px; text-align: center; font-weight: bold;">${printDrugVolume}</span>
                         <span style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ml Add ลงใน Diluent</span>
-                        <span class="line-input" style="width: 250px; text-align: left;">${row.solvent ? `${row.solvent} ${row.volume || ''} ml` : ''}</span>
+                        <span class="line-input" style="flex: 1; text-align: center;">${row.solvent ? `${row.solvent} ${row.volume || ''} ml` : ''}</span>
                     </div>
                     <div class="qc-section" style="margin-left: 20px;">
                         <div class="qc-title">การตรวจสอบคุณภาพยาเคมีบำบัดที่ผสมเสร็จ</div>
