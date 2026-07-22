@@ -1279,7 +1279,6 @@ function App() {
                 }
 
             drugBlocks += `
-            drugBlocks += `
                 <div class="drug-block">
                     <div style="margin-bottom: 6px;">
                         <span style="display: inline-block; width: 20px;">${i + 1}.</span>
