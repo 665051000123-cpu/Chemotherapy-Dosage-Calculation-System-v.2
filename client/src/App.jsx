@@ -1279,26 +1279,27 @@ function App() {
                 }
 
             drugBlocks += `
+            drugBlocks += `
                 <div class="drug-block">
-                    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; margin-bottom: 6px;">
-                        <div style="width: 20px;">${i + 1}.</div>
-                        <div>Drug</div>
-                        <div class="line-input" style="flex: 1.5; margin: 0 10px 0 5px;">${row.drugName || ''}</div>
-                        <div>Dose formular</div>
-                        <div class="line-input" style="flex: 1.5; margin: 0 10px 0 5px;">${row.doseFormula || ''}</div>
-                        <div>Dose</div>
-                        <div class="line-input" style="width: 90px; text-align: center; margin: 0 5px;">${row.dose || ''}</div>
-                        <div>mg</div>
+                    <div style="margin-bottom: 6px;">
+                        <span style="display: inline-block; width: 20px;">${i + 1}.</span>
+                        <span>Drug</span>
+                        <span class="line-input" style="width: 180px; margin: 0 10px 0 5px;">${row.drugName || ''}</span>
+                        <span>Dose formular</span>
+                        <span class="line-input" style="width: 150px; margin: 0 10px 0 5px;">${row.doseFormula || ''}</span>
+                        <span>Dose</span>
+                        <span class="line-input" style="width: 90px; text-align: center; margin: 0 5px;">${row.dose || ''}</span>
+                        <span>mg</span>
                     </div>
-                    <div style="display: flex; align-items: flex-start; margin-left: 20px; margin-bottom: 6px;">
-                        <div style="white-space: nowrap; margin-right: 5px; margin-top: 2px;">สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution)</div>
-                        <div class="line-input" style="flex: 1; text-align: left; line-height: 1.5;">${finalPrepInstructions}</div>
+                    <div style="margin-left: 20px; margin-bottom: 6px;">
+                        <span style="white-space: nowrap; margin-right: 5px;">สารละลายและปริมาตรที่ใช้ละลายผงยา (Reconstitution)</span>
+                        <span class="line-input" style="width: 380px; text-align: left;">${finalPrepInstructions}</span>
                     </div>
-                    <div style="display: flex; align-items: flex-end; margin-left: 20px; margin-bottom: 6px;">
-                        <div style="white-space: nowrap; margin-right: 5px;">ปริมาตรยาที่เตรียม</div>
-                        <div class="line-input" style="width: 150px; text-align: center; font-weight: bold;">${printDrugVolume}</div>
-                        <div style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ml Add ลงใน Diluent</div>
-                        <div class="line-input" style="flex: 1; text-align: left;">${row.solvent ? `${row.solvent} ${row.volume || ''} ml` : ''}</div>
+                    <div style="margin-left: 20px; margin-bottom: 6px;">
+                        <span style="white-space: nowrap; margin-right: 5px;">ปริมาตรยาที่เตรียม</span>
+                        <span class="line-input" style="width: 150px; text-align: center; font-weight: bold;">${printDrugVolume}</span>
+                        <span style="white-space: nowrap; margin-left: 5px; margin-right: 5px;">ml Add ลงใน Diluent</span>
+                        <span class="line-input" style="width: 250px; text-align: left;">${row.solvent ? `${row.solvent} ${row.volume || ''} ml` : ''}</span>
                     </div>
                     <div class="qc-section" style="margin-left: 20px;">
                         <div class="qc-title">การตรวจสอบคุณภาพยาเคมีบำบัดที่ผสมเสร็จ</div>
@@ -1310,7 +1311,7 @@ function App() {
                             <div><span class="checkbox-square"></span> ภาชนะบรรจุยาไม่รั่วซึม</div>
                             <div><span class="checkbox-square"></span> ติดฉลากถูกต้อง</div>
                             <div>
-                                เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 180px;"></span>
+                                เภสัชกรผู้ตรวจสอบ <span class="line-input" style="width: 160px;"></span>
                             </div>
                         </div>
                     </div>
@@ -1329,7 +1330,7 @@ function App() {
                 body { 
                     font-family: 'Sarabun', sans-serif; 
                     margin: 0; 
-                    padding: 2cm 2.5cm; /* Added padding to ensure margins when printing */
+                    padding: 1cm 1.5cm; /* Restored to original */
                     font-size: 13px;
                     color: #000;
                     line-height: 1.6;
@@ -1412,32 +1413,23 @@ function App() {
                 <h1>ใบบันทึกการเตรียมยาเคมีบำบัด</h1>
             </div>
 
-            <div class="row" style="display: flex; align-items: flex-end;">
-                <div style="white-space: nowrap;">วันที่เตรียมยา</div> 
-                <div class="line-input" style="flex: 1; margin: 0 10px; text-align: center;">${producedTime}</div>
-                <div style="white-space: nowrap;">ผู้เตรียมยา</div> 
-                <div class="line-input" style="flex: 2; margin-left: 10px; text-align: center;">${user.name || user.username || ''}</div>
+            <div class="row">
+                วันที่เตรียมยา <span class="line-input" style="width: 150px; text-align: center;">${producedTime}</span>
+                <span style="margin-left: 30px;">ผู้เตรียมยา</span> <span class="line-input" style="width: 250px; text-align: center;">${user.name || user.username || ''}</span>
             </div>
             
-            <div class="row" style="display: flex; align-items: flex-end;">
-                <div style="white-space: nowrap;">HN.</div> 
-                <div class="line-input" style="flex: 1; margin: 0 10px; text-align: center;">${patient.hn || ''}</div>
-                <div style="white-space: nowrap;">ชื่อ-สกุล</div> 
-                <div class="line-input" style="flex: 3; margin: 0 10px; text-align: center;">${patient.title || ''}${patient.name || ''}</div>
-                <div style="white-space: nowrap;">อายุ</div> 
-                <div class="line-input" style="width: 50px; text-align: center; margin: 0 10px;">${patient.age || ''}</div> 
-                <div style="white-space: nowrap;">ปี เพศ</div>
-                <div class="line-input" style="width: 60px; text-align: center; margin-left: 10px;">${patient.gender === 'male' ? 'ชาย' : patient.gender === 'female' ? 'หญิง' : ''}</div>
+            <div class="row">
+                HN. <span class="line-input" style="width: 100px; text-align: center;">${patient.hn || ''}</span>
+                <span style="margin-left: 10px;">ชื่อ-สกุล</span> <span class="line-input" style="width: 250px; text-align: center;">${patient.title || ''}${patient.name || ''}</span>
+                <span style="margin-left: 10px;">อายุ</span> <span class="line-input" style="width: 50px; text-align: center;">${patient.age || ''}</span> ปี
+                <span style="margin-left: 10px;">เพศ</span> <span class="line-input" style="width: 60px; text-align: center;">${patient.gender === 'male' ? 'ชาย' : patient.gender === 'female' ? 'หญิง' : ''}</span>
             </div>
             
-            <div class="row" style="display: flex; align-items: flex-end;">
-                <div style="white-space: nowrap;">น้ำหนัก</div> 
-                <div class="line-input" style="width: 60px; text-align: center; margin: 0 10px;">${patient.weight || ''}</div> 
-                <div style="white-space: nowrap;">kg ส่วนสูง</div> 
-                <div class="line-input" style="width: 60px; text-align: center; margin: 0 10px;">${patient.height || ''}</div> 
-                <div style="white-space: nowrap;">cm. BSA = Square root of [(Weight(kg) x Height(cm)) / 3600] = </div>
-                <div class="line-input" style="width: 80px; text-align: center; margin: 0 10px;">${bsa ? Number(bsa).toFixed(4) : ''}</div> 
-                <div style="white-space: nowrap;">m²</div>
+            <div class="row">
+                น้ำหนัก <span class="line-input" style="width: 60px; text-align: center;">${patient.weight || ''}</span> kg 
+                <span style="margin-left: 10px;">ส่วนสูง</span> <span class="line-input" style="width: 60px; text-align: center;">${patient.height || ''}</span> cm. 
+                <span style="margin-left: 10px;">BSA = Square root of [(Weight(kg) x Height(cm)) / 3600] = </span>
+                <span class="line-input" style="width: 80px; text-align: center;">${bsa ? Number(bsa).toFixed(4) : ''}</span> m²
             </div>
 
             <div class="lab-row">
@@ -1445,15 +1437,13 @@ function App() {
                 <div><span class="checkbox-square"></span> Hb > 10 g/dl and <span class="checkbox-square" style="margin-left: 5px;"></span> Plt > 100,000 /mm³</div>
             </div>
 
-            <div class="row" style="display: flex; align-items: flex-end;">
-                <div style="white-space: nowrap;">ผล Lab อื่นๆ</div> 
-                <div class="line-input" style="width: 250px; margin: 0 10px;"></div> 
-                <div class="text-xs">(Creatinine clearance ใช้สูตร CrCl= [72xScr (mg/dL)/(140-อายุ)xน้ำหนัก (kg)]x(0.85 if female)]</div>
+            <div class="row">
+                ผล Lab อื่นๆ <span class="line-input" style="width: 250px;"></span> 
+                <span class="text-xs" style="margin-left: 10px;">(Creatinine clearance ใช้สูตร CrCl= [72xScr (mg/dL)/(140-อายุ)xน้ำหนัก (kg)]x(0.85 if female)]</span>
             </div>
 
-            <div class="row" style="display: flex; align-items: flex-end; margin-bottom: 10px;">
-                <div style="white-space: nowrap;">Drug regimen</div> 
-                <div class="line-input" style="flex: 1; margin-left: 10px;"></div>
+            <div class="row" style="margin-bottom: 10px;">
+                Drug regimen <span class="line-input" style="width: 550px;"></span>
             </div>
 
             <div class="drug-section">
