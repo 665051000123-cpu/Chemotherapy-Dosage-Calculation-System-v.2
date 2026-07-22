@@ -2977,21 +2977,22 @@ function App() {
                                                         {latestLog.gender === 'female' ? '♀' : '♂'}
                                                     </div>
                                                     <div className="relative z-10 flex items-center gap-3">
-                                                        <p className="font-black text-xl uppercase tracking-tight text-slate-800 dark:text-white mb-0.5">{latestLog.patient_name || '-'}</p>
-                                                        {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleUpdatePatientName(latestLog.hn, latestLog.patient_name);
-                                                                }}
-                                                                className="text-slate-400 hover:text-sky-500 transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                                title="แก้ไขชื่อผู้ป่วย"
-                                                            >
-                                                                <Edit2 size={16} />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <p className="font-black text-xl uppercase tracking-tight text-slate-800 dark:text-white mb-0.5">{latestLog.patient_name || '-'}</p>
+                                                            {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleUpdatePatientName(latestLog.hn, latestLog.patient_name);
+                                                                    }}
+                                                                    className="text-slate-400 hover:text-sky-500 transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                                    title="แก้ไขชื่อผู้ป่วย"
+                                                                >
+                                                                    <Edit2 size={16} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2 mt-1">
                                                             <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.gender === 'female' ? 'หญิง' : latestLog.gender === 'male' ? 'ชาย' : '-'}</span>
                                                             {latestLog.age && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.age} ปี</span>}
                                                             {latestLog.ward && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.ward}</span>}
