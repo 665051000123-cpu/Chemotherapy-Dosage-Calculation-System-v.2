@@ -4034,6 +4034,9 @@ function App() {
                                                             <option value="mg">mg</option>
                                                             <option value="g">g</option>
                                                             <option value="mcg">mcg</option>
+                                                            <option value="mg/m2">mg/m2</option>
+                                                            <option value="mg/kg">mg/kg</option>
+                                                            <option value="mcg/kg">mcg/kg</option>
                                                             <option value="ml">ml</option>
                                                             <option value="L">L</option>
                                                             <option value="units">units</option>
@@ -4365,6 +4368,9 @@ function App() {
                                                                     <option value="mg">mg</option>
                                                                     <option value="g">g</option>
                                                                     <option value="mcg">mcg</option>
+                                                                    <option value="mg/m2">mg/m2</option>
+                                                                    <option value="mg/kg">mg/kg</option>
+                                                                    <option value="mcg/kg">mcg/kg</option>
                                                                     <option value="ml">ml</option>
                                                                     <option value="L">L</option>
                                                                     <option value="units">units</option>
