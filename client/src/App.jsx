@@ -1438,7 +1438,7 @@ function App() {
             </div>
 
             <div class="row">
-                ผล Lab อื่นๆ <span class="line-input" style="width: 250px;"></span> 
+                ผล Lab อื่นๆ <span class="line-input" style="width: 250px; text-align: center;">${patient.otherLab || ''}</span> 
                 <span class="text-xs" style="margin-left: 10px;">(Creatinine clearance ใช้สูตร CrCl= [72xScr (mg/dL)/(140-อายุ)xน้ำหนัก (kg)]x(0.85 if female)]</span>
             </div>
 
@@ -3949,6 +3949,20 @@ function App() {
                                                 )}
                                             </div>
                                         )}
+                                    </div>
+
+                                    {/* Other Lab Input */}
+                                    <div className="mt-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/30">
+                                        <label className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2 mb-2">
+                                            <Activity size={14} className="text-indigo-500" /> ผล Lab อื่นๆ (Optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={patient.otherLab || ''}
+                                            onChange={(e) => setPatient({ ...patient, otherLab: e.target.value })}
+                                            placeholder="เช่น Na 135, K 4.0, ... (ถ้ามี)"
+                                            className="w-full text-sm font-bold bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                        />
                                     </div>
 
                                     {/* Warnings list in Section 05 */}
