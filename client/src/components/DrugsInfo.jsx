@@ -1481,7 +1481,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             ยืนยันการลบรายการยา
                         </h3>
                         <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                            คุณแน่ใจหรือไม่ที่จะลบรายการยา <strong className="text-slate-200">{deleteConfirmDrug.drug_name}</strong> ออกจากระบบ? การกระทำนี้ไม่สามารถกู้คืนข้อมูลกลับมาได้
+                            คุณแน่ใจหรือไม่ที่จะลบรายการยา <strong className="text-rose-500 text-lg mx-1">{deleteConfirmDrug.drug_name}</strong> ออกจากระบบ? การกระทำนี้ไม่สามารถกู้คืนข้อมูลกลับมาได้
                         </p>
                         <div className="flex gap-3">
                             <button
