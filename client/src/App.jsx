@@ -78,6 +78,26 @@ const SOLVENT_OPTIONS = [
 
 
 function App() {
+    const calculateAgeFromThaiDateString = (dateStr) => {
+        if (dateStr && dateStr.length === 10) {
+            const d = parseInt(dateStr.substring(0, 2), 10);
+            const m = parseInt(dateStr.substring(3, 5), 10);
+            const yNum = parseInt(dateStr.substring(6, 10), 10);
+            if (!isNaN(d) && !isNaN(m) && !isNaN(yNum)) {
+                const gYear = yNum > 2400 ? yNum - 543 : yNum;
+                const birthDate = new Date(gYear, m - 1, d);
+                const today = new Date();
+                let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+                const mDiff = today.getMonth() - birthDate.getMonth();
+                if (mDiff < 0 || (mDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    calculatedAge--;
+                }
+                return calculatedAge.toString();
+            }
+        }
+        return '';
+    };
+
     const [theme, setTheme] = useState(localStorage.getItem('appThemeMode') || 'light');
     const [step, setStep] = useState(() => {
         return localStorage.getItem('app_current_step') || 'auth'; // 'auth', 'login', 'workspace'
@@ -90,7 +110,7 @@ function App() {
         return null;
     });
     const [loginData, setLoginData] = useState({ username: '', password: '' });
-    const [patient, setPatient] = useState({ hn: '', title: '', name: '', height: '', weight: '', gender: '', age: '', allergies: '', ward: '', doctor: '', cycle: '' });
+    const [patient, setPatient] = useState({ hn: '', title: '', name: '', height: '', weight: '', gender: '', dob: '', age: '', allergies: '', ward: '', doctor: '', cycle: '' });
     const [isDateEditable, setIsDateEditable] = useState(false);
     const [logs, setLogs] = useState([]);
     const [notification, setNotification] = useState(null);
@@ -99,7 +119,7 @@ function App() {
     const [patients, setPatients] = useState([]);
     const [patientSearch, setPatientSearch] = useState('');
     const lastAutofilledHnRef = useRef(patient.hn);
-    const [prevStats, setPrevStats] = useState({ height: '', weight: '', ward: '', doctor: '' });
+    const [prevStats, setPrevStats] = useState({ height: '', weight: '', ward: '', doctor: '', dob: '' });
     const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
     const [editPatientNameData, setEditPatientNameData] = useState(null);
     const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
@@ -550,7 +570,8 @@ function App() {
             height: p.height || '',
             weight: p.weight || '',
             ward: p.ward || '',
-            doctor: p.doctor || ''
+            doctor: p.doctor || '',
+            dob: p.dob || ''
         });
         showNotification(`ดึงข้อมูลผู้ป่วย H.N. ${p.hn} เรียบร้อยแล้ว`, "success");
     };
@@ -583,7 +604,7 @@ function App() {
     useEffect(() => {
         if (!patient.hn) {
             lastAutofilledHnRef.current = '';
-            setPrevStats({ height: '', weight: '', ward: '', doctor: '' });
+            setPrevStats({ height: '', weight: '', ward: '', doctor: '', dob: '' });
             return;
         }
 
@@ -605,7 +626,8 @@ function App() {
                 height: matched.height || '',
                 weight: matched.weight || '',
                 ward: matched.ward || '',
-                doctor: matched.doctor || ''
+                doctor: matched.doctor || '',
+                dob: matched.dob || ''
             });
             lastAutofilledHnRef.current = matched.hn;
             showNotification(`พบข้อมูลผู้ป่วย H.N. ${matched.hn} ในระบบและดึงข้อมูลมากรอกสำเร็จ`, "success");
@@ -946,26 +968,40 @@ function App() {
         }
     };
 
-    const handleUpdatePatientName = (hn, currentName) => {
-        setEditPatientNameData({ hn, currentName, newName: currentName });
+    const handleUpdatePatientName = (log) => {
+        setEditPatientNameData({ 
+            hn: log.hn, 
+            currentName: log.patient_name, 
+            newName: log.patient_name || '',
+            newGender: log.gender || '',
+            newAge: log.age || '',
+            newDob: '',
+            newWard: log.ward || ''
+        });
     };
 
     const submitUpdatePatientName = async () => {
         if (!editPatientNameData) return;
-        const { hn, currentName, newName } = editPatientNameData;
+        const { hn, newName, newGender, newAge, newDob, newWard } = editPatientNameData;
         
-        if (newName && newName.trim() !== currentName) {
+        if (newName && newName.trim()) {
             try {
-                const response = await axios.put(`${API_BASE}/admin/logs/hn/${hn}/name`, { patient_name: newName.trim() }, {
+                const response = await axios.put(`${API_BASE}/admin/logs/hn/${hn}/name`, { 
+                    patient_name: newName.trim(),
+                    gender: newGender,
+                    age: newAge,
+                    dob: newDob,
+                    ward: newWard
+                }, {
                     headers: { 'x-employee-id': user?.employee_id || '' }
                 });
                 if (response.data.success) {
-                    showNotification('อัปเดตชื่อผู้ป่วยสำเร็จ', 'success');
+                    showNotification('อัปเดตข้อมูลผู้ป่วยสำเร็จ', 'success');
                     fetchLogs();
                 }
             } catch (err) {
                 console.error(err);
-                showNotification('ไม่สามารถอัปเดตชื่อผู้ป่วยได้ หรือคุณไม่มีสิทธิ์', 'error');
+                showNotification('ไม่สามารถอัปเดตข้อมูลผู้ป่วยได้ หรือคุณไม่มีสิทธิ์', 'error');
             }
         }
         setEditPatientNameData(null);
@@ -1999,6 +2035,7 @@ function App() {
             userName: user.name || user.username,
             gender: patient.gender,
             age: patient.age,
+            dob: patient.dob,
             ward: patient.ward || '',
             allergies: patient.allergies || '',
             drugsUsed: drugsUsed,
@@ -2207,13 +2244,16 @@ function App() {
             }
         }
 
+        const finalDob = patient.dob || prevStats.dob || '';
+
         const updatedPatient = {
             ...patient,
             name: cleanedName,
             height: String(finalHeight),
             weight: String(finalWeight),
             ward: finalWard,
-            doctor: finalDoctor
+            doctor: finalDoctor,
+            dob: finalDob
         };
 
         try {
@@ -2698,16 +2738,44 @@ function App() {
                                         />
                                     </div>
                                     <div className="col-span-1 space-y-1">
-                                        <label className="text-xs font-bold text-slate-500 ml-1">อายุ (ปี)</label>
-                                        <div className="relative">
+                                        <label className="text-xs font-bold text-slate-500 ml-1 flex justify-between items-center">
+                                            <span>วันเดือนปีเกิด</span>
+                                            {patient.age && <span className="text-sky-500 bg-sky-500/10 px-1.5 py-0.5 rounded text-[9px] font-black">อายุ {patient.age} ปี</span>}
+                                        </label>
+                                        <div className="relative flex items-center">
                                             <input
-                                                type="number"
-                                                placeholder="อายุ"
-                                                className="form-control pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                value={patient.age || ''}
-                                                onChange={e => setPatient({ ...patient, age: e.target.value })}
+                                                type="text"
+                                                placeholder={prevStats.dob ? prevStats.dob : "วัน/เดือน/ปีเกิด"}
+                                                value={patient.dob || ''}
+                                                onChange={e => handleDateInputChange(e.target.value, patient.dob || '', (val) => setPatient({...patient, dob: val, age: calculateAgeFromThaiDateString(val) || patient.age}))}
+                                                className="form-control pr-8"
+                                                maxLength={10}
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium pointer-events-none">ปี</span>
+                                            <input
+                                                type="date"
+                                                className="absolute left-0 right-0 top-0 bottom-0 opacity-0 cursor-pointer w-full h-full"
+                                                onClick={(e) => { try { e.target.showPicker(); } catch(err){} }}
+                                                value={(() => {
+                                                    if (patient.dob && patient.dob.length === 10) {
+                                                        const d = patient.dob.substring(0, 2);
+                                                        const m = patient.dob.substring(3, 5);
+                                                        const yNum = parseInt(patient.dob.substring(6, 10), 10);
+                                                        if (!isNaN(yNum)) {
+                                                            const gYear = yNum > 2400 ? yNum - 543 : yNum;
+                                                            return `${gYear}-${m}-${d}`;
+                                                        }
+                                                    }
+                                                    return '';
+                                                })()}
+                                                onChange={(e) => {
+                                                    if (!e.target.value) return;
+                                                    const [y, m, d] = e.target.value.split('-');
+                                                    const thaiYear = parseInt(y, 10) < 2400 ? parseInt(y, 10) + 543 : parseInt(y, 10);
+                                                    const newDob = `${d}/${m}/${thaiYear}`;
+                                                    setPatient({...patient, dob: newDob, age: calculateAgeFromThaiDateString(newDob)});
+                                                }}
+                                            />
+                                            <Calendar size={16} className="absolute right-3 text-slate-400 pointer-events-none" />
                                         </div>
                                     </div>
                                 </div>
@@ -2994,7 +3062,7 @@ function App() {
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        handleUpdatePatientName(latestLog.hn, latestLog.patient_name);
+                                                                        handleUpdatePatientName(latestLog);
                                                                     }}
                                                                     className="text-slate-400 hover:text-sky-500 transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
                                                                     title="แก้ไขชื่อผู้ป่วย"
@@ -3006,6 +3074,7 @@ function App() {
                                                         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2 mt-1">
                                                             <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.gender === 'female' ? 'หญิง' : latestLog.gender === 'male' ? 'ชาย' : '-'}</span>
                                                             {latestLog.age && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.age} ปี</span>}
+                                                            {latestLog.dob && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.dob}</span>}
                                                             {latestLog.ward && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.ward}</span>}
                                                         </p>
                                                     </div>
@@ -3360,8 +3429,8 @@ function App() {
                                 </div>
                                 <button onClick={() => {
                                     localStorage.removeItem('workspace_form_data');
-                                    setPatient({ hn: '', title: '', name: '', height: '', weight: '', gender: '', age: '', allergies: '', ward: '', doctor: '', cycle: '' });
-                                    setPrevStats({ height: '', weight: '', ward: '', doctor: '' });
+                                    setPatient({ hn: '', title: '', name: '', height: '', weight: '', gender: '', dob: '', age: '', allergies: '', ward: '', doctor: '', cycle: '' });
+                                    setPrevStats({ height: '', weight: '', ward: '', doctor: '', dob: '' });
                                     setPatientScr('');
                                     setUseAutoGfr(true);
                                     setAmputation('none');
@@ -3849,7 +3918,7 @@ function App() {
                                                                 <input
                                                                     type="number"
                                                                     placeholder="Age"
-                                                                    value={patient.age}
+                                                                    value={patient.age || ''}
                                                                     className="form-control text-xs px-2 py-1"
                                                                     onChange={e => setPatient({ ...patient, age: e.target.value })}
                                                                 />
@@ -4834,31 +4903,90 @@ function App() {
                 </div>
             )}
             
-            {/* Edit Patient Name Modal */}
+            {/* Edit Patient Data Modal */}
             {editPatientNameData && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
-                    <div className="premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-sky-500/30">
+                    <div className="premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-sky-500/30 max-h-[90vh] overflow-y-auto">
                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-sky-400/20 rounded-full blur-3xl pointer-events-none"></div>
                         <h3 className="font-black text-xl mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-3 text-sky-500">
                             <Edit2 size={20} />
-                            แก้ไขชื่อผู้ป่วย
+                            แก้ไขข้อมูลผู้ป่วย
                         </h3>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mb-2 font-medium">
                             H.N.: <span className="font-bold text-sky-600 dark:text-sky-400">{editPatientNameData.hn}</span>
                         </p>
-                        <div className="mb-6">
+                        <div className="mb-4">
                             <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">ชื่อ-นามสกุลใหม่</label>
                             <input 
                                 type="text"
                                 value={editPatientNameData.newName}
                                 onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newName: e.target.value })}
-                                className="form-control text-sm py-3 px-4 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
+                                className="form-control text-sm py-2 px-3 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
                                 placeholder="กรอกชื่อ-นามสกุล..."
                                 autoFocus
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') submitUpdatePatientName();
-                                    if (e.key === 'Escape') setEditPatientNameData(null);
-                                }}
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">เพศ</label>
+                            <select 
+                                value={editPatientNameData.newGender}
+                                onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newGender: e.target.value })}
+                                className="form-control text-sm py-2 px-3 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
+                            >
+                                <option value="">ไม่ระบุ</option>
+                                <option value="male">ชาย</option>
+                                <option value="female">หญิง</option>
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="text-xs font-black text-slate-500 mb-1.5 uppercase flex justify-between items-center">
+                                <span>วันเดือนปีเกิด</span>
+                                {editPatientNameData.newAge && <span className="text-sky-500 bg-sky-500/10 px-2 py-0.5 rounded text-[10px]">อายุ {editPatientNameData.newAge} ปี</span>}
+                            </label>
+                            <div className="relative flex items-center">
+                                <input
+                                    type="text"
+                                    placeholder="วัน/เดือน/ปีเกิด"
+                                    value={editPatientNameData.newDob || ''}
+                                    onChange={e => handleDateInputChange(e.target.value, editPatientNameData.newDob || '', (val) => setEditPatientNameData({...editPatientNameData, newDob: val, newAge: calculateAgeFromThaiDateString(val) || editPatientNameData.newAge}))}
+                                    className="form-control text-sm py-2 pl-3 pr-8 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
+                                    maxLength={10}
+                                />
+                                <input
+                                    type="date"
+                                    className="absolute left-0 right-0 top-0 bottom-0 opacity-0 cursor-pointer w-full h-full"
+                                    onClick={(e) => { try { e.target.showPicker(); } catch(err){} }}
+                                    value={(() => {
+                                        if (editPatientNameData.newDob && editPatientNameData.newDob.length === 10) {
+                                            const d = editPatientNameData.newDob.substring(0, 2);
+                                            const m = editPatientNameData.newDob.substring(3, 5);
+                                            const yNum = parseInt(editPatientNameData.newDob.substring(6, 10), 10);
+                                            if (!isNaN(yNum)) {
+                                                const gYear = yNum > 2400 ? yNum - 543 : yNum;
+                                                return `${gYear}-${m}-${d}`;
+                                            }
+                                        }
+                                        return '';
+                                    })()}
+                                    onChange={(e) => {
+                                        if (!e.target.value) return;
+                                        const [y, m, d] = e.target.value.split('-');
+                                        const thaiYear = parseInt(y, 10) < 2400 ? parseInt(y, 10) + 543 : parseInt(y, 10);
+                                        const newDob = `${d}/${m}/${thaiYear}`;
+                                        setEditPatientNameData({...editPatientNameData, newDob, newAge: calculateAgeFromThaiDateString(newDob)});
+                                    }}
+                                />
+                                <Calendar size={16} className="absolute right-3 text-slate-400 pointer-events-none" />
+                            </div>
+                        </div>
+                        <div className="mb-6">
+                            <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">หอผู้ป่วย (WARD)</label>
+                            <input 
+                                type="text"
+                                value={editPatientNameData.newWard}
+                                onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newWard: e.target.value })}
+                                className="form-control text-sm py-2 px-3 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
+                                placeholder="กรอกชื่อ Ward..."
                             />
                         </div>
                         <div className="flex gap-3">

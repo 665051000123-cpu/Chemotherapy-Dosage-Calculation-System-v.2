@@ -124,6 +124,7 @@ const DosageLog = sequelize.define('DosageLog', {
     prescribed_dose: DataTypes.STRING(50),
     user_name: DataTypes.STRING(255),
     gender: DataTypes.STRING(20),
+    dob: DataTypes.STRING(20),
     age: DataTypes.STRING(20),
     height: DataTypes.STRING(20),
     weight: DataTypes.STRING(20),
@@ -348,6 +349,7 @@ const Patient = sequelize.define('Patient', {
         allowNull: false
     },
     gender: DataTypes.STRING(20),
+    dob: DataTypes.STRING(20),
     age: DataTypes.STRING(20),
     height: DataTypes.STRING(20),
     weight: DataTypes.STRING(20)
@@ -496,8 +498,31 @@ async function initializeDatabase() {
                 });
                 console.log('✅ Column other_lab added successfully to dosage_logs table.');
             }
+            if (dosageLogTableInfo && !dosageLogTableInfo.dob) {
+                console.log('Adding dob column to dosage_logs table...');
+                await queryInterface.addColumn('dosage_logs', 'dob', {
+                    type: DataTypes.STRING(20),
+                    allowNull: true
+                });
+                console.log('✅ Column dob added successfully to dosage_logs table.');
+            }
         } catch(e) {
-            console.log('Table dosage_logs may not exist yet, skipping alter column check for other_lab.');
+            console.log('Table dosage_logs may not exist yet, skipping alter column check for other_lab/dob.');
+        }
+
+        // Check if dob column exists in patients table
+        try {
+            const patientsTableInfo = await queryInterface.describeTable('patients');
+            if (patientsTableInfo && !patientsTableInfo.dob) {
+                console.log('Adding dob column to patients table...');
+                await queryInterface.addColumn('patients', 'dob', {
+                    type: DataTypes.STRING(20),
+                    allowNull: true
+                });
+                console.log('✅ Column dob added successfully to patients table.');
+            }
+        } catch(e) {
+            console.log('Table patients may not exist yet, skipping alter column check for dob.');
         }
 
         // Check if default_printer column exists in login table, if not add it
@@ -735,6 +760,7 @@ app.post('/api/logs', async (req, res) => {
             prescribedDose, 
             userName, 
             gender, 
+            dob,
             age, 
             height, 
             weight,
@@ -756,6 +782,7 @@ app.post('/api/logs', async (req, res) => {
             prescribed_dose: prescribedDose,
             user_name: userName,
             gender,
+            dob,
             age,
             height,
             weight,
@@ -773,6 +800,7 @@ app.post('/api/logs', async (req, res) => {
             await existingPatient.update({
                 name: patientName,
                 gender,
+                dob,
                 age,
                 height,
                 weight
@@ -782,6 +810,7 @@ app.post('/api/logs', async (req, res) => {
                 hn,
                 name: patientName,
                 gender,
+                dob,
                 age,
                 height,
                 weight
@@ -854,23 +883,33 @@ app.get('/api/admin/logs', requireAdmin, async (req, res) => {
     }
 });
 
-// Update patient name globally by HN (Admin/Head only)
+// Update patient data globally by HN (Admin/Head only)
 app.put('/api/admin/logs/hn/:hn/name', requireHeadOrAdmin, async (req, res) => {
     try {
         const { hn } = req.params;
-        const { patient_name } = req.body;
+        const { patient_name, gender, age, dob, ward } = req.body;
         
         if (!hn || !patient_name) {
             return res.status(400).json({ success: false, message: 'Missing hn or patient_name' });
         }
 
-        await DosageLog.update({ patient_name }, { where: { hn } });
-        await OrderLog.update({ patient_name }, { where: { hn } });
+        const dosageUpdateData = { patient_name };
+        if (gender !== undefined) dosageUpdateData.gender = gender;
+        if (dob !== undefined) dosageUpdateData.dob = dob;
+        if (age !== undefined) dosageUpdateData.age = age;
+        if (ward !== undefined) dosageUpdateData.ward = ward;
+
+        const orderUpdateData = { patient_name };
+        if (ward !== undefined) orderUpdateData.ward = ward;
+
+        await DosageLog.update(dosageUpdateData, { where: { hn } });
+        await OrderLog.update(orderUpdateData, { where: { hn } });
+        await Patient.update(dosageUpdateData, { where: { hn } });
         
-        res.json({ success: true, message: 'อัปเดตชื่อผู้ป่วยสำเร็จ' });
+        res.json({ success: true, message: 'อัปเดตข้อมูลผู้ป่วยสำเร็จ' });
     } catch (err) {
-        console.error('❌ Error updating patient name:', err);
-        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการอัปเดตชื่อ: ' + err.message });
+        console.error('❌ Error updating patient info:', err);
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล: ' + err.message });
     }
 });
 
@@ -1461,7 +1500,7 @@ app.get('/api/patients', async (req, res) => {
 // 👤 API: เพิ่มหรืออัปเดตข้อมูลคนไข้ (บังคับ H.N. ไม่ซ้ำกันกับคนละชื่อ)
 app.post('/api/patients', async (req, res) => {
     try {
-        const { hn, title, name, gender, age, height, weight } = req.body;
+        const { hn, title, name, gender, age, dob, height, weight } = req.body;
         if (!hn || !name) {
             return res.status(400).json({ success: false, message: 'กรุณากรอก H.N. และ ชื่อ-นามสกุล' });
         }
@@ -1495,11 +1534,11 @@ app.post('/api/patients', async (req, res) => {
                 });
             }
             // อัปเดตข้อมูลผู้ป่วยเดิม
-            await existingPatient.update({ title: cleanedTitle, name: cleanedName, gender, age, height, weight });
+            await existingPatient.update({ title: cleanedTitle, name: cleanedName, gender, age, dob, height, weight });
             return res.json({ success: true, patient: existingPatient });
         } else {
             // สร้างผู้ป่วยรายใหม่
-            const newPatient = await Patient.create({ hn, title: cleanedTitle, name: cleanedName, gender, age, height, weight });
+            const newPatient = await Patient.create({ hn, title: cleanedTitle, name: cleanedName, gender, age, dob, height, weight });
             return res.json({ success: true, patient: newPatient });
         }
     } catch (err) {

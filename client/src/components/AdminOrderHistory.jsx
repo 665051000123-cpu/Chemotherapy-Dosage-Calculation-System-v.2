@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { ArrowLeft, ArrowRight, History, Trash2, Search, Calendar, ChevronDown, ChevronUp, Edit2, Filter } from 'lucide-react';
+import { ArrowLeft, ArrowRight, History, Trash2, Search, Calendar, ChevronDown, ChevronUp, Edit2, Filter, User } from 'lucide-react';
 
 const API_BASE = '/api';
 
@@ -9,7 +9,7 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [expandedLogId, setExpandedLogId] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedPatient, setSelectedPatient] = useState(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
     const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -125,14 +125,11 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
         return !!currentUser;
     };
 
-    const dateGroups = useMemo(() => {
+    const patientGroups = useMemo(() => {
         return filteredLogs.reduce((acc, log) => {
-            const dateObj = new Date(log.timestamp);
-            const dateStr = dateObj.toLocaleDateString('th-TH', { 
-                year: 'numeric', month: 'long', day: 'numeric' 
-            });
-            if (!acc[dateStr]) acc[dateStr] = [];
-            acc[dateStr].push(log);
+            const groupKey = log.hn !== '-' && log.hn ? `${log.hn} - ${log.patient_name || 'ไม่ระบุชื่อ'}` : (log.patient_name || 'ไม่ระบุชื่อ');
+            if (!acc[groupKey]) acc[groupKey] = [];
+            acc[groupKey].push(log);
             return acc;
         }, {});
     }, [filteredLogs]);
@@ -315,21 +312,21 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
                     <div className="py-12 text-center text-slate-400 font-bold animate-pulse">กำลังโหลดข้อมูล...</div>
                 ) : filteredLogs.length === 0 ? (
                     <div className="py-12 text-center text-slate-400 font-bold">ไม่พบประวัติการสั่งยา</div>
-                ) : !selectedDate ? (
+                ) : !selectedPatient ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {Object.entries(dateGroups).map(([date, logsInGroup]) => (
+                        {Object.entries(patientGroups).map(([patientKey, logsInGroup]) => (
                             <div 
-                                key={date} 
+                                key={patientKey} 
                                 className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-3xl overflow-hidden transition-all hover:border-rose-400 hover:shadow-lg shadow-sm cursor-pointer group flex flex-col"
-                                onClick={() => setSelectedDate(date)}
+                                onClick={() => setSelectedPatient(patientKey)}
                             >
                                 <div className="p-5 flex flex-col h-full">
                                     <div className="flex items-start gap-4 mb-4">
                                         <div className="w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center shrink-0 text-rose-500 bg-gradient-to-br from-rose-400/20 to-rose-500/10 border border-rose-500/20 group-hover:rotate-[5deg] transition-transform duration-300">
-                                            <Calendar size={24} />
+                                            <User size={24} />
                                         </div>
-                                        <div>
-                                            <h3 className="font-black text-lg text-slate-800 dark:text-white">{date}</h3>
+                                        <div className="flex-1 overflow-hidden">
+                                            <h3 className="font-black text-lg text-slate-800 dark:text-white truncate" title={patientKey}>{patientKey}</h3>
                                             <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
                                                 <History size={12} /> {logsInGroup.length} รายการสั่งยา
                                             </p>
@@ -349,18 +346,18 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
                     <div className="animate-pop">
                         <div className="flex items-center gap-3 mb-6">
                             <button 
-                                onClick={() => setSelectedDate(null)}
+                                onClick={() => setSelectedPatient(null)}
                                 className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 transition-colors"
-                                title="กลับไปหน้าเลือกวันที่"
+                                title="กลับไปหน้ารายชื่อผู้ป่วย"
                             >
                                 <ArrowLeft size={18} />
                             </button>
                             <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                                <Calendar size={24} className="text-rose-500" /> วันที่ {selectedDate}
+                                <User size={24} className="text-rose-500" /> {selectedPatient}
                             </h3>
                         </div>
                         <div className="space-y-4">
-                            {dateGroups[selectedDate]?.map(log => {
+                            {patientGroups[selectedPatient]?.map(log => {
                                 let details = [];
                                 try {
                                     details = JSON.parse(log.order_details || '[]');
