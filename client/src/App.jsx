@@ -3071,6 +3071,14 @@ function App() {
                                                                                 <span className="text-xs font-bold italic text-slate-400/70">-</span>
                                                                             )}
                                                                         </div>
+                                                                        <div>
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">ผล LAB อื่นๆ</p>
+                                                                            {log.other_lab ? (
+                                                                                <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">{log.other_lab}</span>
+                                                                            ) : (
+                                                                                <span className="text-xs font-bold italic text-slate-400/70">-</span>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
 
                                                                     {/* Regimen */}
