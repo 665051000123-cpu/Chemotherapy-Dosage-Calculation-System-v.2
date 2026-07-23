@@ -3074,7 +3074,7 @@ function App() {
                                                         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2 mt-1">
                                                             <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.gender === 'female' ? 'หญิง' : latestLog.gender === 'male' ? 'ชาย' : '-'}</span>
                                                             {latestLog.age && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.age} ปี</span>}
-                                                            {latestLog.dob && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.dob}</span>}
+                                                            {latestLog.dob && <span className="text-slate-500 dark:text-slate-400 font-medium">{latestLog.dob}</span>}
                                                             {latestLog.ward && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.ward}</span>}
                                                         </p>
                                                     </div>
@@ -4946,7 +4946,7 @@ function App() {
                             <div className="relative flex items-center">
                                 <input
                                     type="text"
-                                    placeholder="วัน/เดือน/ปีเกิด"
+                                    placeholder={patients.find(p => p.hn === editPatientNameData.hn)?.dob || "วัน/เดือน/ปีเกิด"}
                                     value={editPatientNameData.newDob || ''}
                                     onChange={e => handleDateInputChange(e.target.value, editPatientNameData.newDob || '', (val) => setEditPatientNameData({...editPatientNameData, newDob: val, newAge: calculateAgeFromThaiDateString(val) || editPatientNameData.newAge}))}
                                     className="form-control text-sm py-2 pl-3 pr-8 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
@@ -4981,13 +4981,20 @@ function App() {
                         </div>
                         <div className="mb-6">
                             <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">หอผู้ป่วย (WARD)</label>
-                            <input 
-                                type="text"
-                                value={editPatientNameData.newWard}
+                            <select 
+                                value={editPatientNameData.newWard || ''}
                                 onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newWard: e.target.value })}
                                 className="form-control text-sm py-2 px-3 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
-                                placeholder="กรอกชื่อ Ward..."
-                            />
+                            >
+                                <option value="">-- กรุณาเลือกหอผู้ป่วย --</option>
+                                <option value="WARD 08">WARD 08</option>
+                                <option value="WARD 10">WARD 10</option>
+                                <option value="WARD 11">WARD 11</option>
+                                <option value="รังสีรักษา (RTD)">รังสีรักษา (RTD)</option>
+                                {editPatientNameData.newWard && !['WARD 08', 'WARD 10', 'WARD 11', 'รังสีรักษา (RTD)'].includes(editPatientNameData.newWard) && (
+                                    <option value={editPatientNameData.newWard}>{editPatientNameData.newWard}</option>
+                                )}
+                            </select>
                         </div>
                         <div className="flex gap-3">
                             <button
