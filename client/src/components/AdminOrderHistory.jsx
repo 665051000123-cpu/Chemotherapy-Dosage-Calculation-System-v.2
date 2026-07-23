@@ -10,6 +10,7 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
     const [loading, setLoading] = useState(true);
     const [expandedLogId, setExpandedLogId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [startDateFilter, setStartDateFilter] = useState('');
@@ -34,8 +35,15 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
         }
     };
 
-    const handleDelete = async (logId) => {
-        if (!window.confirm('คุณแน่ใจหรือไม่ที่จะลบบันทึกการสั่งยานี้?')) return;
+    const requestDelete = (logId) => {
+        setDeleteConfirmId(logId);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirmId) return;
+        const logId = deleteConfirmId;
+        setDeleteConfirmId(null);
+        
         try {
             const response = await axios.delete(`${API_BASE}/order-logs/${logId}`, {
                 headers: { 'x-employee-id': currentUser?.employee_id || '' }
@@ -401,7 +409,7 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
                                                 )}
                                                 {currentUser?.role?.toUpperCase() === 'ADMIN' || currentUser?.username === log.user_name ? (
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); handleDelete(log.id); }}
+                                                        onClick={(e) => { e.stopPropagation(); requestDelete(log.id); }}
                                                         className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors"
                                                         title="ลบข้อมูล"
                                                     >
@@ -458,6 +466,40 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-pop border border-slate-200 dark:border-slate-700">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 size={32} />
+                            </div>
+                            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">
+                                ยืนยันการลบข้อมูล
+                            </h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6">
+                                คุณแน่ใจหรือไม่ที่จะลบบันทึกการสั่งยานี้? <br/>
+                                <span className="text-rose-500 mt-1 inline-block">ข้อมูลที่ลบจะไม่สามารถกู้คืนได้</span>
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDeleteConfirmId(null)}
+                                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors"
+                                >
+                                    ยกเลิก
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-rose-500 text-white hover:bg-rose-600 shadow-md shadow-rose-500/20 transition-all"
+                                >
+                                    ยืนยันการลบ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
