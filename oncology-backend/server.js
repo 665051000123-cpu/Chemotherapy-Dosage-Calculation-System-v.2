@@ -131,7 +131,8 @@ const DosageLog = sequelize.define('DosageLog', {
     allergies: DataTypes.TEXT,
     drugs_used: DataTypes.TEXT,
     doctor: DataTypes.STRING(255),
-    gfr_value: DataTypes.STRING(50)
+    gfr_value: DataTypes.STRING(50),
+    other_lab: DataTypes.STRING(255)
 }, {
     tableName: 'dosage_logs',
     timestamps: false
@@ -484,6 +485,21 @@ async function initializeDatabase() {
             console.log('Table order_logs may not exist yet, skipping alter column check.');
         }
 
+        // Check if other_lab column exists in dosage_logs table, if not add it
+        try {
+            const dosageLogTableInfo = await queryInterface.describeTable('dosage_logs');
+            if (dosageLogTableInfo && !dosageLogTableInfo.other_lab) {
+                console.log('Adding other_lab column to dosage_logs table...');
+                await queryInterface.addColumn('dosage_logs', 'other_lab', {
+                    type: DataTypes.STRING(255),
+                    allowNull: true
+                });
+                console.log('✅ Column other_lab added successfully to dosage_logs table.');
+            }
+        } catch(e) {
+            console.log('Table dosage_logs may not exist yet, skipping alter column check for other_lab.');
+        }
+
         // Check if default_printer column exists in login table, if not add it
         try {
             const loginTableInfo = await queryInterface.describeTable('login');
@@ -727,6 +743,7 @@ app.post('/api/logs', async (req, res) => {
             drugsUsed,
             doctor,
             gfr_value,
+            other_lab,
             employee_id
         } = req.body;
 
@@ -746,7 +763,8 @@ app.post('/api/logs', async (req, res) => {
             allergies,
             drugs_used: drugsUsed,
             doctor,
-            gfr_value
+            gfr_value,
+            other_lab
         });
 
         // Update or create patient record to keep stats updated

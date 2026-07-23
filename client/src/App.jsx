@@ -2002,7 +2002,8 @@ function App() {
             ward: patient.ward || '',
             allergies: patient.allergies || '',
             drugsUsed: drugsUsed,
-            doctor: patient.doctor || ''
+            doctor: patient.doctor || '',
+            other_lab: patient.otherLab || ''
         };
 
         try {
