@@ -156,12 +156,16 @@ function App() {
                 
                 if (incompat === 'Dextrose Incompatibility' && isDextrose) {
                     showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้เข้ากันไม่ได้กับสารน้ำ Dextrose (ห้ามผสม D5W)`, 'error', 0);
+                    return false;
                 } else if (incompat === 'NaCl Incompatibility' && isNaCl) {
                     showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้เข้ากันไม่ได้กับสารน้ำ NaCl (ห้ามผสม NSS)`, 'error', 0);
+                    return false;
                 } else if (incompat === 'NaCl Inclusive' && !isNaCl && solvent.trim() !== '') {
                     showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้ต้องใช้กับสารน้ำ NaCl/NSS เท่านั้น`, 'error', 0);
+                    return false;
                 } else if (incompat === 'Dextrose Inclusive' && !isDextrose && solvent.trim() !== '') {
                     showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้ต้องใช้กับสารน้ำ Dextrose/D5W เท่านั้น`, 'error', 0);
+                    return false;
                 }
             }
         }
@@ -181,8 +185,10 @@ function App() {
             }
             if (triggers) {
                 showNotification(rule.title + '\n' + rule.desc, 'error', 0);
+                return false;
             }
         }
+        return true;
     };
 
     // Check for persisted session routing
@@ -4392,8 +4398,9 @@ function App() {
                                                                             }
                                                                         }
                                                                         
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, drugName: val, dose: matchedDose, calculatedDose: calcDose, drugVolume: autoVol } : r));
-                                                                        checkSolventRules(val, row.solvent);
+                                                                        const isValid = checkSolventRules(val, row.solvent);
+                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, drugName: val, dose: matchedDose, calculatedDose: calcDose, drugVolume: autoVol, solvent: isValid === false ? '' : r.solvent } : r));
+
                                                                     }}
                                                                     placeholder="ค้นหา/ระบุชื่อยา..."
                                                                 />
@@ -4544,8 +4551,8 @@ function App() {
                                                                     disabled={isLockedRow}
                                                                     onChange={e => {
                                                                         const val = e.target.value;
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, solvent: val } : r));
-                                                                        checkSolventRules(row.drugName, val);
+                                                                        const isValid = checkSolventRules(row.drugName, val);
+                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, solvent: isValid === false ? '' : val } : r));
                                                                     }}
                                                                     placeholder="ค้นหา/ระบุเอง..."
                                                                     className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[200px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
