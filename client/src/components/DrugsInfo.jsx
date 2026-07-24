@@ -706,7 +706,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                                         <p className="font-black text-sm uppercase tracking-wide">{drug.drug_name}</p>
                                                         <button
                                                             onClick={() => setViewingDrugInfo(drug)}
-                                                            className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 ${isDark
+                                                            className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
                                                                 ? 'bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-400 hover:text-emerald-300 border-emerald-900/50'
                                                                 : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 border-emerald-200 shadow-sm'
                                                                 }`}
