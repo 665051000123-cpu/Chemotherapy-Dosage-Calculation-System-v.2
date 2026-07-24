@@ -702,9 +702,19 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                                     }`}>
                                                     <Pill size={14} />
                                                 </div>
-                                                <div>
-                                                    <p className="font-black text-sm uppercase tracking-wide">{drug.drug_name}</p>
-                                                </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-black text-sm uppercase tracking-wide">{drug.drug_name}</p>
+                                                        <button
+                                                            onClick={() => setViewingDrugInfo(drug)}
+                                                            className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 ${isDark
+                                                                ? 'bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-400 hover:text-emerald-300 border-emerald-900/50'
+                                                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 border-emerald-200 shadow-sm'
+                                                                }`}
+                                                            title="ดูรายละเอียดเพิ่มเติม"
+                                                        >
+                                                            <FlaskConical size={14} />
+                                                        </button>
+                                                    </div>
                                             </div>
                                         </td>
                                         <td className="px-2.5 py-3 text-center">
@@ -753,16 +763,6 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                         </td>
                                         <td className="px-2.5 py-3 text-center no-print">
                                             <div className="flex justify-center gap-1.5">
-                                                <button
-                                                    onClick={() => setViewingDrugInfo(drug)}
-                                                    className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
-                                                        ? 'bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-400 hover:text-emerald-300 border-emerald-900/50'
-                                                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 border-emerald-200 shadow-sm'
-                                                        }`}
-                                                    title="ดูรายละเอียดเพิ่มเติม"
-                                                >
-                                                    <FlaskConical size={14} />
-                                                </button>
                                                 {isAdmin && (
                                                     <>
                                                         <button
