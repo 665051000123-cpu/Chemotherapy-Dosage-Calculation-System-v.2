@@ -94,9 +94,12 @@ function AdminOrderHistory({ currentUser, onBack, showNotification, theme, onEdi
     };
 
     const filteredLogs = orderLogs.filter(log => {
-        const query = searchQuery.toLowerCase();
-        const matchSearch = (log.hn && log.hn.toLowerCase().includes(query)) ||
-                            (log.patient_name && log.patient_name.toLowerCase().includes(query));
+        const query = searchQuery.toLowerCase().trim();
+        let matchSearch = true;
+        if (query) {
+            matchSearch = (log.hn && log.hn.toLowerCase() === query) ||
+                          (log.patient_name && log.patient_name.toLowerCase().includes(query));
+        }
 
         let matchDate = true;
         if (startDateFilter.length === 10 || endDateFilter.length === 10) {
