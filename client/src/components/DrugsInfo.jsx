@@ -663,6 +663,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[3%]">#</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[10%]">CODE</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[15%]">ชื่อยา</th>
+                                    <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[6%] text-center">ข้อมูล</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[12%] text-center">กลุ่มยา</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[13%]">ประเภทการคำนวณ</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[10%]">ขนาดยามาตรฐาน</th>
@@ -702,19 +703,23 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                                     }`}>
                                                     <Pill size={14} />
                                                 </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-black text-sm uppercase tracking-wide">{drug.drug_name}</p>
-                                                        <button
-                                                            onClick={() => setViewingDrugInfo(drug)}
-                                                            className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
-                                                                ? 'bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-400 hover:text-emerald-300 border-emerald-900/50'
-                                                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 border-emerald-200 shadow-sm'
-                                                                }`}
-                                                            title="ดูรายละเอียดเพิ่มเติม"
-                                                        >
-                                                            <FlaskConical size={14} />
-                                                        </button>
-                                                    </div>
+                                                <div>
+                                                    <p className="font-black text-sm uppercase tracking-wide">{drug.drug_name}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-2.5 py-3 text-center">
+                                            <div className="flex justify-center">
+                                                <button
+                                                    onClick={() => setViewingDrugInfo(drug)}
+                                                    className={`p-1.5 rounded-lg border transition-all active:scale-95 cursor-pointer ${isDark
+                                                        ? 'bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-400 hover:text-emerald-300 border-emerald-900/50'
+                                                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 border-emerald-200 shadow-sm'
+                                                        }`}
+                                                    title="ดูรายละเอียดเพิ่มเติม"
+                                                >
+                                                    <FlaskConical size={14} />
+                                                </button>
                                             </div>
                                         </td>
                                         <td className="px-2.5 py-3 text-center">
