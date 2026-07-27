@@ -1917,6 +1917,23 @@ app.delete('/api/drug_rules/:id', async (req, res) => {
 
 // รัน Server ที่พอร์ต 5004 เป็นตัวกลางกระจายคำสั่ง
 const PORT = 5004;
+
+// Cleanup leftover temp PDF files on startup
+try {
+    const files = fs.readdirSync(__dirname);
+    let deletedCount = 0;
+    for (const file of files) {
+        if (file.startsWith('temp_print_') && file.endsWith('.pdf')) {
+            fs.unlinkSync(path.join(__dirname, file));
+            deletedCount++;
+        }
+    }
+    if (deletedCount > 0) {
+        console.log(`🗑️ Cleaned up ${deletedCount} leftover temp PDF files on startup.`);
+    }
+} catch (err) {
+    console.error('Error cleaning up temp files on startup:', err);
+}
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🌐 Clinical API Bridge is running on http://localhost:${PORT}`);
 });

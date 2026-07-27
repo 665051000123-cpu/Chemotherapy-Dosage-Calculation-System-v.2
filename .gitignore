@@ -32,3 +32,10 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+ 
+# Temp and Backup Files
+*.patch
+*.rej
+*.orig
+temp_print_*.pdf
+*.rar
