@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useCalculations } from './utils/useCalculations';
-import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ArrowUpDown, ChevronUp, ChevronDown, Filter, X, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Syringe, Package, Clock, Activity, FileText, Edit2 } from 'lucide-react';
+import { Moon, Sun, ChevronRight, ArrowLeft, ArrowRight, Printer, Trash2, History, User, Info, LogOut, ChevronUp, ChevronDown, Filter, Settings, Pill, Search, Calendar, ClipboardList, AlertTriangle, AlertCircle, CheckCircle, Activity, FileText, Edit2 } from 'lucide-react';
 import axios from 'axios';
 import Login from './components/Login';
 import Notification from './components/Notification';
