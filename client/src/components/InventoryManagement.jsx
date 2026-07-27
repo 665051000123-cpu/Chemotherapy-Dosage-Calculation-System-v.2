@@ -93,24 +93,24 @@ export default function InventoryManagement({ currentUser }) {
                 />
             )}
 
-            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col flex-1 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 dark:border-slate-700 flex flex-col flex-1 overflow-hidden">
                 {/* Header Section */}
-                <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <div className="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 p-3 rounded-2xl shadow-inner">
                             <Package size={28} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+                            <h2 className="text-xl font-black text-slate-800 dark:text-white dark:text-white flex items-center gap-2">
                                 บริหารคลังยา
                             </h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">จัดการสต๊อกและข้อมูลบรรจุภัณฑ์ของรายการยา</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium">จัดการสต๊อกและข้อมูลบรรจุภัณฑ์ของรายการยา</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                         <div className="relative w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
                             <input
                                 type="text"
                                 placeholder="ค้นหาชื่อยา..."
@@ -119,14 +119,14 @@ export default function InventoryManagement({ currentUser }) {
                                 className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
                             />
                         </div>
-                        <button onClick={fetchDrugs} className="p-2 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300">
+                        <button onClick={fetchDrugs} className="p-2 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 dark:text-slate-300">
                             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                         </button>
                     </div>
                 </div>
 
                 {/* Filter Options */}
-                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-6">
+                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-6">
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${filterMode === 'auto' ? 'border-indigo-500' : 'border-slate-400 group-hover:border-indigo-400'}`}>
                             {filterMode === 'auto' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />}
@@ -138,7 +138,7 @@ export default function InventoryManagement({ currentUser }) {
                             checked={filterMode === 'auto'}
                             onChange={() => setFilterMode('auto')}
                         />
-                        <span className={`font-bold text-sm ${filterMode === 'auto' ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300'}`}>
+                        <span className={`font-bold text-sm ${filterMode === 'auto' ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 dark:text-slate-400 dark:text-slate-500 group-hover:text-slate-800 dark:text-white dark:group-hover:text-slate-300'}`}>
                             รายการยาในระบบเบิกอัตโนมัติ
                         </span>
                     </label>
@@ -154,36 +154,36 @@ export default function InventoryManagement({ currentUser }) {
                             checked={filterMode === 'all'}
                             onChange={() => setFilterMode('all')}
                         />
-                        <span className={`font-bold text-sm ${filterMode === 'all' ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-300'}`}>
+                        <span className={`font-bold text-sm ${filterMode === 'all' ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 dark:text-slate-400 dark:text-slate-500 group-hover:text-slate-800 dark:text-white dark:group-hover:text-slate-300'}`}>
                             รายการยาทั้งหมด
                         </span>
                     </label>
                 </div>
 
                 {/* Table Section */}
-                <div className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900/30 p-6 relative">
-                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm h-full flex flex-col">
+                <div className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-800 dark:bg-slate-900/30 p-6 relative">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm h-full flex flex-col">
                         <div className="overflow-auto flex-1">
                             <table className="w-full text-left border-collapse min-w-[800px]">
-                                <thead className="sticky top-0 bg-slate-100 dark:bg-slate-900 z-10">
-                                    <tr className="border-b border-slate-200 dark:border-slate-700 shadow-sm">
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-16 text-center">ออโต้</th>
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">dname</th>
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-32">dose/pack</th>
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-32">package</th>
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Inv</th>
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">InvMin</th>
-                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">InvMax</th>
+                                <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 dark:bg-slate-900 z-10">
+                                    <tr className="border-b border-slate-200 dark:border-slate-700 dark:border-slate-700 shadow-sm">
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider w-16 text-center">ออโต้</th>
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider">dname</th>
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider w-32">dose/pack</th>
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider w-32">package</th>
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24">Inv</th>
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24">InvMin</th>
+                                        <th className="px-4 py-3 text-xs font-black text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24">InvMax</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                     {loading ? (
                                         <tr>
-                                            <td colSpan="7" className="text-center py-10 text-slate-500 font-medium">กำลังโหลดข้อมูล...</td>
+                                            <td colSpan="7" className="text-center py-10 text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium">กำลังโหลดข้อมูล...</td>
                                         </tr>
                                     ) : filteredDrugs.length === 0 ? (
                                         <tr>
-                                            <td colSpan="7" className="text-center py-10 text-slate-500 font-medium">ไม่พบรายการยาที่ค้นหา</td>
+                                            <td colSpan="7" className="text-center py-10 text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium">ไม่พบรายการยาที่ค้นหา</td>
                                         </tr>
                                     ) : (
                                         filteredDrugs.map(drug => (
@@ -193,11 +193,11 @@ export default function InventoryManagement({ currentUser }) {
                                                         type="checkbox" 
                                                         checked={!!drug.is_auto_dispensed}
                                                         onChange={(e) => handleUpdateInventory(drug.drug_id, 'is_auto_dispensed', e.target.checked)}
-                                                        className="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
+                                                        className="w-4 h-4 text-indigo-600 bg-slate-100 dark:bg-slate-800 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    <div className="font-bold text-slate-800 dark:text-slate-200 text-sm truncate max-w-[200px]" title={drug.drug_name}>{drug.drug_name}</div>
+                                                    <div className="font-bold text-slate-800 dark:text-white dark:text-slate-200 text-sm truncate max-w-[200px]" title={drug.drug_name}>{drug.drug_name}</div>
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <input 
@@ -205,7 +205,7 @@ export default function InventoryManagement({ currentUser }) {
                                                         value={drug.dose_per_pack === null ? '' : drug.dose_per_pack}
                                                         onChange={(e) => setDrugs(prev => prev.map(d => d.drug_id === drug.drug_id ? { ...d, dose_per_pack: e.target.value } : d))}
                                                         onBlur={(e) => handleUpdateInventory(drug.drug_id, 'dose_per_pack', e.target.value)}
-                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md"
+                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md"
                                                         placeholder="0"
                                                     />
                                                 </td>
@@ -215,7 +215,7 @@ export default function InventoryManagement({ currentUser }) {
                                                         value={drug.package_type || ''}
                                                         onChange={(e) => setDrugs(prev => prev.map(d => d.drug_id === drug.drug_id ? { ...d, package_type: e.target.value } : d))}
                                                         onBlur={(e) => handleUpdateInventory(drug.drug_id, 'package_type', e.target.value)}
-                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md"
+                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md"
                                                         placeholder="Vial"
                                                     />
                                                 </td>
@@ -225,7 +225,7 @@ export default function InventoryManagement({ currentUser }) {
                                                         value={drug.inventory_qty === null ? '' : drug.inventory_qty}
                                                         onChange={(e) => setDrugs(prev => prev.map(d => d.drug_id === drug.drug_id ? { ...d, inventory_qty: e.target.value } : d))}
                                                         onBlur={(e) => handleUpdateInventory(drug.drug_id, 'inventory_qty', e.target.value)}
-                                                        className={`w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-bold outline-none transition-all shadow-sm focus:shadow-md ${
+                                                        className={`w-full bg-transparent border border-transparent hover:border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-bold outline-none transition-all shadow-sm focus:shadow-md ${
                                                             parseFloat(drug.inventory_qty) <= parseFloat(drug.inventory_min) && parseFloat(drug.inventory_min) > 0 ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10' : 'text-emerald-700 dark:text-emerald-400'
                                                         }`}
                                                         placeholder="0"
@@ -237,7 +237,7 @@ export default function InventoryManagement({ currentUser }) {
                                                         value={drug.inventory_min === null ? '' : drug.inventory_min}
                                                         onChange={(e) => setDrugs(prev => prev.map(d => d.drug_id === drug.drug_id ? { ...d, inventory_min: e.target.value } : d))}
                                                         onBlur={(e) => handleUpdateInventory(drug.drug_id, 'inventory_min', e.target.value)}
-                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md text-amber-600 dark:text-amber-500"
+                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md text-amber-600 dark:text-amber-500"
                                                         placeholder="0"
                                                     />
                                                 </td>
@@ -247,7 +247,7 @@ export default function InventoryManagement({ currentUser }) {
                                                         value={drug.inventory_max === null ? '' : drug.inventory_max}
                                                         onChange={(e) => setDrugs(prev => prev.map(d => d.drug_id === drug.drug_id ? { ...d, inventory_max: e.target.value } : d))}
                                                         onBlur={(e) => handleUpdateInventory(drug.drug_id, 'inventory_max', e.target.value)}
-                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md text-slate-600 dark:text-slate-400"
+                                                        className="w-full bg-transparent border border-transparent hover:border-slate-300 dark:border-slate-600 dark:bg-slate-700 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-all shadow-sm focus:shadow-md text-slate-600 dark:text-slate-300 dark:text-slate-400 dark:text-slate-500"
                                                         placeholder="0"
                                                     />
                                                 </td>
@@ -258,12 +258,12 @@ export default function InventoryManagement({ currentUser }) {
                             </table>
                         </div>
                     </div>
-                    <div className="mt-4 text-[11px] text-slate-500 font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white/50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+                    <div className="mt-4 text-[11px] text-slate-500 dark:text-slate-400 dark:text-slate-500 font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white/50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:border-slate-700 backdrop-blur-sm">
                         <div className="flex items-center gap-2">
                             <AlertCircle size={14} className="text-indigo-500" /> 
                             <span>สามารถคลิกที่ช่องตัวเลขหรือข้อความเพื่อพิมพ์แก้ไข และ<span className="text-indigo-600 dark:text-indigo-400">ระบบจะบันทึกอัตโนมัติ</span>เมื่อคลิกออกไปที่อื่น (Inline Edit)</span>
                         </div>
-                        <div className="bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm">
+                        <div className="bg-white dark:bg-slate-700 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 dark:border-slate-600 shadow-sm">
                             พบรายการยาทั้งหมด <span className="text-indigo-600 dark:text-indigo-400">{filteredDrugs.length}</span> รายการ
                         </div>
                     </div>

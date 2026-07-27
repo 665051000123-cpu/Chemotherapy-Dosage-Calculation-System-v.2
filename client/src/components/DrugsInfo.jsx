@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Pill, Search, FlaskConical, Ruler, ShieldAlert, Activity, Plus, Edit2, Trash2, Save, X, Printer, Package, Shield, AlertTriangle, Thermometer, Stethoscope, Download, Info, Syringe, HeartPulse, MessageSquare } from 'lucide-react';
 import axios from 'axios';
 import DrugRulesManager from './DrugRulesManager';
+import AdminDoseRules from './AdminDoseRules';
 
 const API_BASE = '/api';
 
@@ -15,6 +16,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
     // Form Modal states
     const [showFormModal, setShowFormModal] = useState(false);
     const [showRulesManager, setShowRulesManager] = useState(false);
+    const [showDoseRules, setShowDoseRules] = useState(false);
     const [viewingDrugInfo, setViewingDrugInfo] = useState(null);
     const [editingDrug, setEditingDrug] = useState(null);
     const [drugForm, setDrugForm] = useState({
@@ -48,7 +50,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         expire_after_mix_hours: '',
         expire_after_recon_days: '',
         warning_msg: '',
-        storage_instruction: '',
+        storage_condition: '',
         infusion_rate: '',
         alert_cumulative_dose: '',
         alert_cumulative_dose_unit: '',
@@ -130,7 +132,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             expire_after_mix_hours: '',
             expire_after_recon_days: '',
             warning_msg: '',
-            storage_instruction: '',
+            storage_condition: '',
             infusion_rate: '',
             alert_cumulative_dose: '',
             alert_cumulative_dose_unit: '',
@@ -184,7 +186,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             expire_after_mix_hours: drug.expire_after_mix_hours || '',
             expire_after_recon_days: drug.expire_after_recon_days || '',
             warning_msg: drug.warning_msg || '',
-            storage_instruction: drug.storage_instruction || '',
+            storage_condition: drug.storage_condition || '',
             infusion_rate: drug.infusion_rate || '',
             alert_cumulative_dose: drug.alert_cumulative_dose || '',
             alert_cumulative_dose_unit: drug.alert_cumulative_dose_unit || '',
@@ -231,7 +233,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             expire_after_mix_hours: drugForm.expire_after_mix_hours,
             expire_after_recon_days: drugForm.expire_after_recon_days,
             warning_msg: drugForm.warning_msg,
-            storage_instruction: drugForm.storage_instruction,
+            storage_condition: drugForm.storage_condition,
             infusion_rate: drugForm.infusion_rate,
             alert_cumulative_dose: drugForm.alert_cumulative_dose,
             alert_cumulative_dose_unit: drugForm.alert_cumulative_dose_unit,
@@ -489,7 +491,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             case 'CALVERT_FORMULA': return isDark ? 'bg-amber-950/50 text-amber-400 border-amber-800/50' : 'bg-amber-50 text-amber-700 border-amber-200';
             case 'FIXED_DOSE': return isDark ? 'bg-purple-950/50 text-purple-400 border-purple-800/50' : 'bg-purple-50 text-purple-700 border-purple-200';
             case 'WEIGHT_BASED': return isDark ? 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
-            default: return isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200';
+            default: return isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200';
         }
     };
 
@@ -509,7 +511,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             case 'TARGETED_THERAPY': return isDark ? 'bg-amber-950/50 text-amber-400 border-amber-800/50' : 'bg-amber-50 text-amber-700 border-amber-200';
             case 'IMMUNOTHERAPY': return isDark ? 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
             case 'SUPPORTIVE_CARE': return isDark ? 'bg-sky-950/50 text-sky-400 border-sky-800/50' : 'bg-sky-50 text-sky-700 border-sky-200';
-            default: return isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200';
+            default: return isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200';
         }
     };
 
@@ -543,7 +545,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         onClick={onBack}
                         className={`p-2.5 rounded-xl border transition-all active:scale-95 cursor-pointer shadow-md ${isDark
                             ? 'bg-slate-800 hover:bg-slate-700 text-sky-400 border-slate-700'
-                            : 'bg-slate-100 hover:bg-slate-200 text-sky-600 border-slate-200 shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 text-sky-600 border-slate-200 shadow-sm'
                             }`}
                     >
                         <ArrowLeft size={16} />
@@ -565,14 +567,14 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={`pl-9 pr-4 py-2 rounded-xl text-sm font-bold border transition-all w-full md:w-[220px] ${isDark
-                                ? 'bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-sky-500'
-                                : 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-sky-500 shadow-sm'
+                                ? 'bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 dark:text-slate-400 dark:text-slate-500 focus:border-sky-500'
+                                : 'bg-white dark:bg-slate-800 border-slate-200 text-slate-900 dark:text-white placeholder:text-slate-400 dark:text-slate-500 focus:border-sky-500 shadow-sm'
                                 }`}
                         />
                     </div>
                     <button
                         onClick={printAllDrugs}
-                        className={`text-sm py-2 px-4 rounded-xl border flex items-center gap-2 cursor-pointer shrink-0 shadow-sm transition-colors ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'}`}
+                        className={`text-sm py-2 px-4 rounded-xl border flex items-center gap-2 cursor-pointer shrink-0 shadow-sm transition-colors ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-white hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200'}`}
                         title="พิมพ์ข้อมูลยาทั้งหมด"
                     >
                         <Printer size={16} /> พิมพ์
@@ -590,7 +592,13 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 onClick={() => setShowRulesManager(true)}
                                 className="bg-amber-500 hover:bg-amber-600 text-white text-sm py-2 px-4 rounded-xl flex items-center gap-2 cursor-pointer shrink-0 shadow-md transition-colors"
                             >
-                                <Shield size={16} /> จัดการกฎข้อห้ามสารละลาย
+                                <Shield size={16} /> กฎการให้ยา
+                            </button>
+                            <button
+                                onClick={() => setShowDoseRules(true)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2 px-4 rounded-xl flex items-center gap-2 cursor-pointer shrink-0 shadow-md transition-colors"
+                            >
+                                <Activity size={16} /> กฎตับ/ไต
                             </button>
                             <button
                                 onClick={handleOpenAddModal}
@@ -659,7 +667,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead>
-                                <tr className={`border-b ${isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-slate-50 border-slate-200'}`}>
+                                <tr className={`border-b ${isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-slate-50 dark:bg-slate-800 border-slate-200'}`}>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[3%]">#</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[10%]">CODE</th>
                                     <th className="px-2.5 py-3 text-[11px] font-black uppercase tracking-wider opacity-60 w-[15%]">ชื่อยา</th>
@@ -810,19 +818,19 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                         <div className="premium-card p-6 md:p-8 w-full max-w-[75%] animate-pop relative border-sky-500/50">
                         <button
                             onClick={() => setShowFormModal(false)}
-                            className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                            className="absolute top-4 right-4 text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
                         >
                             <X size={20} />
                         </button>
 
-                        <h3 className="font-black text-lg mb-6 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-3">
+                        <h3 className="font-black text-lg mb-6 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700/50 pb-3">
                             <Pill size={18} className="text-sky-500 dark:text-sky-400" />
                             {editingDrug ? "แก้ไขข้อมูลยา" : "เพิ่มยารายการใหม่"}
                         </h3>
 
                         <form onSubmit={handleFormSubmit} className="space-y-4">
                             {/* ดึงข้อมูลยาที่มีอยู่แล้ว */}
-                            <div className="mb-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50">
+                            <div className="mb-4 bg-slate-50 dark:bg-slate-800 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:border-slate-700/50">
                                 <label className="block text-xs font-black opacity-70 mb-1.5 uppercase flex items-center gap-2 text-sky-600 dark:text-sky-400">
                                     <Search size={14} /> ค้นหารายชื่อยา (เลือกเพื่อดึงข้อมูลมาแก้ไข)
                                 </label>
@@ -935,7 +943,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-200 dark:border-slate-700/50 pt-4 mt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-200 dark:border-slate-700 dark:border-slate-700/50 pt-4 mt-2">
                                 <div>
                                     <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1">จำกัดขนาดยาสูงสุด (Dose Cap mg)</label>
                                     <input
@@ -983,7 +991,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             </div>
 
                             {/* Additional Drug Details Section */}
-                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700/50 pb-2">
                                 <FlaskConical size={16} className="text-amber-500" />
                                 ข้อมูลทางเทคนิคและข้อควรระวัง (Technical & Warnings)
                             </h4>
@@ -1067,12 +1075,12 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-sky-600 dark:text-sky-400">การเก็บรักษา (STORAGE)</label>
-                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="เช่น เก็บในตู้เย็น 2-8 องศา" value={drugForm.storage_instruction} onChange={e => setDrugForm({...drugForm, storage_instruction: e.target.value})}></textarea>
+                                    <textarea className="form-control text-sm min-h-[60px]" placeholder="เช่น เก็บในตู้เย็น 2-8 องศา" value={drugForm.storage_condition} onChange={e => setDrugForm({...drugForm, storage_condition: e.target.value})}></textarea>
                                 </div>
                             </div>
 
                             {/* Clinical Info Section */}
-                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                            <h4 className="font-black text-sm mt-6 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700/50 pb-2">
                                 <Stethoscope size={16} className="text-purple-500" />
                                 ข้อมูลเชิงการแพทย์
                             </h4>
@@ -1102,12 +1110,12 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             </div>
 
                             {/* Inventory Section */}
-                            <div className="mt-6 mb-3 flex items-center justify-between border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                            <div className="mt-6 mb-3 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 dark:border-slate-700/50 pb-2">
                                 <h4 className="font-black text-sm flex items-center gap-2">
                                     <Package size={16} className="text-emerald-500" />
                                     ข้อมูลบรรจุภัณฑ์ (Package Information)
                                 </h4>
-                                <button type="button" className="text-xs btn-secondary py-1 px-3 rounded-lg border bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold" onClick={() => setDrugForm({...drugForm, packages: [...(drugForm.packages || []), { dose: '', dose_unit: 'mg', vol: '', vol_unit: 'ml' }]})}>
+                                <button type="button" className="text-xs btn-secondary py-1 px-3 rounded-lg border bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold" onClick={() => setDrugForm({...drugForm, packages: [...(drugForm.packages || []), { dose: '', dose_unit: 'mg', vol: '', vol_unit: 'ml' }]})}>
                                     + เพิ่มขนาดบรรจุ
                                 </button>
                             </div>
@@ -1139,11 +1147,11 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                             </div>
                             {(!drugForm.packages || drugForm.packages.length === 0) ? (
-                                <div className="text-sm text-slate-500 italic py-4 text-center border border-dashed rounded-xl border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">ไม่มีข้อมูลขนาดบรรจุ กดเพิ่มขนาดบรรจุด้านบน</div>
+                                <div className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 italic py-4 text-center border border-dashed rounded-xl border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:bg-slate-800/50">ไม่มีข้อมูลขนาดบรรจุ กดเพิ่มขนาดบรรจุด้านบน</div>
                             ) : (
                                 <div className="space-y-4">
                                 {drugForm.packages.map((pkg, idx) => (
-                                    <div key={idx} className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-800 relative shadow-sm border-slate-200 dark:border-slate-700">
+                                    <div key={idx} className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-800 dark:bg-slate-800 relative shadow-sm border-slate-200 dark:border-slate-700">
                                         <button type="button" className="absolute top-2 right-2 text-rose-400 hover:text-rose-600 bg-white dark:bg-slate-900 rounded-full p-1 shadow-sm border border-rose-100 dark:border-rose-900" onClick={() => {
                                             const newPkgs = [...drugForm.packages];
                                             newPkgs.splice(idx, 1);
@@ -1158,7 +1166,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                                         newPkgs[idx].dose = e.target.value;
                                                         setDrugForm({...drugForm, packages: newPkgs});
                                                     }} />
-                                                    <select className="form-control text-sm rounded-l-none w-24 bg-slate-100 dark:bg-slate-700 focus:z-10 cursor-pointer font-bold border-l border-slate-200" value={pkg.dose_unit || 'mg'} onChange={e => {
+                                                    <select className="form-control text-sm rounded-l-none w-24 bg-slate-100 dark:bg-slate-800 dark:bg-slate-700 focus:z-10 cursor-pointer font-bold border-l border-slate-200" value={pkg.dose_unit || 'mg'} onChange={e => {
                                                         const newPkgs = [...drugForm.packages];
                                                         newPkgs[idx].dose_unit = e.target.value;
                                                         setDrugForm({...drugForm, packages: newPkgs});
@@ -1180,7 +1188,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                                         newPkgs[idx].vol = e.target.value;
                                                         setDrugForm({...drugForm, packages: newPkgs});
                                                     }} />
-                                                    <select className="form-control text-sm rounded-l-none w-24 bg-slate-100 dark:bg-slate-700 focus:z-10 cursor-pointer font-bold border-l border-slate-200" value={pkg.vol_unit || 'ml'} onChange={e => {
+                                                    <select className="form-control text-sm rounded-l-none w-24 bg-slate-100 dark:bg-slate-800 dark:bg-slate-700 focus:z-10 cursor-pointer font-bold border-l border-slate-200" value={pkg.vol_unit || 'ml'} onChange={e => {
                                                         const newPkgs = [...drugForm.packages];
                                                         newPkgs[idx].vol_unit = e.target.value;
                                                         setDrugForm({...drugForm, packages: newPkgs});
@@ -1196,13 +1204,13 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                             )}
 
-                            <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/50 mt-6">
+                            <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700 dark:border-slate-700/50 mt-6">
                                 <button
                                     type="button"
                                     onClick={() => setShowFormModal(false)}
                                     className={`w-1/2 py-3 px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 cursor-pointer text-center ${isDark
                                         ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
-                                        : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
+                                        : 'border-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm'
                                         }`}
                                 >
                                     ยกเลิก
@@ -1225,21 +1233,21 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
                     <div className="premium-card max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/30">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800 dark:bg-slate-800/30">
                             <h3 className="font-black text-lg flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
                                 <Stethoscope size={20} />
                                 ข้อมูลยา : {viewingDrugInfo.drug_name}
                             </h3>
                             <button
                                 onClick={() => setViewingDrugInfo(null)}
-                                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                className="p-2 rounded-full hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-700 transition-colors"
                             >
                                 <X size={20} />
                             </button>
                         </div>
                         
                         {/* Content */}
-                        <div className="p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 flex-1 space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                        <div className="p-6 overflow-y-auto bg-slate-50 dark:bg-slate-800 dark:bg-slate-900/50 flex-1 space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-200 dark:text-slate-300">
                             
                             {/* ข้อมูลพื้นฐาน (General Info) */}
                             <div>
@@ -1248,20 +1256,20 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-28">รหัสยา:</span>
-                                        <span className="font-mono text-slate-800 dark:text-slate-200">{viewingDrugInfo.drug_code || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-28">รหัสยา:</span>
+                                        <span className="font-mono text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.drug_code || '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-28">กลุ่มยา:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.drug_category || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-28">กลุ่มยา:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.drug_category || '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-28">การคำนวณตั้งต้น:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.calculation_type || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-28">การคำนวณตั้งต้น:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.calculation_type || '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-28">น้ำหนักตั้งต้น:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.default_weight_type === 'ACTUAL' ? 'น้ำหนักจริง (Actual)' : viewingDrugInfo.default_weight_type === 'IDEAL' ? 'น้ำหนักอุดมคติ (Ideal)' : viewingDrugInfo.default_weight_type || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-28">น้ำหนักตั้งต้น:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.default_weight_type === 'ACTUAL' ? 'น้ำหนักจริง (Actual)' : viewingDrugInfo.default_weight_type === 'IDEAL' ? 'น้ำหนักอุดมคติ (Ideal)' : viewingDrugInfo.default_weight_type || '-'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1273,34 +1281,34 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-40">ขนาดยามาตรฐาน:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.standard_dose_value ? `${viewingDrugInfo.standard_dose_value} ${viewingDrugInfo.standard_dose_unit || ''}` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40">ขนาดยามาตรฐาน:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.standard_dose_value ? `${viewingDrugInfo.standard_dose_value} ${viewingDrugInfo.standard_dose_unit || ''}` : '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-40">จำกัดขนาดสูงสุดต่อครั้ง:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.max_dose_cap ? `${viewingDrugInfo.max_dose_cap} mg` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40">จำกัดขนาดสูงสุดต่อครั้ง:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.max_dose_cap ? `${viewingDrugInfo.max_dose_cap} mg` : '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-40">จำกัดตามพื้นที่ผิว:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.max_bsa_cap ? `${viewingDrugInfo.max_bsa_cap} m²` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40">จำกัดตามพื้นที่ผิว:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.max_bsa_cap ? `${viewingDrugInfo.max_bsa_cap} m²` : '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-40">จำกัดตามค่าการทำงานไต:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.max_gfr_cap ? `${viewingDrugInfo.max_gfr_cap} ml/min` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40">จำกัดตามค่าการทำงานไต:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.max_gfr_cap ? `${viewingDrugInfo.max_gfr_cap} ml/min` : '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-40">จำกัดขนาดยาสะสม:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.alert_cumulative_dose ? `${viewingDrugInfo.alert_cumulative_dose} ${viewingDrugInfo.alert_cumulative_dose_unit || 'mg'}` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40">จำกัดขนาดยาสะสม:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.alert_cumulative_dose ? `${viewingDrugInfo.alert_cumulative_dose} ${viewingDrugInfo.alert_cumulative_dose_unit || 'mg'}` : '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-40">ความเข้มข้นสูงสุด:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.alert_concentration_max ? `${viewingDrugInfo.alert_concentration_max} mg/ml` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40">ความเข้มข้นสูงสุด:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.alert_concentration_max ? `${viewingDrugInfo.alert_concentration_max} mg/ml` : '-'}</span>
                                     </div>
                                 </div>
                                 {viewingDrugInfo.usual_dosage && (
                                     <div className="mt-3">
-                                        <span className="font-semibold text-slate-500 block mb-1">ขนาดยาปกติ (Usual dosage):</span>
-                                        <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 bg-emerald-50 dark:bg-emerald-900/10 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 block mb-1">ขนาดยาปกติ (Usual dosage):</span>
+                                        <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-white dark:text-slate-200 bg-emerald-50 dark:bg-emerald-900/10 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
                                             {viewingDrugInfo.usual_dosage}
                                         </div>
                                     </div>
@@ -1320,24 +1328,24 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                         
                                         if (packages.length > 0) {
                                             return packages.map((pkg, i) => (
-                                                <div key={i} className="flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                <div key={i} className="flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-800 dark:border-slate-700 shadow-sm">
                                                     <span className="font-bold text-violet-500">ขนาดที่ {i+1}:</span>
-                                                    <span className="text-slate-800 dark:text-slate-200">
+                                                    <span className="text-slate-800 dark:text-white dark:text-slate-200">
                                                         {pkg.dose} {pkg.dose_unit} {pkg.vol ? ` / ${pkg.vol} ${pkg.vol_unit}` : ''}
                                                     </span>
                                                 </div>
                                             ));
                                         } else if (viewingDrugInfo.dose_per_pack) {
                                             return (
-                                                <div className="flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                <div className="flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-800 dark:border-slate-700 shadow-sm">
                                                     <span className="font-bold text-violet-500">ขนาด:</span>
-                                                    <span className="text-slate-800 dark:text-slate-200">
+                                                    <span className="text-slate-800 dark:text-white dark:text-slate-200">
                                                         {viewingDrugInfo.dose_per_pack} {viewingDrugInfo.dose_per_pack_unit} {viewingDrugInfo.vol_per_pack ? ` / ${viewingDrugInfo.vol_per_pack} ${viewingDrugInfo.vol_per_pack_unit}` : ''}
                                                     </span>
                                                 </div>
                                             );
                                         }
-                                        return <span className="text-slate-400 italic">ไม่มีข้อมูลขนาดยาในระบบ</span>;
+                                        return <span className="text-slate-400 dark:text-slate-500 italic">ไม่มีข้อมูลขนาดยาในระบบ</span>;
                                     })()}
                                 </div>
                             </div>
@@ -1349,20 +1357,20 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 mb-3">
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36">ช่องทางการให้ยา:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.admin_route || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36">ช่องทางการให้ยา:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.admin_route || '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36">สารละลายที่แนะนำ:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.solvent || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36">สารละลายที่แนะนำ:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.solvent || '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36">ความเข้มข้น:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.concentration_per_ml || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36">ความเข้มข้น:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.concentration_per_ml || '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36">อัตราการให้ยา:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.infusion_rate || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36">อัตราการให้ยา:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.infusion_rate || '-'}</span>
                                     </div>
                                     <div className="flex gap-2 sm:col-span-2">
                                         <span className="font-semibold text-rose-500 w-36">สารน้ำที่ห้ามใช้ร่วม:</span>
@@ -1371,8 +1379,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </div>
                                 {viewingDrugInfo.prep_instructions && (
                                     <div>
-                                        <span className="font-semibold text-slate-500 block mb-1">การเตรียมยา (Prep instructions):</span>
-                                        <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-amber-200 dark:border-amber-900/50">
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 block mb-1">การเตรียมยา (Prep instructions):</span>
+                                        <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-white dark:text-slate-200 border-l-2 border-amber-200 dark:border-amber-900/50">
                                             {viewingDrugInfo.prep_instructions}
                                         </div>
                                     </div>
@@ -1386,23 +1394,23 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 mb-3">
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36">อายุหลังละลาย:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.expire_after_recon_days ? `${viewingDrugInfo.expire_after_recon_days} วัน` : '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36">อายุหลังละลาย:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.expire_after_recon_days ? `${viewingDrugInfo.expire_after_recon_days} วัน` : '-'}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36">อายุหลังผสม:</span>
-                                        <span className="text-slate-800 dark:text-slate-200">
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36">อายุหลังผสม:</span>
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">
                                             {viewingDrugInfo.expire_after_mix_days ? `${viewingDrugInfo.expire_after_mix_days} วัน ` : ''}
                                             {viewingDrugInfo.expire_after_mix_hours ? `${viewingDrugInfo.expire_after_mix_hours} ชม.` : ''}
                                             {!viewingDrugInfo.expire_after_mix_days && !viewingDrugInfo.expire_after_mix_hours ? '-' : ''}
                                         </span>
                                     </div>
                                 </div>
-                                {viewingDrugInfo.storage_instruction && (
+                                {viewingDrugInfo.storage_condition && (
                                     <div>
-                                        <span className="font-semibold text-slate-500 block mb-1">การเก็บรักษา (Storage):</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 block mb-1">การเก็บรักษา (Storage):</span>
                                         <div className="pl-4 whitespace-pre-wrap text-teal-700 dark:text-teal-300 border-l-2 border-teal-200 dark:border-teal-900/50">
-                                            {viewingDrugInfo.storage_instruction}
+                                            {viewingDrugInfo.storage_condition}
                                         </div>
                                     </div>
                                 )}
@@ -1415,27 +1423,27 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 </h4>
                                 <div className="space-y-3">
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36 shrink-0">ภาวะกดไขกระดูก:</span> 
-                                        <span className={viewingDrugInfo.myelosuppression?.toLowerCase().includes('severe') ? 'text-rose-500 font-bold' : 'text-slate-800 dark:text-slate-200'}>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36 shrink-0">ภาวะกดไขกระดูก:</span> 
+                                        <span className={viewingDrugInfo.myelosuppression?.toLowerCase().includes('severe') ? 'text-rose-500 font-bold' : 'text-slate-800 dark:text-white dark:text-slate-200'}>
                                             {viewingDrugInfo.myelosuppression || '-'}
                                         </span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="font-semibold text-slate-500 w-36 shrink-0">ผลข้างเคียง:</span> 
-                                        <span className="text-slate-800 dark:text-slate-200">{viewingDrugInfo.side_effect_info || '-'}</span>
+                                        <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 w-36 shrink-0">ผลข้างเคียง:</span> 
+                                        <span className="text-slate-800 dark:text-white dark:text-slate-200">{viewingDrugInfo.side_effect_info || '-'}</span>
                                     </div>
                                     {viewingDrugInfo.stability_info && (
                                         <div>
-                                            <span className="font-semibold text-slate-500 block mb-1">ความคงตัว:</span>
-                                            <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-slate-300 dark:border-slate-600">
+                                            <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 block mb-1">ความคงตัว:</span>
+                                            <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-white dark:text-slate-200 border-l-2 border-slate-300 dark:border-slate-600">
                                                 {viewingDrugInfo.stability_info}
                                             </div>
                                         </div>
                                     )}
                                     {viewingDrugInfo.drug_interactions && (
                                         <div>
-                                            <span className="font-semibold text-slate-500 block mb-1">ปฏิกิริยาระหว่างยา:</span>
-                                            <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-rose-300 dark:border-rose-600">
+                                            <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 block mb-1">ปฏิกิริยาระหว่างยา:</span>
+                                            <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-white dark:text-slate-200 border-l-2 border-rose-300 dark:border-rose-600">
                                                 {viewingDrugInfo.drug_interactions}
                                             </div>
                                         </div>
@@ -1446,7 +1454,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                             {/* หมายเหตุและคำเตือน (Note & Warning) */}
                             {(viewingDrugInfo.warning_msg || viewingDrugInfo.note) && (
                                 <div>
-                                    <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                    <h4 className="font-bold text-slate-700 dark:text-slate-200 dark:text-slate-300 mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700 pb-2">
                                         <MessageSquare size={16} /> หมายเหตุและคำเตือน
                                     </h4>
                                     <div className="space-y-3">
@@ -1462,8 +1470,8 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                         )}
                                         {viewingDrugInfo.note && (
                                             <div>
-                                                <span className="font-semibold text-slate-500 block mb-1">หมายเหตุ:</span>
-                                                <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-slate-200 border-l-2 border-slate-300 dark:border-slate-600">
+                                                <span className="font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 block mb-1">หมายเหตุ:</span>
+                                                <div className="pl-4 whitespace-pre-wrap text-slate-800 dark:text-white dark:text-slate-200 border-l-2 border-slate-300 dark:border-slate-600">
                                                     {viewingDrugInfo.note}
                                                 </div>
                                             </div>
@@ -1481,11 +1489,11 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             {deleteConfirmDrug && (
                 <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
                     <div className="premium-card p-6 md:p-8 w-full max-w-sm animate-pop relative border-rose-500/30">
-                        <h3 className="font-black text-lg mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/50 pb-3 text-rose-500">
+                        <h3 className="font-black text-lg mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 dark:border-slate-700/50 pb-3 text-rose-500">
                             <Trash2 size={18} />
                             ยืนยันการลบรายการยา
                         </h3>
-                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                        <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 leading-relaxed">
                             คุณแน่ใจหรือไม่ที่จะลบรายการยา <strong className="text-rose-500 text-lg mx-1">{deleteConfirmDrug.drug_name}</strong> ออกจากระบบ? การกระทำนี้ไม่สามารถกู้คืนข้อมูลกลับมาได้
                         </p>
                         <div className="flex gap-3">
@@ -1494,7 +1502,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                 onClick={() => setDeleteConfirmDrug(null)}
                                 className={`w-1/2 py-3 px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 cursor-pointer text-center ${isDark
                                     ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
-                                    : 'border-slate-200 hover:bg-slate-100 text-slate-600 shadow-sm'
+                                    : 'border-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm'
                                     }`}
                             >
                                 ยกเลิก
@@ -1514,6 +1522,7 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
 
 
             <DrugRulesManager isOpen={showRulesManager} onClose={() => setShowRulesManager(false)} isDark={isDark} />
+            <AdminDoseRules isOpen={showDoseRules} onClose={() => setShowDoseRules(false)} showNotification={showNotification} isDark={isDark} />
         </>
     );
 };

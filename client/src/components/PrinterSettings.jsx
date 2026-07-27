@@ -82,30 +82,30 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-sky-50 to-white">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-gradient-to-r from-sky-50 to-white dark:from-slate-900 dark:to-slate-900">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-sky-100 flex items-center justify-center text-sky-600 shadow-inner">
+                        <div className="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-500/20 flex items-center justify-center text-sky-600 shadow-inner">
                             <Printer size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-slate-800">ตั้งค่าเครื่องพิมพ์ (Local Print Server)</h2>
-                            <p className="text-sm font-medium text-slate-500">พิมพ์เอกสารอัตโนมัติ ไม่ต้องกด Confirm</p>
+                            <h2 className="text-xl font-black text-slate-800 dark:text-white">ตั้งค่าเครื่องพิมพ์ (Local Print Server)</h2>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">พิมพ์เอกสารอัตโนมัติ ไม่ต้องกด Confirm</p>
                         </div>
                     </div>
                     <button 
                         onClick={onClose}
-                        className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+                        className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-300 dark:text-slate-400 dark:text-slate-500 flex items-center justify-center transition-colors"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="p-6 overflow-y-auto max-h-[70vh] bg-slate-50/50">
+                <div className="p-6 overflow-y-auto max-h-[70vh] bg-slate-50/50 dark:bg-slate-900">
                     {/* Status Box */}
-                    <div className={`mb-6 p-4 rounded-2xl flex items-start gap-3 border ${error ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+                    <div className={`mb-6 p-4 rounded-2xl flex items-start gap-3 border ${error ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400' : 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400'}`}>
                         <div className="mt-0.5">
                             {error ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
                         </div>
@@ -117,11 +117,11 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
 
                     <div className="space-y-6">
                         {/* Local Agent Toggle */}
-                        <div className="bg-sky-50 p-5 rounded-2xl border border-sky-100 shadow-sm flex items-center justify-between">
+                        <div className="bg-sky-50 dark:bg-sky-900/20 p-5 rounded-2xl border border-sky-100 dark:border-sky-800/50 shadow-sm flex items-center justify-between">
                             <div>
-                                <h3 className="font-bold text-sky-900 text-lg">เปิดใช้งาน Local Print Agent (พิมพ์ตรงจากเครื่องนี้)</h3>
-                                <p className="text-sm text-sky-700">*ต้องเปิดโปรแกรมตัวจิ๋ว (Node.js) ทิ้งไว้ที่เครื่องนี้</p>
-                                <a href="/Oncology-Local-Print-Agent.zip" download="Oncology-Local-Print-Agent.zip" className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold bg-sky-200 text-sky-800 px-3 py-1.5 rounded-lg hover:bg-sky-300 transition-colors">
+                                <h3 className="font-bold text-sky-900 dark:text-sky-100 text-lg">เปิดใช้งาน Local Print Agent (พิมพ์ตรงจากเครื่องนี้)</h3>
+                                <p className="text-sm text-sky-700 dark:text-sky-400">*ต้องเปิดโปรแกรมตัวจิ๋ว (Node.js) ทิ้งไว้ที่เครื่องนี้</p>
+                                <a href="/Oncology-Local-Print-Agent.zip" download="Oncology-Local-Print-Agent.zip" className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold bg-sky-200 dark:bg-sky-700 text-sky-800 dark:text-sky-100 px-3 py-1.5 rounded-lg hover:bg-sky-300 dark:hover:bg-sky-600 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                     ดาวน์โหลดโปรแกรมติดตั้งสำหรับเครื่องอื่น
                                 </a>
@@ -137,11 +137,11 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                         </div>
 
                         {/* Sticker Printer Setting */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="bg-white dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
                             <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h3 className="font-bold text-slate-800 text-lg">เครื่องพิมพ์สติ๊กเกอร์ (Stickers)</h3>
-                                    <p className="text-sm text-slate-500">สำหรับพิมพ์ฉลากยาขนาด 80x50mm</p>
+                                    <h3 className="font-bold text-slate-800 dark:text-white text-lg">เครื่องพิมพ์สติ๊กเกอร์ (Stickers)</h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">สำหรับพิมพ์ฉลากยาขนาด 80x50mm</p>
                                 </div>
                             </div>
                             
@@ -151,7 +151,7 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                                 <select 
                                     value={stickerPrinter}
                                     onChange={(e) => setStickerPrinter(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 text-slate-800 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all"
                                 >
                                     <option value="">-- ปิดระบบพิมพ์อัตโนมัติ (Manual Print) --</option>
                                     {printers.map(p => (
@@ -162,13 +162,13 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                         </div>
 
                         {/* Working Formula Printer */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="bg-white dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
                             <div className="mb-4">
-                                <h3 className="font-bold text-slate-800 text-lg">พิมพ์ใบเตรียมยา (Working Formula - A4)</h3>
-                                <p className="text-sm text-slate-500">เครื่องสำหรับพิมพ์ใบเตรียมยาขนาด A4</p>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-lg">พิมพ์ใบเตรียมยา (Working Formula - A4)</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">เครื่องสำหรับพิมพ์ใบเตรียมยาขนาด A4</p>
                             </div>
                             {loading ? ( <div className="h-12 bg-slate-100 rounded-xl animate-pulse"></div> ) : (
-                                <select value={workingFormulaPrinter} onChange={(e) => setWorkingFormulaPrinter(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
+                                <select value={workingFormulaPrinter} onChange={(e) => setWorkingFormulaPrinter(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 text-slate-800 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
                                     <option value="">-- ปิดระบบพิมพ์อัตโนมัติ (Manual Print) --</option>
                                     {printers.map(p => ( <option key={p} value={p}>{p}</option> ))}
                                 </select>
@@ -176,13 +176,13 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                         </div>
 
                         {/* Calculation Result Printer */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="bg-white dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
                             <div className="mb-4">
-                                <h3 className="font-bold text-slate-800 text-lg">พิมพ์ผลการคำนวณ (Calculation - A5)</h3>
-                                <p className="text-sm text-slate-500">เครื่องสำหรับพิมพ์ใบสรุปผลการคำนวณขนาด A5</p>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-lg">พิมพ์ผลการคำนวณ (Calculation - A5)</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">เครื่องสำหรับพิมพ์ใบสรุปผลการคำนวณขนาด A5</p>
                             </div>
                             {loading ? ( <div className="h-12 bg-slate-100 rounded-xl animate-pulse"></div> ) : (
-                                <select value={calculationPrinter} onChange={(e) => setCalculationPrinter(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
+                                <select value={calculationPrinter} onChange={(e) => setCalculationPrinter(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 text-slate-800 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
                                     <option value="">-- ปิดระบบพิมพ์อัตโนมัติ (Manual Print) --</option>
                                     {printers.map(p => ( <option key={p} value={p}>{p}</option> ))}
                                 </select>
@@ -190,13 +190,13 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                         </div>
 
                         {/* Drug Info Printer */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="bg-white dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
                             <div className="mb-4">
-                                <h3 className="font-bold text-slate-800 text-lg">พิมพ์ข้อมูลยา (Selected Drug Info)</h3>
-                                <p className="text-sm text-slate-500">เครื่องสำหรับพิมพ์รายละเอียดข้อมูลยาที่เลือก</p>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-lg">พิมพ์ข้อมูลยา (Selected Drug Info)</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">เครื่องสำหรับพิมพ์รายละเอียดข้อมูลยาที่เลือก</p>
                             </div>
                             {loading ? ( <div className="h-12 bg-slate-100 rounded-xl animate-pulse"></div> ) : (
-                                <select value={drugInfoPrinter} onChange={(e) => setDrugInfoPrinter(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
+                                <select value={drugInfoPrinter} onChange={(e) => setDrugInfoPrinter(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 text-slate-800 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
                                     <option value="">-- ปิดระบบพิมพ์อัตโนมัติ (Manual Print) --</option>
                                     {printers.map(p => ( <option key={p} value={p}>{p}</option> ))}
                                 </select>
@@ -204,13 +204,13 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                         </div>
 
                         {/* All Drugs Printer */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="bg-white dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
                             <div className="mb-4">
-                                <h3 className="font-bold text-slate-800 text-lg">พิมพ์ข้อมูลยาทั้งหมด (All Drugs List)</h3>
-                                <p className="text-sm text-slate-500">เครื่องสำหรับพิมพ์ตารางรายการยาทั้งหมดในระบบ</p>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-lg">พิมพ์ข้อมูลยาทั้งหมด (All Drugs List)</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">เครื่องสำหรับพิมพ์ตารางรายการยาทั้งหมดในระบบ</p>
                             </div>
                             {loading ? ( <div className="h-12 bg-slate-100 rounded-xl animate-pulse"></div> ) : (
-                                <select value={allDrugsPrinter} onChange={(e) => setAllDrugsPrinter(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
+                                <select value={allDrugsPrinter} onChange={(e) => setAllDrugsPrinter(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 text-slate-800 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 block p-3 font-medium transition-all">
                                     <option value="">-- ปิดระบบพิมพ์อัตโนมัติ (Manual Print) --</option>
                                     {printers.map(p => ( <option key={p} value={p}>{p}</option> ))}
                                 </select>
@@ -220,10 +220,10 @@ const PrinterSettings = ({ user, setUser, show, onClose, showNotification }) => 
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-slate-100 bg-white flex justify-end gap-3">
+                <div className="p-6 border-t border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800 flex justify-end gap-3">
                     <button 
-                        onClick={fetchPrinters}
-                        className="px-6 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+                        onClick={() => fetchPrinters()}
+                        className="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                         disabled={loading}
                     >
                         รีเฟรชรายชื่อ

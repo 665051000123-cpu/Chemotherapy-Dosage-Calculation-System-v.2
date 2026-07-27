@@ -319,12 +319,29 @@ const Drug = sequelize.define('Drug', {
     infusion_rate: DataTypes.STRING(100),
     alert_cumulative_dose: DataTypes.DECIMAL(10, 2),
     alert_cumulative_dose_unit: DataTypes.STRING(20),
+    min_anc: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    min_plt: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     alert_concentration_max: DataTypes.DECIMAL(10, 2),
     diluent_incompat: DataTypes.TEXT,
     note: DataTypes.TEXT,
     myelosuppression: DataTypes.STRING(255),
     side_effect_info: DataTypes.TEXT,
     stability_info: DataTypes.TEXT,
+    storage_condition: DataTypes.STRING(255),
+    protect_from_light: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    emetogenic_risk: {
+        type: DataTypes.STRING(50),
+        allowNull: true
+    },
     drug_interactions: DataTypes.TEXT,
     usual_dosage: DataTypes.TEXT,
     created_at: DataTypes.DATE
@@ -383,6 +400,27 @@ const Solvent = sequelize.define('Solvent', {
 });
 
 // Associations
+const RegimenTemplate = sequelize.define('RegimenTemplate', {
+    name: { type: DataTypes.STRING, allowNull: false, unique: true },
+    description: { type: DataTypes.TEXT },
+    drugs: { type: DataTypes.JSON }
+}, {
+    tableName: 'regimen_templates'
+});
+
+const DoseAdjustmentRule = sequelize.define('DoseAdjustmentRule', {
+    drug_name: { type: DataTypes.STRING, allowNull: false },
+    lab_type: { type: DataTypes.STRING, allowNull: false },
+    condition_type: { type: DataTypes.STRING, allowNull: false },
+    value1: { type: DataTypes.FLOAT, allowNull: false },
+    value2: { type: DataTypes.FLOAT },
+    recommendation: { type: DataTypes.TEXT },
+    alert_level: { type: DataTypes.STRING, defaultValue: 'warning' }
+}, {
+    tableName: 'dose_adjustment_rules',
+    timestamps: false
+});
+
 ActivityLog.belongsTo(User, { foreignKey: 'employee_id', targetKey: 'employee_id', as: 'user', constraints: false });
 
 // Initialize and sync models
@@ -428,8 +466,8 @@ async function initializeDatabase() {
         }
 
         // Sync models with DB (automatically creates tables if they do not exist)
-        await sequelize.sync({ alter: true });
-        console.log('✅ Database schema synchronized.');
+        await sequelize.sync({ alter: false });
+        console.log('✅ Database schema synchronized (alter: false).');
 
         // Check if title column exists in patients table, if not add it
         const patientTableInfo = await queryInterface.describeTable('patients');
@@ -1474,6 +1512,16 @@ app.get('/api/cumulative-dose/:hn', async (req, res) => {
 });
 
 // 👤 API: ดึงข้อมูลคนไข้ทั้งหมด
+app.get('/api/toxicity/:hn', async (req, res) => {
+    try {
+        // Return empty array for now since toxicity tracking is not yet implemented in DB
+        res.json([]);
+    } catch (err) {
+        console.error("Error fetching toxicity:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/patients', async (req, res) => {
     try {
         const { q } = req.query;
@@ -1596,6 +1644,59 @@ app.post('/api/solvents', async (req, res) => {
     }
 });
 
+// 📊 API: Dashboard Analytics for Admin
+app.get('/api/admin/dashboard', requireHeadOrAdmin, async (req, res) => {
+    try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const logs = await OrderLog.findAll({
+            where: {
+                createdAt: {
+                    [Op.gte]: thirtyDaysAgo
+                }
+            }
+        });
+        
+        let totalOrders = logs.length;
+        let uniquePatients = new Set();
+        let drugUsage = {};
+        
+        logs.forEach(log => {
+            if (log.hn) uniquePatients.add(log.hn);
+            try {
+                if (log.order_details) {
+                    const details = JSON.parse(log.order_details);
+                    details.forEach(row => {
+                        if (row.drug) {
+                            drugUsage[row.drug] = (drugUsage[row.drug] || 0) + 1;
+                        }
+                    });
+                }
+            } catch (e) {
+                // Ignore parse errors
+            }
+        });
+        
+        // Sort top drugs
+        const topDrugs = Object.entries(drugUsage)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+            
+        res.json({
+            success: true,
+            totalOrders,
+            uniquePatients: uniquePatients.size,
+            topDrugs,
+            message: 'Dashboard data retrieved successfully'
+        });
+    } catch (err) {
+        console.error('❌ Dashboard fetch error:', err);
+        res.status(500).json({ success: false, message: 'Dashboard Error: ' + err.message });
+    }
+});
+
 // 💊 API: ดึงข้อมูลยาทั้งหมดจากตาราง drugs
 app.get('/api/drugs', async (req, res) => {
     try {
@@ -1639,7 +1740,7 @@ app.put('/api/drugs/:id/inventory', requireHeadOrAdmin, async (req, res) => {
 // 👥 Admin Drug Management APIs
 app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
     try {
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages, protect_from_light, emetogenic_risk } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1661,7 +1762,9 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
             dose_per_pack_unit,
             vol_per_pack: vol_per_pack === '' ? null : vol_per_pack,
             vol_per_pack_unit,
-            packages: packages || null
+            packages: packages || null,
+            protect_from_light: protect_from_light === true || protect_from_light === 'true' || protect_from_light === 1,
+            emetogenic_risk: emetogenic_risk || null
         });
 
         logActivity(employeeId, 'CREATE_DRUG', `เพิ่มยาใหม่: ${drug_name} (${calculation_type})`);
@@ -1678,7 +1781,7 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
 app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
     try {
         const drugId = req.params.id;
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages, protect_from_light, emetogenic_risk } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1700,7 +1803,9 @@ app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
             dose_per_pack_unit,
             vol_per_pack: vol_per_pack === '' ? null : vol_per_pack,
             vol_per_pack_unit,
-            packages: packages || null
+            packages: packages || null,
+            protect_from_light: protect_from_light === true || protect_from_light === 'true' || protect_from_light === 1,
+            emetogenic_risk: emetogenic_risk || null
         }, { where: { drug_id: drugId } });
 
         logActivity(employeeId, 'UPDATE_DRUG', `แก้ไขยา ID ${drugId}: name=${drug_name}, type=${calculation_type}`);
@@ -1917,6 +2022,92 @@ app.delete('/api/drug_rules/:id', async (req, res) => {
 
 // รัน Server ที่พอร์ต 5004 เป็นตัวกลางกระจายคำสั่ง
 const PORT = 5004;
+
+// --- Regimen Templates API ---
+app.get(['/api/regimen_templates', '/api/admin/regimen_templates'], async (req, res) => {
+    try {
+        const templates = await RegimenTemplate.findAll();
+        res.json(templates);
+    } catch (err) {
+        console.error('RegimenTemplates fetch error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post(['/api/regimen_templates', '/api/admin/regimen_templates'], async (req, res) => {
+    try {
+        const template = await RegimenTemplate.create(req.body);
+        res.json(template);
+    } catch (err) {
+        console.error('RegimenTemplates create error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put(['/api/regimen_templates/:id', '/api/admin/regimen_templates/:id'], async (req, res) => {
+    try {
+        const template = await RegimenTemplate.findByPk(req.params.id);
+        if (!template) return res.status(404).json({ error: 'Not found' });
+        await template.update(req.body);
+        res.json(template);
+    } catch (err) {
+        console.error('RegimenTemplates update error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete(['/api/regimen_templates/:id', '/api/admin/regimen_templates/:id'], async (req, res) => {
+    try {
+        const template = await RegimenTemplate.findByPk(req.params.id);
+        if (!template) return res.status(404).json({ error: 'Not found' });
+        await template.destroy();
+        res.json({ success: true });
+    } catch (err) {
+        console.error('RegimenTemplates delete error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- Dose Adjustment Rules API ---
+app.get('/api/dose_adjustment_rules', async (req, res) => {
+    try {
+        const rules = await DoseAdjustmentRule.findAll();
+        res.json(rules);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/dose_adjustment_rules', async (req, res) => {
+    try {
+        const rule = await DoseAdjustmentRule.create(req.body);
+        res.json(rule);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/dose_adjustment_rules/:id', async (req, res) => {
+    try {
+        const rule = await DoseAdjustmentRule.findByPk(req.params.id);
+        if (!rule) return res.status(404).json({ error: 'Not found' });
+        await rule.update(req.body);
+        res.json(rule);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/dose_adjustment_rules/:id', async (req, res) => {
+    try {
+        const rule = await DoseAdjustmentRule.findByPk(req.params.id);
+        if (!rule) return res.status(404).json({ error: 'Not found' });
+        await rule.destroy();
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Cleanup leftover temp PDF files on startup
 try {

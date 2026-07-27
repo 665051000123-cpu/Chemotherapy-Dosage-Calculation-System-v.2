@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, UserPlus, Edit2, Trash2, Shield, User, Lock, Save, X, Eye, EyeOff, Search, FileText, LogIn, PenLine, LayoutDashboard, TrendingUp, Users, Activity, Filter, Calendar } from 'lucide-react';
+import { ArrowLeft, UserPlus, Edit2, Trash2, Shield, User, Lock, Save, X, Eye, EyeOff, Search, FileText, LogIn, PenLine, LayoutDashboard, TrendingUp, Users, Activity, Filter, Calendar, Download } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE = '/api';
@@ -223,6 +223,52 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
         } finally {
             setStatsLoading(false);
         }
+    };
+
+    const exportStatsToCSV = () => {
+        if (!stats) return;
+
+        // Prepare CSV rows
+        const rows = [];
+        rows.push(['Dashboard Export']);
+        rows.push(['Generated At:', new Date().toLocaleString('th-TH')]);
+        rows.push([]);
+
+        // Overview metrics
+        rows.push(['Metrics Overview']);
+        rows.push(['Total Calculations', stats.totalCalculations || 0]);
+        rows.push(['Total Unique Patients', stats.totalPatients || 0]);
+        rows.push(['Unique Drugs Prescribed', stats.totalDrugsUsed || 0]);
+        rows.push([]);
+
+        // Drug Usage Ranking
+        rows.push(['Top 10 Most Used Drugs']);
+        rows.push(['Rank', 'Drug Name', 'Count']);
+        (stats.topDrugs || []).forEach((d, idx) => {
+            rows.push([idx + 1, d.drugName, d.count]);
+        });
+        rows.push([]);
+
+        // Doctor Ranking
+        rows.push(['Top 10 Prescribing Doctors']);
+        rows.push(['Rank', 'Doctor Name', 'Count']);
+        (stats.topDoctors || []).forEach((d, idx) => {
+            rows.push([idx + 1, d.doctor, d.count]);
+        });
+        rows.push([]);
+
+        // Generate CSV string
+        const csvContent = rows.map(e => e.join(",")).join("\n");
+        // Add BOM for Excel UTF-8 compatibility
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `oncology_stats_${new Date().getTime()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const fetchUsers = async () => {
@@ -694,6 +740,16 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                 กรองข้อมูล
                             </button>
                             <button
+                                onClick={exportStatsToCSV}
+                                className={`py-2.5 px-6 rounded-xl border font-black text-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2 ${
+                                    isDark 
+                                        ? 'border-emerald-500/30 bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' 
+                                        : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shadow-sm'
+                                }`}
+                            >
+                                <Download size={16} /> Export CSV
+                            </button>
+                            <button
                                 onClick={handleClearStatsFilter}
                                 className={`py-2.5 px-6 rounded-xl border font-black text-sm transition-all active:scale-95 cursor-pointer ${
                                     isDark 
@@ -938,6 +994,61 @@ const AdminUsers = ({ currentUser, setCurrentUser, onBack, showNotification, the
                                                 </>
                                             );
                                         })()}
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Weekly Trend Bar Chart */}
+                            <div className="bg-white dark:bg-slate-900/80 rounded-3xl p-6 md:p-8 border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-pink-500/10 transition-all duration-700"></div>
+                                <h3 className="font-black mb-8 uppercase tracking-wider text-sm flex items-center gap-2 opacity-90 relative z-10">
+                                    <div className="p-2 bg-pink-50 dark:bg-pink-500/10 text-pink-500 rounded-lg">
+                                        <TrendingUp size={16} />
+                                    </div>
+                                    แนวโน้มการสั่งยา (WEEKLY TREND)
+                                </h3>
+                                <div className="h-[200px] w-full flex items-end justify-between px-2 pt-6 relative border-b-2 border-slate-200 dark:border-slate-700/50 z-10">
+                                    {/* SVG Grid Lines */}
+                                    <div className="absolute inset-x-0 top-0 bottom-0 flex flex-col justify-between pointer-events-none opacity-[0.05] dark:opacity-[0.03]">
+                                        <div className="border-t-2 border-dashed border-current h-0 w-full" />
+                                        <div className="border-t-2 border-dashed border-current h-0 w-full" />
+                                        <div className="border-t-2 border-dashed border-current h-0 w-full" />
+                                        <div className="border-t-2 border-dashed border-current h-0 w-full" />
+                                    </div>
+                                    
+                                    {(() => {
+                                        const trend = stats.weeklyTrend || [0,0,0,0,0,0,0];
+                                        const days = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
+                                        const maxVal = Math.max(...trend, 1);
+                                        
+                                        return trend.map((val, i) => {
+                                            const heightPercent = (val / maxVal) * 100;
+                                            return (
+                                                <div key={i} className="flex flex-col items-center flex-1 h-full relative z-10 group/point">
+                                                    <div className="w-full flex-1 relative flex flex-col justify-end items-center">
+                                                        <div 
+                                                            className="w-1/2 sm:w-2/3 md:w-3/4 max-w-[40px] bg-gradient-to-t from-pink-500 to-rose-400 rounded-t-lg transition-all duration-700 ease-out group-hover/point:brightness-110 shadow-lg shadow-pink-500/20"
+                                                            style={{ height: `${heightPercent}%`, minHeight: val > 0 ? '4px' : '0' }}
+                                                        ></div>
+                                                        {/* Tooltip */}
+                                                        <div 
+                                                            className="absolute opacity-0 group-hover/point:opacity-100 transition-opacity bg-slate-800 text-white text-xs font-black py-1 px-2 rounded-lg pointer-events-none whitespace-nowrap z-20"
+                                                            style={{ bottom: `calc(${heightPercent}% + 10px)` }}
+                                                        >
+                                                            {val} เคส
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-[10px] sm:text-xs font-black text-slate-400 mt-4 absolute -bottom-7">
+                                                        {days[i]}
+                                                    </span>
+                                                </div>
+                                            )
+                                        });
+                                    })()}
+                                </div>
+                                <div className="mt-10 w-full flex justify-between items-center relative z-10">
+                                    <div className="text-xs font-bold text-slate-400">ปริมาณการสั่งยาแบ่งตามวันในสัปดาห์ (จันทร์ - อาทิตย์)</div>
+                                    <div className="text-xs font-black text-pink-500 bg-pink-50 dark:bg-pink-500/10 px-3 py-1 rounded-full">
+                                        รวมทั้งหมด {stats.weeklyTrend ? stats.weeklyTrend.reduce((a,b)=>a+b,0) : 0} เคส
                                     </div>
                                 </div>
                             </div>
