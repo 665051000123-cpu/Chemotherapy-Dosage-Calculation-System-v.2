@@ -2034,9 +2034,9 @@ function App() {
         // Cumulative Dose warnings
         activeDrugs.forEach(drugId => {
             const drugInfo = drugsInfo.find(d => d.id === drugId);
-            if (drugInfo && drugInfo.raw && drugInfo.raw.alert_cumulative_dose > 0) {
-                const limit = parseFloat(drugInfo.raw.alert_cumulative_dose);
-                const unit = drugInfo.raw.alert_cumulative_dose_unit || 'mg';
+            if (drugInfo && drugInfo.raw && drugInfo.raw.lifetime_max_dose > 0) {
+                const limit = parseFloat(drugInfo.raw.lifetime_max_dose);
+                const unit = drugInfo.raw.alert_cumulative_dose_unit || 'mg/m2'; // default to mg/m2 for lifetime max dose
                 const dName = drugId.toUpperCase();
                 const pastDose = cumulativeDoses[dName] || 0;
                 

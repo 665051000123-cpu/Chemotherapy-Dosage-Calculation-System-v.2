@@ -48,6 +48,27 @@ async function alterTable() {
             console.log('Added emetogenic_risk');
         } catch (e) { console.log('emetogenic_risk may already exist'); }
 
+        try {
+            await queryInterface.addColumn('drugs', 'min_anc', {
+                type: DataTypes.INTEGER
+            });
+            console.log('Added min_anc');
+        } catch (e) { console.log('min_anc may already exist'); }
+
+        try {
+            await queryInterface.addColumn('drugs', 'min_plt', {
+                type: DataTypes.INTEGER
+            });
+            console.log('Added min_plt');
+        } catch (e) { console.log('min_plt may already exist'); }
+
+        try {
+            await queryInterface.addColumn('drugs', 'lifetime_max_dose', {
+                type: DataTypes.DECIMAL(10, 2)
+            });
+            console.log('Added lifetime_max_dose');
+        } catch (e) { console.log('lifetime_max_dose may already exist'); }
+
         console.log('Schema update complete.');
     } catch (err) {
         console.error('Error updating schema:', err);

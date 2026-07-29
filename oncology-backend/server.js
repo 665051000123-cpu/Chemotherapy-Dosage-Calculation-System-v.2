@@ -260,6 +260,9 @@ const Drug = sequelize.define('Drug', {
     max_dose_cap: DataTypes.DECIMAL(10, 2),
     max_bsa_cap: DataTypes.DECIMAL(4, 2),
     max_gfr_cap: DataTypes.INTEGER,
+    min_anc: DataTypes.INTEGER,
+    min_plt: DataTypes.INTEGER,
+    lifetime_max_dose: DataTypes.DECIMAL(10, 2),
     is_active: {
         type: DataTypes.TINYINT,
         defaultValue: 1
@@ -1740,7 +1743,7 @@ app.put('/api/drugs/:id/inventory', requireHeadOrAdmin, async (req, res) => {
 // 👥 Admin Drug Management APIs
 app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
     try {
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages, protect_from_light, emetogenic_risk } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages, protect_from_light, emetogenic_risk, min_anc, min_plt, lifetime_max_dose } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1764,7 +1767,10 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
             vol_per_pack_unit,
             packages: packages || null,
             protect_from_light: protect_from_light === true || protect_from_light === 'true' || protect_from_light === 1,
-            emetogenic_risk: emetogenic_risk || null
+            emetogenic_risk: emetogenic_risk || null,
+            min_anc: min_anc === '' ? null : min_anc,
+            min_plt: min_plt === '' ? null : min_plt,
+            lifetime_max_dose: lifetime_max_dose === '' ? null : lifetime_max_dose
         });
 
         logActivity(employeeId, 'CREATE_DRUG', `เพิ่มยาใหม่: ${drug_name} (${calculation_type})`);
@@ -1781,7 +1787,7 @@ app.post('/api/admin/drugs', requireHeadOrAdmin, async (req, res) => {
 app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
     try {
         const drugId = req.params.id;
-        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages, protect_from_light, emetogenic_risk } = req.body;
+        const { drug_code, drug_name, drug_category, calculation_type, default_weight_type, standard_dose_value, standard_dose_unit, max_dose_cap, max_bsa_cap, max_gfr_cap, is_active, dose_per_pack_unit, vol_per_pack, vol_per_pack_unit, packages, protect_from_light, emetogenic_risk, min_anc, min_plt, lifetime_max_dose } = req.body;
         const employeeId = req.headers['x-employee-id'];
 
         if (!drug_name || !calculation_type) {
@@ -1805,7 +1811,10 @@ app.put('/api/admin/drugs/:id', requireHeadOrAdmin, async (req, res) => {
             vol_per_pack_unit,
             packages: packages || null,
             protect_from_light: protect_from_light === true || protect_from_light === 'true' || protect_from_light === 1,
-            emetogenic_risk: emetogenic_risk || null
+            emetogenic_risk: emetogenic_risk || null,
+            min_anc: min_anc === '' ? null : min_anc,
+            min_plt: min_plt === '' ? null : min_plt,
+            lifetime_max_dose: lifetime_max_dose === '' ? null : lifetime_max_dose
         }, { where: { drug_id: drugId } });
 
         logActivity(employeeId, 'UPDATE_DRUG', `แก้ไขยา ID ${drugId}: name=${drug_name}, type=${calculation_type}`);

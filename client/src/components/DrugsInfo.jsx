@@ -61,7 +61,10 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
         side_effect_info: '',
         stability_info: '',
         drug_interactions: '',
-        usual_dosage: ''
+        usual_dosage: '',
+        min_anc: '',
+        min_plt: '',
+        lifetime_max_dose: ''
     });
 
     const [deleteConfirmDrug, setDeleteConfirmDrug] = useState(null);
@@ -143,7 +146,10 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             side_effect_info: '',
             stability_info: '',
             drug_interactions: '',
-            usual_dosage: ''
+            usual_dosage: '',
+        min_anc: '',
+        min_plt: '',
+        lifetime_max_dose: ''
         });
         setShowFormModal(true);
     };
@@ -159,6 +165,9 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             standard_dose_value: drug.standard_dose_value !== null && drug.standard_dose_value !== undefined ? drug.standard_dose_value.toString() : '',
             standard_dose_unit: drug.standard_dose_unit || '',
             max_dose_cap: drug.max_dose_cap !== null && drug.max_dose_cap !== undefined ? drug.max_dose_cap.toString() : '',
+            min_anc: drug.min_anc !== null && drug.min_anc !== undefined ? drug.min_anc.toString() : '',
+            min_plt: drug.min_plt !== null && drug.min_plt !== undefined ? drug.min_plt.toString() : '',
+            lifetime_max_dose: drug.lifetime_max_dose !== null && drug.lifetime_max_dose !== undefined ? drug.lifetime_max_dose.toString() : '',
             max_bsa_cap: drug.max_bsa_cap !== null && drug.max_bsa_cap !== undefined ? drug.max_bsa_cap.toString() : '',
             max_gfr_cap: drug.max_gfr_cap !== null && drug.max_gfr_cap !== undefined ? drug.max_gfr_cap.toString() : '',
             is_active: drug.is_active !== undefined ? drug.is_active : 1,
@@ -215,6 +224,9 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
             drug_name: drugForm.drug_name.toUpperCase().trim(),
             standard_dose_value: drugForm.standard_dose_value === '' ? null : parseFloat(drugForm.standard_dose_value),
             max_dose_cap: drugForm.max_dose_cap === '' ? null : parseFloat(drugForm.max_dose_cap),
+            min_anc: drugForm.min_anc === '' ? null : parseInt(drugForm.min_anc, 10),
+            min_plt: drugForm.min_plt === '' ? null : parseInt(drugForm.min_plt, 10),
+            lifetime_max_dose: drugForm.lifetime_max_dose === '' ? null : parseFloat(drugForm.lifetime_max_dose),
             max_bsa_cap: drugForm.max_bsa_cap === '' ? null : parseFloat(drugForm.max_bsa_cap),
             max_gfr_cap: drugForm.max_gfr_cap === '' ? null : parseInt(drugForm.max_gfr_cap, 10),
             is_active: parseInt(drugForm.is_active, 10),
@@ -1065,6 +1077,30 @@ const DrugsInfo = ({ currentUser, onBack, showNotification, theme, setPreviewDat
                                         <option value="NaCl Inclusive">NaCl Inclusive</option>
                                         <option value="Dextrose Inclusive">Dextrose Inclusive</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">ANC ขั้นต่ำ (Min ANC)</label>
+                                    <div className="flex gap-2 items-center">
+                                        <input type="number" className="form-control text-sm flex-1" value={drugForm.min_anc || ''} onChange={e => setDrugForm({...drugForm, min_anc: e.target.value})} placeholder="เช่น 1500" />
+                                        <span className="text-xs font-bold text-slate-500 w-16 text-right">เซลล์/µL</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">Platelet ขั้นต่ำ (Min Plt)</label>
+                                    <div className="flex gap-2 items-center">
+                                        <input type="number" className="form-control text-sm flex-1" value={drugForm.min_plt || ''} onChange={e => setDrugForm({...drugForm, min_plt: e.target.value})} placeholder="เช่น 100000" />
+                                        <span className="text-xs font-bold text-slate-500 w-16 text-right">เซลล์/µL</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black opacity-70 mb-1.5 uppercase ml-1 text-rose-500">Lifetime Max Dose</label>
+                                    <div className="flex gap-2 items-center">
+                                        <input type="number" step="0.01" className="form-control text-sm flex-1" value={drugForm.lifetime_max_dose || ''} onChange={e => setDrugForm({...drugForm, lifetime_max_dose: e.target.value})} placeholder="เช่น 550" />
+                                        <span className="text-xs font-bold text-slate-500 w-16 text-right">mg/m²</span>
+                                    </div>
                                 </div>
                             </div>
 
