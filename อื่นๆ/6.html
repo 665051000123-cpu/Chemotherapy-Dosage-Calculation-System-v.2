@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Flowchart - 6. Workflow</title>
+    <title>System Flowchart - 6. Workflow (A4 Landscape Fixed)</title>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ 
@@ -18,58 +18,103 @@
             flowchart: {
                 useMaxWidth: true,
                 htmlLabels: true,
-                curve: 'linear', // ใช้เส้นตรงแบบในรูปเพื่อลดการทับซ้อน
-                rankSpacing: 40,
-                nodeSpacing: 40
+                curve: 'linear',
+                rankSpacing: 25, /* บีบระยะห่างบน-ล่างให้กระชับขึ้น */
+                nodeSpacing: 35  /* บีบระยะห่างซ้าย-ขวาให้กระชับขึ้น */
             }
         });
     </script>
     <style>
+        /* ตั้งค่าหน้ากระดาษสำหรับการสั่งพิมพ์ (Print to PDF) */
+        @page {
+            size: A4 landscape;
+            margin: 0; 
+        }
+
         body {
             font-family: 'Inter', sans-serif, 'Noto Sans Thai';
-            background-color: #f1f5f9;
+            background-color: #525659;
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
+
         .flowchart-card {
             background-color: #ffffff;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            max-width: 100%;
-            width: 1100px;
-            overflow-x: auto;
-            border: 1px solid #e2e8f0;
+            /* ล็อกขนาด A4 แนวนอนตายตัว ห้ามยืดเด็ดขาด! */
+            width: 297mm; 
+            height: 210mm; 
+            padding: 12mm 15mm;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* ตัดส่วนเกินที่อาจจะดันกรอบทิ้ง */
         }
+
         h1 {
             color: #1e293b;
-            font-size: 22px;
-            margin-bottom: 30px;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 10px;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         h1 span {
             background-color: #6366f1;
             color: white;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 15px;
         }
+
+        .mermaid {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* บังคับให้กราฟ SVG ย่อขนาดตัวเองให้พอดีความสูงแนวนอน */
+        .mermaid svg {
+            max-width: 100% !important;
+            max-height: 140mm !important; 
+            height: auto;
+        }
+
         .legend-box {
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: auto; 
+            padding-top: 10px;
             border-top: 1px solid #e2e8f0;
-            font-size: 13px;
+            font-size: 12px;
             color: #64748b;
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+            }
+            .flowchart-card {
+                box-shadow: none;
+                width: 297mm;
+                height: 210mm;
+                page-break-after: avoid;
+            }
         }
     </style>
 </head>
@@ -77,11 +122,10 @@
 
 <div class="flowchart-card">
     <h1><span>6</span> 6. Workflow</h1>
-    <p style="color: #64748b; font-size: 14px; margin-top: -20px; margin-bottom: 30px;">แผนผังการทำงานทั้งระบบ (System Flowchart) และการประมวลผลสิทธิ์ระดับคลินิก</p>
+    <p style="color: #64748b; font-size: 13px; margin-top: -10px; margin-bottom: 15px;">แผนผังการทำงานทั้งระบบ (System Flowchart) และการประมวลผลสิทธิ์ระดับคลินิก</p>
 
     <div class="mermaid">
         flowchart TD
-            %% การตั้งค่าสไตล์ตามภาพตัวอย่าง
             classDef default fill:#ffffff,stroke:#94a3b8,stroke-width:1.px,color:#1e293b,rx:6px,ry:6px
             classDef decision fill:#ffffff,stroke:#475569,stroke-width:1.5px,color:#1e293b
             classDef purpleNode fill:#ffffff,stroke:#a855f7,stroke-width:2px,color:#1e293b,rx:6px,ry:6px
@@ -90,7 +134,6 @@
             classDef danger fill:#ffffff,stroke:#ef4444,stroke-width:2px,color:#dc2626,font-weight:bold
             classDef database fill:#ffffff,stroke:#334155,stroke-width:2px,color:#1e293b
 
-            %% ลิงก์เส้นสีตามสิทธิ์
             linkStyle default stroke:#64748b,stroke-width:1.5px;
             
             %% --- SECTION 1: AUTHENTICATION ---
@@ -103,7 +146,6 @@
             PatientCheckin --> InputData[ป้อนข้อมูล: H.N., ส่วนสูง cm, น้ำหนัก kg]
             InputData --> CalcPage[หน้าคำนวณขนาดยา / Calculator]:::blueNode
 
-            %% แยกกลุ่มย่อยเพื่อไม่ให้เส้นดึงกันจนทับกัน
             subgraph Calculation_Actions [ฟังก์ชันการประมวลผล]
                 direction LR
                 CalcPage --> ShowResult[แสดงผลลัพธ์: BSA, GFR, ขนาดยา]
@@ -129,7 +171,6 @@
             AdminPanel --> CheckAdminRole{ตรวจสอบบทบาท Role?}:::decision
             CheckAdminRole -- Admin --> ManageUsers[จัดการผู้ใช้งาน / ดูประวัติระบบ]:::success
             CheckAdminRole -- Staff --> Blocked[ถูกซ่อนและไม่มีสิทธิ์เข้าถึง]:::danger
-
     </div>
 
     <div class="legend-box">

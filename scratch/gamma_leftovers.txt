@@ -1,0 +1,4 @@
+{latestLog.gender === 'female' ? 'ΓÖÇ' : 'ΓÖé'}
+ΓÜá∩╕Å {a}
+{p.gender === 'female' ? 'ΓÖÇ' : 'ΓÖé'}
+ΓÜá∩╕Å {a}

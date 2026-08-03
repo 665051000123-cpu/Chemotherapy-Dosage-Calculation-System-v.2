@@ -1,0 +1,25 @@
+แผนการพัฒนาระบบแจ้งเตือนผลเลือด (Dynamic CBC & ANC Alerts)
+ระบบนี้จะเปลี่ยนการแจ้งเตือนค่าผลเลือด (ANC และ Platelet) จากแบบคงที่ (Hardcoded ยาบางตัว) เป็นแบบยืดหยุ่น (Dynamic) โดยแอดมินหรือเภสัชกรสามารถตั้งค่าเกณฑ์ขั้นต่ำของผลเลือดสำหรับยา "ทุกตัว" ในระบบได้ด้วยตัวเองผ่านหน้าจัดการยา
+
+Proposed Changes
+Backend (ฐานข้อมูลและ API)
+[MODIFY] 
+server.js
+Drug Model: เพิ่มคอลัมน์ min_anc (Integer) และ min_plt (Integer) ในโมเดล Drug
+API Endpoints:
+อัปเดต POST /api/admin/drugs ให้รองรับการบันทึกค่า min_anc และ min_plt
+อัปเดต PUT /api/admin/drugs/:id ให้รองรับการแก้ไขค่า min_anc และ min_plt
+Frontend (หน้าจัดการข้อมูลยา และหน้าสั่งยา)
+[MODIFY] 
+client/src/components/DrugsInfo.jsx
+UI แบบฟอร์มเพิ่ม/แก้ไขยา: เพิ่มฟิลด์ให้กรอก ANC ขั้นต่ำ (cells/mm³) และ Platelet ขั้นต่ำ (cells/mm³) ในส่วนของการแจ้งเตือนความปลอดภัย
+State Management: อัปเดตตัวแปร drugForm เพื่อดึงและบันทึกค่ากลับไปที่ฐานข้อมูล
+[MODIFY] 
+client/src/App.jsx
+Function getLabRecommendations: ลบเงื่อนไขคงที่ (Carboplatin, Cisplatin) ออก
+Dynamic Alerts: วนลูปอ่านค่ายาที่ถูกเลือก หากยาตัวใดมีค่า min_anc หรือ min_plt อยู่ในระบบ และผลเลือดของคนไข้ต่ำกว่าค่านี้ ระบบจะแจ้งเตือน (Clinical Safety Warnings) ให้แพทย์พิจารณาชะลอการให้ยา (Delay/Hold)
+Verification Plan
+Manual Verification
+เปิดหน้า "จัดการข้อมูลยา" และตั้งค่า ANC ต่ำสุด = 1500, Platelet ต่ำสุด = 100000 ให้ยา Carboplatin
+ไปที่หน้าสั่งยา เลือก Carboplatin และกรอกผล ANC = 1200
+ตรวจสอบว่าระบบแสดงข้อความเตือนความปลอดภัยสีแดงทันที

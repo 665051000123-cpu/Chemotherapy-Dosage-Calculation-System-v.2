@@ -1,0 +1,43 @@
+title="α╕ó้α╕¡α╕Öα╕üα╕Ñα╕▒α╕Ü"
+<History size={28} className="text-sky-400 print-hide" /> α╕úα╕▓α╕óα╕çα╕▓α╕Öα╕Üα╕▒α╕Öα╕ùα╕╢α╕üα╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤α╕üα╕▓α╕úα╕äα╕│α╕Öα╕ºα╕ô
+<p className="text-slate-500 font-medium">α╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤แα╕Ñα╕░α╕Üα╕▒α╕Öα╕ùα╕╢α╕üα╕é้α╕¡α╕íα╕╣α╕Ñα╕üα╕▓α╕úα╕äα╕│α╕Öα╕ºα╕ôα╕éα╕Öα╕▓α╕öα╕óα╕▓เα╕äα╕íα╕╡α╕Üα╕│α╕Üα╕▒α╕öα╕éα╕¡α╕çα╕£α╕╣้α╕¢่α╕ºα╕ó</p>
+<Filter size={15} /> {showFilterPanel ? 'α╕¢α╕┤α╕öα╕òα╕▒α╕ºα╕üα╕úα╕¡α╕ç' : 'α╕òα╕▒α╕ºα╕üα╕úα╕¡α╕ç (Filters)'}
+placeholder="α╕ä้α╕Öα╕½α╕▓ H.N. / α╕èα╕╖่α╕¡α╕äα╕Öไα╕é้..."
+<label className="block text-xs font-black text-slate-400 mb-1.5 uppercase">α╕ºα╕▒α╕Öα╕ùα╕╡่เα╕úα╕┤่α╕íα╕ò้α╕Ö (Start Date)</label>
+placeholder="α╕ºα╕º/α╕öα╕ö/α╕¢α╕¢α╕¢α╕¢"
+<label className="block text-xs font-black text-slate-400 mb-1.5 uppercase">α╕ºα╕▒α╕Öα╕ùα╕╡่α╕¬α╕┤้α╕Öα╕¬α╕╕α╕ö (End Date)</label>
+placeholder="α╕ºα╕º/α╕öα╕ö/α╕¢α╕¢α╕¢α╕¢"
+<label className="block text-xs font-black text-slate-400 mb-1.5 uppercase">α╕¬α╕╣α╕òα╕úα╕äα╕│α╕Öα╕ºα╕ô (Formula)</label>
+<option value="all">α╕¬α╕╣α╕òα╕úα╕ùα╕▒้α╕çα╕½α╕íα╕ö (All)</option>
+<label className="block text-xs font-black text-slate-400 mb-1.5 uppercase">α╕£α╕╣้α╕Üα╕▒α╕Öα╕ùα╕╢α╕ü (Pharmacist)</label>
+<option value="all">α╕£α╕╣้α╕Üα╕▒α╕Öα╕ùα╕╢α╕üα╕ùα╕▒้α╕çα╕½α╕íα╕ö (All)</option>
+α╕Ñ้α╕▓α╕çα╕òα╕▒α╕ºα╕üα╕úα╕¡α╕ç (Reset)
+α╕¢α╕┤α╕ö (Close)
+ΓåÉ α╕üα╕Ñα╕▒α╕Ü
+<span className="text-slate-400 text-sm ml-2">ΓÇö {filteredLogs.filter(l => l.hn === selectedHnDetail).length} α╕úα╕▓α╕óα╕üα╕▓α╕ú</span>
+<Printer size={16} /> α╕₧α╕┤α╕íα╕₧์α╕úα╕▓α╕óα╕çα╕▓α╕Ö
+{latestLog.gender === 'female' ? 'ΓÖÇ' : 'ΓÖé'}
+title="แα╕ü้ไα╕éα╕èα╕╖่α╕¡α╕£α╕╣้α╕¢่α╕ºα╕ó"
+<span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.gender === 'female' ? 'α╕½α╕ìα╕┤α╕ç' : latestLog.gender === 'male' ? 'α╕èα╕▓α╕ó' : '-'}</span>
+{latestLog.age && <span className="px-2 py-0.5 rounded-md bg-slate-200/50 dark:bg-slate-700/50 text-xs font-bold">{latestLog.age} α╕¢α╕╡</span>}
+<div className="text-xs text-slate-400 uppercase tracking-widest font-bold">α╕äα╕úα╕▒้α╕çα╕ùα╕╡่α╕äα╕│α╕Öα╕ºα╕ô</div>
+<span className="text-[10px] text-slate-400">α╕Üα╕▒α╕Öα╕ùα╕╢α╕üโα╕öα╕ó: <span className="font-bold text-sky-500 uppercase">{log.user_name || '-'}</span></span>
+title="α╕Ñα╕Üα╕úα╕▓α╕óα╕üα╕▓α╕úα╕Üα╕▒α╕Öα╕ùα╕╢α╕üα╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤α╕Öα╕╡้"
+<p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">α╕₧α╕╖้α╕Öα╕ùα╕╡่α╕£α╕┤α╕º (BSA)</p>
+<p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">α╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤แα╕₧้α╕óα╕▓</p>
+ΓÜá∩╕Å {a}
+<p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-0.5">α╕£α╕Ñ LAB α╕¡α╕╖่α╕Öๆ</p>
+<p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Pill size={10}/> α╕¬α╕╣α╕òα╕úα╕óα╕▓α╕ùα╕╡่ใα╕è้ (Regimen)</p>
+<p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">α╕ºα╕┤α╕ÿα╕╡α╕üα╕▓α╕úα╕äα╕│α╕Öα╕ºα╕ô</p>
+<p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">α╕éα╕Öα╕▓α╕öα╕óα╕▓α╕¬α╕╕α╕ùα╕ÿα╕┤ (Final Dose)</p>
+<span className="text-[9px] font-black text-slate-400 uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">แα╕₧α╕ùα╕ó์α╕£α╕╣้α╕¬α╕▒่α╕çα╕óα╕▓</span>
+if (patientList.length === 0) return <div className="p-12 text-center text-slate-400 font-bold italic text-lg">ไα╕í่α╕₧α╕Üα╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤α╕üα╕▓α╕úα╕äα╕│α╕Öα╕ºα╕ôα╕ùα╕╡่α╕òα╕úα╕çα╕üα╕▒α╕Üα╕üα╕▓α╕úα╕ä้α╕Öα╕½α╕▓</div>;
+{p.gender === 'female' ? 'ΓÖÇ' : 'ΓÖé'}
+<History size={10} /> {p.logs.length} α╕äα╕úα╕▒้α╕ç
+{p.gender === 'female' ? 'α╕½α╕ìα╕┤α╕ç' : p.gender === 'male' ? 'α╕èα╕▓α╕ó' : '-'}
+{latestLog.age} α╕¢α╕╡
+<span className="text-slate-500 mr-1 text-xs">แα╕₧้:</span>
+ΓÜá∩╕Å {a}
+<span className="text-slate-400/70 font-bold italic">ไα╕í่α╕íα╕╡α╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤แα╕₧้α╕óα╕▓</span>
+<span className="opacity-70">α╕Ñ่α╕▓α╕¬α╕╕α╕ö: {p.logs[0]?.timestamp || '-'}</span>
+<span className="text-sky-500 font-black flex items-center gap-1 group-hover:translate-x-1 transition-transform">α╕öα╕╣α╕¢α╕úα╕░α╕ºα╕▒α╕òα╕┤ <ArrowRight size={12} /></span>
