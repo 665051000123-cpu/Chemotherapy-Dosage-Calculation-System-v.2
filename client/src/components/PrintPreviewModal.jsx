@@ -20,12 +20,12 @@ const PrintPreviewModal = ({ isOpen, htmlContent, title, printerName, paperSize 
                 
                 {/* Preview Area - Exact Paper Size */}
                 <div className="flex-1 bg-slate-200 overflow-auto p-4 md:p-8 flex justify-center items-start">
-                    <div style={paperSize === 'Sticker' ? { width: 'calc(8cm * 1.8)', height: 'calc(5.5cm * 1.8)' } : {}}>
+                    <div style={paperSize === 'Sticker' ? { width: 'calc(4in * 1.4)', height: 'calc(2.25in * 1.4)' } : {}}>
                         <div 
                             className="bg-white shadow-xl border border-slate-300 flex flex-col overflow-hidden shrink-0"
                             style={
                                 paperSize === 'Sticker' 
-                                    ? { width: '8cm', height: '5.5cm', transform: 'scale(1.8)', transformOrigin: 'top left' } 
+                                    ? { width: '4in', height: '2.25in', transform: 'scale(1.4)', transformOrigin: 'top left' } 
                                     : { width: '210mm', minHeight: '297mm' }
                             }
                         >

@@ -64,8 +64,8 @@ app.post('/api/print', async (req, res) => {
         };
 
         if (paperSize === 'Sticker') {
-            pdfOptions.width = '80mm';
-            pdfOptions.height = '50mm';
+            pdfOptions.width = '4in';
+            pdfOptions.height = '2.25in';
         } else if (paperSize === 'A5') {
             pdfOptions.format = 'A5';
         } else {
@@ -81,7 +81,12 @@ app.post('/api/print', async (req, res) => {
         fs.writeFileSync(tempPath, pdfBuffer);
 
         // Print using pdf-to-printer
-        await ptp.print(tempPath, { printer: printerName });
+        let ptpOptions = { printer: printerName };
+        if (paperSize === 'Sticker') {
+            ptpOptions.scale = 'noscale';
+            ptpOptions.orientation = 'portrait';
+        }
+        await ptp.print(tempPath, ptpOptions);
 
         // Clean up temp file after some time
         setTimeout(() => {

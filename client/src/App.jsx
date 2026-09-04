@@ -123,16 +123,16 @@ const BeautifulAutocomplete = ({ value, onChange, options, placeholder, onSave, 
 
     const filteredOptions = options.filter(opt => opt.toLowerCase().includes((value || '').toLowerCase()));
     const exactMatch = options.find(opt => opt.toLowerCase() === (value || '').trim().toLowerCase());
-    
+
     const dropdownContent = (
-        <div 
+        <div
             ref={dropdownRef}
             style={{ top: coords.top, left: coords.left, width: coords.width }}
             className="absolute z-[99999] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95"
         >
             {filteredOptions.length > 0 ? (
                 filteredOptions.map((opt, i) => (
-                    <div 
+                    <div
                         key={i}
                         onClick={() => {
                             onChange(opt);
@@ -144,9 +144,9 @@ const BeautifulAutocomplete = ({ value, onChange, options, placeholder, onSave, 
                     </div>
                 ))
             ) : null}
-            
+
             {value && !exactMatch && (
-                <div 
+                <div
                     onClick={() => {
                         onSave(value.trim());
                         setIsOpen(false);
@@ -173,7 +173,7 @@ const BeautifulAutocomplete = ({ value, onChange, options, placeholder, onSave, 
                 placeholder={placeholder}
                 className={`${className} ${icon ? 'pl-11' : ''}`}
             />
-            <div 
+            <div
                 className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-indigo-500"
                 onClick={() => setIsOpen(!isOpen)}
             >
@@ -206,7 +206,7 @@ function App() {
         return '';
     };
 
-    
+
     const [theme, setTheme] = useState(localStorage.getItem('appThemeMode') || 'light');
     const [step, setStep] = useState(() => {
         return localStorage.getItem('app_current_step') || 'auth'; // 'auth', 'login', 'workspace'
@@ -214,7 +214,7 @@ function App() {
     const [user, setUser] = useState(() => {
         const savedUser = localStorage.getItem('oncology_user');
         if (savedUser) {
-            try { return JSON.parse(savedUser); } catch(e) { return null; }
+            try { return JSON.parse(savedUser); } catch (e) { return null; }
         }
         return null;
     });
@@ -275,7 +275,7 @@ function App() {
                 const incompat = drugInfo.diluent_incompat;
                 const isDextrose = sName.includes('d5w') || sName.includes('dextrose') || sName.includes('d5') || sName.includes('5% d/w');
                 const isNaCl = sName.includes('nss') || sName.includes('nacl') || sName.includes('0.9%') || sName.includes('sodium chloride');
-                
+
                 if (incompat === 'Dextrose Incompatibility' && isDextrose) {
                     showNotification(`คำเตือนการให้ยา: ${drugName}\n❌ ยานี้เข้ากันไม่ได้กับสารน้ำ Dextrose (ห้ามผสม D5W)`, 'error', 0);
                     return false;
@@ -339,7 +339,7 @@ function App() {
                     if (Object.keys(parsed).length > 0) {
                         showNotification("กู้คืนข้อมูลหน้าคำนวณที่กรอกค้างไว้สำเร็จ", "success");
                     }
-                } catch(e) {}
+                } catch (e) { }
             }
         }
     }, []);
@@ -369,7 +369,7 @@ function App() {
         }
     }, [step]);
 
-    
+
 
     const {
         bsa, setBsa,
@@ -395,7 +395,7 @@ function App() {
         }
     };
 
-    
+
 
     const [formula, setFormula] = useState(savedWorkspace.formula || 'mosteller');
     const [selectedDrugs, setSelectedDrugs] = useState(savedWorkspace.selectedDrugs || []);
@@ -445,7 +445,7 @@ function App() {
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [drugDropdownOpen, setDrugDropdownOpen] = useState(false);
     const [editingOrderLogId, setEditingOrderLogId] = useState(null);
-    
+
     // Toxicity Tracker State
     const [pastToxicities, setPastToxicities] = useState([]);
     const [toxicitySymptoms, setToxicitySymptoms] = useState('');
@@ -620,7 +620,7 @@ function App() {
             }
         };
         fetchDrugs();
-        
+
         const fetchSettings = async () => {
             try {
                 const res = await axios.get('/api/settings');
@@ -659,7 +659,7 @@ function App() {
                 if (res.data) setDoseRules(res.data);
             })
             .catch(err => console.error('Failed to fetch dose rules', err));
-            
+
         axios.get(`${API_BASE}/regimen_templates`)
             .then(res => {
                 if (res.data) setRegimenTemplates(res.data);
@@ -676,7 +676,7 @@ function App() {
 
     const [allOrderLogs, setAllOrderLogs] = useState([]);
     const [cumulativeDoses, setCumulativeDoses] = useState({});
-    
+
     const fetchAllOrderLogs = async () => {
         try {
             const res = await axios.get(`${API_BASE}/order-logs`);
@@ -755,14 +755,14 @@ function App() {
             setPastToxicities([]);
             return;
         }
-        
+
         // Fetch toxicity logs
         axios.get(`${API_BASE}/toxicity/${patient.hn}`)
             .then(res => {
                 if (res.data) setPastToxicities(res.data);
             })
             .catch(err => console.error('Failed to fetch toxicity', err));
-            
+
 
         const matched = patients.find(p => p.hn && patient.hn && String(p.hn).trim().toLowerCase() === String(patient.hn).trim().toLowerCase());
         if (matched && String(matched.hn).trim().toLowerCase() !== String(lastAutofilledHnRef.current || '').trim().toLowerCase()) {
@@ -798,7 +798,7 @@ function App() {
         let ampText = 'None';
         if (amputation === 'amputee') {
             let factor = 0, bsaFactor = 0;
-            switch(ampDetails.level) {
+            switch (ampDetails.level) {
                 case 'below_knee': factor = 0.06; bsaFactor = 0.09; break;
                 case 'above_knee': factor = 0.15; bsaFactor = 0.18; break;
                 case 'below_elbow': factor = 0.03; bsaFactor = 0.04; break;
@@ -823,11 +823,11 @@ function App() {
         if (useAutoGfr) {
             const ageVal = parseFloat(patient.age);
             const scrVal = parseFloat(patientScr);
-            
+
             let wtVal = parseFloat(patient.weight);
             if (amputation === 'amputee') {
                 let factor = 0;
-                switch(ampDetails.level) {
+                switch (ampDetails.level) {
                     case 'below_knee': factor = 0.06; break;
                     case 'above_knee': factor = 0.15; break;
                     case 'below_elbow': factor = 0.03; break;
@@ -852,8 +852,8 @@ function App() {
         }
 
         const { ibw, adjBw } = calculateWeights(patient.height, effectiveWeight, patient.gender);
-        const params = { 
-            ...drugParams, 
+        const params = {
+            ...drugParams,
             gfr: useAutoGfr ? effectiveGfr : drugParams.gfr,
             actualWeight: effectiveWeight,
             ibw,
@@ -881,7 +881,7 @@ function App() {
         setFinalDose('');
         setMultipleDoses([]);
         const combinedNote = results.map(r => r.note).filter(Boolean).join(' | ');
-        
+
         let prefix = '';
         if (selectedRegimen === 'cv') prefix = 'CV Regimen | ';
         if (selectedRegimen === 'bc') prefix = 'BC Regimen | ';
@@ -898,7 +898,7 @@ function App() {
             const wbcVal = parseFloat(wbc);
             const neutVal = parseFloat(neutrophils) || 0;
             const bandsVal = parseFloat(bands) || 0;
-            
+
             if (!isNaN(wbcVal)) {
                 setAnc(Math.round(wbcVal * (neutVal + bandsVal) / 100).toString());
             } else {
@@ -913,7 +913,7 @@ function App() {
         setSingleDrugResults(prev => prev.map(item => item.id === drugId ? { ...item, unit: newUnit } : item));
     };
 
-        // Auto-sync dose and volume from singleDrugResults to adminRows when calculation updates
+    // Auto-sync dose and volume from singleDrugResults to adminRows when calculation updates
     useEffect(() => {
         if (!singleDrugResults || singleDrugResults.length === 0) return;
 
@@ -925,11 +925,11 @@ function App() {
                     const newDose = `${foundResult.dose} ${foundResult.unit || 'mg'}`;
                     const newDrugVolume = foundResult.drugVolume || '';
                     const newVials = foundResult.vials || '';
-                    
+
                     // We sync if dose, drugVolume, vials, doseFormula, or prepInstructions changed
                     if (row.dose !== newDose || row.drugVolume !== newDrugVolume || row.vials !== newVials || row.doseFormula !== foundResult.doseFormula || row.prepInstructions !== foundResult.prepInstructions) {
                         changed = true;
-                        
+
                         // Calculate total volume dynamically if IV fluid volume is present
                         let totalVol = '';
                         const dv = parseFloat(newDrugVolume) || 0;
@@ -938,7 +938,7 @@ function App() {
                             totalVol = (dv + iv).toFixed(2);
                             if (totalVol.endsWith('.00')) totalVol = totalVol.replace('.00', '');
                         }
-                        
+
                         return { ...row, dose: newDose, calculatedDose: newDose, drugVolume: newDrugVolume, vials: newVials, totalVolume: totalVol, doseFormula: foundResult.doseFormula, prepInstructions: foundResult.prepInstructions };
                     }
                 }
@@ -988,12 +988,12 @@ function App() {
                         grade: parseInt(toxicityGrade) || null,
                         notes: toxicityNotes
                     });
-                    
+
                     // Clear form
                     setToxicitySymptoms('');
                     setToxicityGrade('');
                     setToxicityNotes('');
-                    
+
                     // Refresh past toxicities
                     const toxRes = await axios.get(`${API_BASE}/toxicity/${patient.hn}`);
                     if (toxRes.data) setPastToxicities(toxRes.data);
@@ -1014,11 +1014,11 @@ function App() {
         }
     };
 
-    
+
     const printHistory = () => {
         const historyContainer = document.getElementById('history-print-area');
         if (!historyContainer) return;
-        
+
         let styleTags = '';
         for (let i = 0; i < document.styleSheets.length; i++) {
             try {
@@ -1032,7 +1032,7 @@ function App() {
                     }
                     styleTags += `<style>${css}</style>`;
                 }
-            } catch(e) {}
+            } catch (e) { }
         }
 
         const htmlContent = `
@@ -1072,7 +1072,7 @@ function App() {
                             printerName: user.calculation_printer,
                             paperSize: 'A4'
                         });
-                        
+
                         if (res.data.success) {
                             showNotification(`ส่งคำสั่งพิมพ์ไปที่ ${user.calculation_printer} แล้ว`, 'success');
                         }
@@ -1113,11 +1113,11 @@ function App() {
                 if (row.calculatedDose && row.dose && row.dose !== row.calculatedDose) {
                     const calcMatch = row.calculatedDose.toString().match(/[\d.]+/);
                     const doseMatch = row.dose.toString().match(/[\d.]+/);
-                    
+
                     if (calcMatch && doseMatch) {
                         const calcVal = parseFloat(calcMatch[0]);
                         const doseVal = parseFloat(doseMatch[0]);
-                        
+
                         if (calcVal > 0) {
                             const diffPercent = (((doseVal - calcVal) / calcVal) * 100).toFixed(1);
                             if (parseFloat(diffPercent) !== 0) {
@@ -1149,9 +1149,9 @@ function App() {
     };
 
     const handleUpdatePatientName = (log) => {
-        setEditPatientNameData({ 
-            hn: log.hn, 
-            currentName: log.patient_name, 
+        setEditPatientNameData({
+            hn: log.hn,
+            currentName: log.patient_name,
             newName: log.patient_name || '',
             newGender: log.gender || '',
             newAge: log.age || '',
@@ -1163,10 +1163,10 @@ function App() {
     const submitUpdatePatientName = async () => {
         if (!editPatientNameData) return;
         const { hn, newName, newGender, newAge, newDob, newWard } = editPatientNameData;
-        
+
         if (newName && newName.trim()) {
             try {
-                const response = await axios.put(`${API_BASE}/admin/logs/hn/${hn}/name`, { 
+                const response = await axios.put(`${API_BASE}/admin/logs/hn/${hn}/name`, {
                     patient_name: newName.trim(),
                     gender: newGender,
                     age: newAge,
@@ -1198,7 +1198,7 @@ function App() {
             cycle: log.cycle || '',
             otherLab: log.other_lab || ''
         }));
-        
+
         setIsDateEditable(log.is_date_unlocked || false);
         try {
             const parsedRows = JSON.parse(log.order_details).map(r => ({ ...r, isOldRecord: true }));
@@ -1206,7 +1206,7 @@ function App() {
         } catch (e) {
             console.error('Failed to parse order_details', e);
         }
-        
+
         setStep('main');
         showNotification('โหลดข้อมูลสำหรับการแก้ไขแล้ว', 'success');
     };
@@ -1221,7 +1221,7 @@ function App() {
         const now = new Date();
         const formatDateTime = (date) => {
             const d = date.getDate().toString().padStart(2, '0');
-            const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
             const m = months[date.getMonth()];
             const y = (date.getFullYear() + 543).toString().substring(2, 4);
             const h = date.getHours().toString().padStart(2, '0');
@@ -1230,9 +1230,9 @@ function App() {
         };
         const producedTime = formatDateTime(now);
 
-        
+
         const rowsToPrint = activeRows.some(r => r.drugName) ? activeRows : (singleDrugResults.length > 0 ? singleDrugResults.map(r => ({ drugName: r.name, dose: r.dose })) : activeRows);
-        
+
         const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -1240,123 +1240,155 @@ function App() {
             <meta charset="UTF-8">
             <title>พิมพ์สติ๊กเกอร์ยา</title>
             <style>
-                @page { size: 8cm 5.5cm; margin: 0; }
-                body { 
+                @page { 
+                    size: 4in 2.25in; 
+                    margin: 0; 
+                }
+                html, body { 
                     font-family: 'Tahoma', 'Leelawadee UI', sans-serif; 
                     margin: 0; 
                     padding: 0;
-                    font-size: 10px;
+                    width: 4in;
+                    height: 2.25in;
+                    font-size: 9.5px;
                     color: #000;
+                    -webkit-print-color-adjust: exact; 
+                    print-color-adjust: exact;
                 }
                 .sticker {
-                    width: 8cm;
-                    height: 5.5cm;
-                    padding: 1.2cm 0.4cm 0.2cm 0.4cm;
+                    width: 4in;
+                    height: 2.25in;
+                    padding: 1.05cm 1.3cm 0.3cm 1.0cm;
                     box-sizing: border-box;
                     display: flex;
                     flex-direction: column;
+                    justify-content: flex-start;
                     overflow: hidden;
                     margin: 0;
                     page-break-after: always;
+                    page-break-inside: avoid;
+                    break-after: page;
+                    break-inside: avoid;
                 }
                 @media print {
+                    @page { 
+                        size: 4in 2.25in; 
+                        margin: 0; 
+                    }
+                    html, body { 
+                        width: 4in; 
+                        height: 2.25in; 
+                        margin: 0; 
+                        padding: 0; 
+                    }
                     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .sticker { 
+                        page-break-after: always; 
+                        break-after: page; 
+                    }
                 }
                 .row {
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 3px;
-                    line-height: 1.2;
+                    line-height: 1.25;
+                }
+                .row-patient {
+                    font-size: 11px;
+                    font-weight: bold;
+                    margin-bottom: 3px;
                 }
                 .row-left-gap {
                     display: flex;
                     gap: 15px;
                 }
                 .drug-title {
-                    font-size: 11px;
+                    font-size: 10px;
+                    margin-bottom: 3px;
                 }
                 .drug-name-u {
                     text-decoration: underline;
+                    font-weight: bold;
                 }
             </style>
         </head>
         <body>
             ${rowsToPrint.map((r, index) => {
-                let pTime = formatDateTime(now);
-                let exp = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Default +3 days
-                
-                if (r.startDate && r.startDate.length === 10) {
-                    const dd = r.startDate.substring(0, 2);
-                    const mm = r.startDate.substring(3, 5);
-                    const yyNum = parseInt(r.startDate.substring(6, 10), 10);
-                    const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-                    const monthText = months[parseInt(mm, 10) - 1] || mm;
-                    const yyShort = yyNum.toString().substring(2, 4);
-                    
-                    let hh = now.getHours().toString().padStart(2, '0');
-                    let min = now.getMinutes().toString().padStart(2, '0');
-                    if (r.startTime && r.startTime.length === 5) {
-                        hh = r.startTime.substring(0, 2);
-                        min = r.startTime.substring(3, 5);
-                    }
-                    pTime = `${dd}-${monthText}-${yyShort} ${hh}:${min}`;
-                    
-                    const gregorianYear = yyNum - 543;
-                    const rDate = new Date(`${gregorianYear}-${mm}-${dd}T${hh}:${min}:00`);
-                    if (!isNaN(rDate.getTime())) {
-                        exp = new Date(rDate.getTime() + 3 * 24 * 60 * 60 * 1000);
-                    }
-                }
-                
-                if (r.endDate && r.endDate.trim() !== '') {
-                    const parts = r.endDate.split('/');
-                    if (parts.length === 3) {
-                        const edd = parts[0].padStart(2, '0');
-                        const emm = parts[1].padStart(2, '0');
-                        const eyyNum = parseInt(parts[2], 10);
-                        let ehh = '23';
-                        let emin = '59';
-                        if (r.endTime && r.endTime.includes(':')) {
-                            const timeParts = r.endTime.split(':');
-                            ehh = timeParts[0].padStart(2, '0');
-                            emin = timeParts[1].padStart(2, '0');
-                        }
-                        const eGregorianYear = eyyNum > 2400 ? eyyNum - 543 : eyyNum;
-                        const eDate = new Date(`${eGregorianYear}-${emm}-${edd}T${ehh}:${emin}:00`);
-                        if (!isNaN(eDate.getTime())) {
-                            exp = eDate;
-                        }
-                    }
-                }
+            let pTime = formatDateTime(now);
+            let exp = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Default +3 days
 
-                let tvText = '';
-                let dvNum = parseFloat(r.drugVolume) || 0;
-                
-                if (dvNum === 0 && r.dose && r.drugName) {
-                    const parsedDose = parseFloat((r.dose.toString().match(/[\d.]+/) || ['0'])[0]);
-                    if (parsedDose > 0) {
-                        const dInfo = drugsInfo.find(d => d.name.toLowerCase() === r.drugName.toLowerCase() || d.id.toLowerCase() === r.drugName.toLowerCase());
-                        if (dInfo && dInfo.raw && parseFloat(dInfo.raw.concentration_per_ml) > 0) {
-                            dvNum = parsedDose / parseFloat(dInfo.raw.concentration_per_ml);
-                        } else {
-                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === r.drugName.toLowerCase());
-                            if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].concentration > 0) {
-                                dvNum = parsedDose / DRUG_CONCENTRATION_DATA[drugKey].concentration;
-                            }
+            if (r.startDate && r.startDate.length === 10) {
+                const dd = r.startDate.substring(0, 2);
+                const mm = r.startDate.substring(3, 5);
+                const yyNum = parseInt(r.startDate.substring(6, 10), 10);
+                const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                const monthText = months[parseInt(mm, 10) - 1] || mm;
+                const yyShort = yyNum.toString().substring(2, 4);
+
+                let hh = now.getHours().toString().padStart(2, '0');
+                let min = now.getMinutes().toString().padStart(2, '0');
+                if (r.startTime && r.startTime.length === 5) {
+                    hh = r.startTime.substring(0, 2);
+                    min = r.startTime.substring(3, 5);
+                }
+                pTime = `${dd}-${monthText}-${yyShort} ${hh}:${min}`;
+
+                const gregorianYear = yyNum - 543;
+                const rDate = new Date(`${gregorianYear}-${mm}-${dd}T${hh}:${min}:00`);
+                if (!isNaN(rDate.getTime())) {
+                    exp = new Date(rDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+                }
+            }
+
+            if (r.endDate && r.endDate.trim() !== '') {
+                const parts = r.endDate.split('/');
+                if (parts.length === 3) {
+                    const edd = parts[0].padStart(2, '0');
+                    const emm = parts[1].padStart(2, '0');
+                    const eyyNum = parseInt(parts[2], 10);
+                    let ehh = '23';
+                    let emin = '59';
+                    if (r.endTime && r.endTime.includes(':')) {
+                        const timeParts = r.endTime.split(':');
+                        ehh = timeParts[0].padStart(2, '0');
+                        emin = timeParts[1].padStart(2, '0');
+                    }
+                    const eGregorianYear = eyyNum > 2400 ? eyyNum - 543 : eyyNum;
+                    const eDate = new Date(`${eGregorianYear}-${emm}-${edd}T${ehh}:${emin}:00`);
+                    if (!isNaN(eDate.getTime())) {
+                        exp = eDate;
+                    }
+                }
+            }
+
+            let tvText = '';
+            let dvNum = parseFloat(r.drugVolume) || 0;
+
+            if (dvNum === 0 && r.dose && r.drugName) {
+                const parsedDose = parseFloat((r.dose.toString().match(/[\d.]+/) || ['0'])[0]);
+                if (parsedDose > 0) {
+                    const dInfo = drugsInfo.find(d => d.name.toLowerCase() === r.drugName.toLowerCase() || d.id.toLowerCase() === r.drugName.toLowerCase());
+                    if (dInfo && dInfo.raw && parseFloat(dInfo.raw.concentration_per_ml) > 0) {
+                        dvNum = parsedDose / parseFloat(dInfo.raw.concentration_per_ml);
+                    } else {
+                        const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === r.drugName.toLowerCase());
+                        if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].concentration > 0) {
+                            dvNum = parsedDose / DRUG_CONCENTRATION_DATA[drugKey].concentration;
                         }
                     }
                 }
+            }
 
-                const ivNum = parseFloat(r.volume) || 0;
-                if (dvNum > 0 || ivNum > 0) {
-                    let tv = (dvNum + ivNum).toFixed(2);
-                    if (tv.endsWith('.00')) tv = tv.replace('.00', '');
-                    tvText = ` (รวมสุทธิ ${tv}&nbsp;ml)`;
-                }
+            const ivNum = parseFloat(r.volume) || 0;
+            if (dvNum > 0 || ivNum > 0) {
+                let tv = (dvNum + ivNum).toFixed(2);
+                if (tv.endsWith('.00')) tv = tv.replace('.00', '');
+                tvText = ` (รวมสุทธิ ${tv}&nbsp;ml)`;
+            }
 
-                return `
+            return `
                 <div class="sticker">
-                    <div class="row">
+                    <div class="row row-patient">
                         <span>${patient.title || ''}${patient.name || '-'}</span>
                         <span>WARD: ${patient.ward || '-'}</span>
                     </div>
@@ -1404,7 +1436,7 @@ function App() {
                                 printerName: user.default_printer,
                                 paperSize: 'Sticker'
                             });
-                            
+
                             if (res.data.success) {
                                 showNotification(`สั่งปริ้นไปยัง ${user.default_printer} สำเร็จ`, 'success');
                                 savePrintLog({ htmlContent, printerName: user.default_printer, paperSize: 'Sticker', isA4: false, title: 'สติ๊กเกอร์ยา: ' + (patient.hn || '') });
@@ -1458,7 +1490,7 @@ function App() {
         const now = new Date();
         const formatDateTime = (date) => {
             const d = date.getDate().toString().padStart(2, '0');
-            const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
             const m = months[date.getMonth()];
             const y = (date.getFullYear() + 543).toString();
             const h = date.getHours().toString().padStart(2, '0');
@@ -1469,12 +1501,12 @@ function App() {
 
         let drugBlocks = '';
         const rowsToPrint = activeRows.some(r => r.drugName) ? activeRows : (singleDrugResults.length > 0 ? singleDrugResults.map(r => ({ drugName: r.name, dose: r.dose, doseFormula: r.doseFormula, prepInstructions: r.prepInstructions, drugVolume: r.drugVolume })) : activeRows);
-        
+
         rowsToPrint.forEach((row, i) => {
             let printDrugVolume = '';
             let printVials = row.vials || '';
             let finalPrepInstructions = row.prepInstructions || 'ไม่ต้องละลาย (Ready to use)';
-            
+
             if (row.drugName) {
                 const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
                 let concentration = 0;
@@ -1483,7 +1515,7 @@ function App() {
                     concentration = parseFloat(dInfo.raw.concentration_per_ml) || 0;
                     dosePerPack = parseFloat(dInfo.raw.dose_per_pack) || 0;
                 }
-                
+
                 if (concentration === 0 || dosePerPack === 0) {
                     const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
                     if (drugKey) {
@@ -1491,7 +1523,7 @@ function App() {
                         dosePerPack = DRUG_CONCENTRATION_DATA[drugKey].dosePerPack || dosePerPack;
                     }
                 }
-                
+
                 let numVal = 0;
                 if (row.dose) {
                     numVal = parseFloat(row.dose.toString().replace(/[^\d.]/g, ''));
@@ -1508,19 +1540,19 @@ function App() {
                         dosePerPack = DRUG_CONCENTRATION_DATA[drugKey].dosePerPack || dosePerPack;
                     }
                 }
-                
+
                 if (!printVials && numVal > 0 && dosePerPack > 0) {
                     printVials = Math.ceil(numVal / dosePerPack);
                 }
             }
 
-                let printTotalVol = '';
-                const dvNum = parseFloat(printDrugVolume) || 0;
-                const ivNum = parseFloat(row.volume) || 0;
-                if (dvNum > 0 || ivNum > 0) {
-                    printTotalVol = (dvNum + ivNum).toFixed(2);
-                    if (printTotalVol.endsWith('.00')) printTotalVol = printTotalVol.replace('.00', '');
-                }
+            let printTotalVol = '';
+            const dvNum = parseFloat(printDrugVolume) || 0;
+            const ivNum = parseFloat(row.volume) || 0;
+            if (dvNum > 0 || ivNum > 0) {
+                printTotalVol = (dvNum + ivNum).toFixed(2);
+                if (printTotalVol.endsWith('.00')) printTotalVol = printTotalVol.replace('.00', '');
+            }
 
             drugBlocks += `
                 <div class="drug-block">
@@ -1922,7 +1954,7 @@ function App() {
             showNotification('ไม่มีข้อมูลยาที่เลือก', 'warning');
             return;
         }
-        
+
         const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -1941,15 +1973,15 @@ function App() {
         <body>
             <h2 style="text-align: center; margin-bottom: 20px;">ข้อมูลยาที่เลือก</h2>
             ${selectedDrugs.map(drugId => {
-                const dInfo = drugsInfo.find(d => d.id === drugId) || drugsInfo[0];
-                return `
+            const dInfo = drugsInfo.find(d => d.id === drugId) || drugsInfo[0];
+            return `
                 <div class="drug-container">
                     <div class="drug-title">${dInfo.name}</div>
                     <div class="drug-desc">${dInfo.desc}</div>
                     <div class="drug-details">${dInfo.details}</div>
                 </div>
                 `;
-            }).join('')}
+        }).join('')}
         </body>
         </html>
         `;
@@ -2039,16 +2071,16 @@ function App() {
                 const unit = drugInfo.raw.alert_cumulative_dose_unit || 'mg/m2'; // default to mg/m2 for lifetime max dose
                 const dName = drugId.toUpperCase();
                 const pastDose = cumulativeDoses[dName] || 0;
-                
+
                 // Find current dose from singleDrugResults
                 const currentResult = singleDrugResults.find(r => r.id === drugId);
                 const currentDose = currentResult && currentResult.dose ? parseFloat(currentResult.dose.toString().replace(/[^\d.]/g, '')) || 0 : 0;
                 const totalDose = pastDose + currentDose;
-                
+
                 // Calculate actual absolute limit based on patient's current BSA
                 let calculatedLimitMg = limit;
                 const currentBsaVal = parseFloat(bsa) || 0;
-                
+
                 if (unit === 'mg/m2' && currentBsaVal > 0) {
                     calculatedLimitMg = limit * currentBsaVal;
                 } else if (unit === 'g') {
@@ -2056,23 +2088,23 @@ function App() {
                 } else if (unit === 'g/m2' && currentBsaVal > 0) {
                     calculatedLimitMg = limit * 1000 * currentBsaVal;
                 }
-                
+
                 const limitPercentage = (totalDose / calculatedLimitMg) * 100;
-                
+
                 if (totalDose >= calculatedLimitMg) {
                     alerts.push({
                         type: 'danger',
-                        message: `🚨 อันตราย: ขนาดยาสะสมตลอดชีวิตของ ${dName} ทะลุขีดจำกัด! ยอดรวม ${totalDose.toLocaleString(undefined, {maximumFractionDigits:1})} mg เกินขีดจำกัด ${calculatedLimitMg.toLocaleString(undefined, {maximumFractionDigits:1})} mg (อ้างอิงจากลิมิต ${limit} ${unit} x BSA ปัจจุบัน) (ประวัติเดิม: ${pastDose.toLocaleString()} mg + รอบนี้: ${currentDose.toLocaleString()} mg)`
+                        message: `🚨 อันตราย: ขนาดยาสะสมตลอดชีวิตของ ${dName} ทะลุขีดจำกัด! ยอดรวม ${totalDose.toLocaleString(undefined, { maximumFractionDigits: 1 })} mg เกินขีดจำกัด ${calculatedLimitMg.toLocaleString(undefined, { maximumFractionDigits: 1 })} mg (อ้างอิงจากลิมิต ${limit} ${unit} x BSA ปัจจุบัน) (ประวัติเดิม: ${pastDose.toLocaleString()} mg + รอบนี้: ${currentDose.toLocaleString()} mg)`
                     });
                 } else if (limitPercentage >= 80) {
                     alerts.push({
                         type: 'warning',
-                        message: `⚠️ ข้อควรระวัง (Lifetime Dose): ยาสะสมของ ${dName} ใกล้ถึงขีดจำกัดสูงสุดแล้ว! ยอดรวม ${totalDose.toLocaleString(undefined, {maximumFractionDigits:1})} mg คิดเป็น ${limitPercentage.toFixed(1)}% ของขีดจำกัด (${calculatedLimitMg.toLocaleString(undefined, {maximumFractionDigits:1})} mg)`
+                        message: `⚠️ ข้อควรระวัง (Lifetime Dose): ยาสะสมของ ${dName} ใกล้ถึงขีดจำกัดสูงสุดแล้ว! ยอดรวม ${totalDose.toLocaleString(undefined, { maximumFractionDigits: 1 })} mg คิดเป็น ${limitPercentage.toFixed(1)}% ของขีดจำกัด (${calculatedLimitMg.toLocaleString(undefined, { maximumFractionDigits: 1 })} mg)`
                     });
                 } else if (pastDose > 0) {
                     alerts.push({
                         type: 'warning',
-                        message: `ℹ️ ข้อมูล: ${dName} ขนาดยาสะสมรวมรอบนี้ ${totalDose.toLocaleString(undefined, {maximumFractionDigits:1})} mg (ลิมิตสูงสุดสำหรับผู้ป่วยรายนี้คือ ${calculatedLimitMg.toLocaleString(undefined, {maximumFractionDigits:1})} mg)`
+                        message: `ℹ️ ข้อมูล: ${dName} ขนาดยาสะสมรวมรอบนี้ ${totalDose.toLocaleString(undefined, { maximumFractionDigits: 1 })} mg (ลิมิตสูงสุดสำหรับผู้ป่วยรายนี้คือ ${calculatedLimitMg.toLocaleString(undefined, { maximumFractionDigits: 1 })} mg)`
                     });
                 }
             }
@@ -2268,7 +2300,7 @@ function App() {
             setAdminRows(prev => {
                 let newRows = [...prev];
                 let changed = false;
-                
+
                 selectedDrugs.forEach(drugId => {
                     const drug = drugsInfo.find(d => d.id === drugId);
                     if (drug) {
@@ -2290,7 +2322,7 @@ function App() {
                         }
                     }
                 });
-                
+
                 return changed ? newRows : prev;
             });
         }
@@ -2566,7 +2598,7 @@ function App() {
         if (val.length > safePrevVal.length) {
             if (cleaned.length === 2 && !cleaned.includes(':')) cleaned += ':';
         }
-        
+
         if (cleaned.length >= 2) {
             let h = parseInt(cleaned.substring(0, 2), 10);
             if (h > 23) cleaned = '23' + cleaned.substring(2);
@@ -2575,7 +2607,7 @@ function App() {
             let m = parseInt(cleaned.substring(3, 5), 10);
             if (m > 59) cleaned = cleaned.substring(0, 3) + '59';
         }
-        
+
         if (cleaned.length <= 5) {
             setAdminRows(prev => prev.map((r, i) => i === rowIdx ? { ...r, [field]: cleaned } : r));
         }
@@ -2695,7 +2727,7 @@ function App() {
     return (
         <div className="p-4 md:p-8 print:p-0 min-h-screen flex flex-col justify-between relative">
             {user && user.must_change_password !== 1 && (
-                <div 
+                <div
                     className="absolute top-6 left-6 flex items-center gap-5 premium-card p-5 pl-8 pr-14 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.3)] z-50 animate-row-in no-print backdrop-blur-xl border-sky-500/50 cursor-pointer hover:shadow-lg transition-all duration-300"
                     onClick={() => setIsUserMenuExpanded(!isUserMenuExpanded)}
                 >
@@ -2717,7 +2749,7 @@ function App() {
                                 <ChevronDown size={20} />
                             </div>
                         </div>
-                        
+
                         {isUserMenuExpanded && (
                             <div className="flex items-center gap-3 mt-3 flex-wrap animate-fade-in" onClick={e => e.stopPropagation()}>
                                 <button
@@ -2819,13 +2851,12 @@ function App() {
                                             <div
                                                 key={p.hn}
                                                 onClick={() => selectPatient(p)}
-                                                className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${
-                                                    patient.hn === p.hn
+                                                className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${patient.hn === p.hn
                                                         ? 'bg-sky-600/10 border-sky-500 shadow-md'
                                                         : theme === 'dark'
                                                             ? 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700'
                                                             : 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300 shadow-sm'
-                                                }`}
+                                                    }`}
                                             >
                                                 <div className="flex justify-between items-start">
                                                     <span
@@ -2844,18 +2875,18 @@ function App() {
                                                     </span>
                                                 </div>
                                                 <p className="font-bold text-sm text-slate-800 dark:text-slate-200 mt-1 truncate">
-                                                {(() => {
-                                                    const title = (p.title || '').trim();
-                                                    let name = (p.name || '').trim();
-                                                    if (title) {
-                                                        while (name.startsWith(title)) {
-                                                            name = name.substring(title.length).trim();
+                                                    {(() => {
+                                                        const title = (p.title || '').trim();
+                                                        let name = (p.name || '').trim();
+                                                        if (title) {
+                                                            while (name.startsWith(title)) {
+                                                                name = name.substring(title.length).trim();
+                                                            }
+                                                            return `${title} ${name}`;
                                                         }
-                                                        return `${title} ${name}`;
-                                                    }
-                                                    return name;
-                                                })()}
-                                            </p>
+                                                        return name;
+                                                    })()}
+                                                </p>
                                                 <div className="flex gap-3 mt-2 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
                                                     <span>อายุ: {p.age || '-'} ปี</span>
                                                     <span>สูง: {p.height || '-'} cm</span>
@@ -2928,14 +2959,14 @@ function App() {
                                                 type="text"
                                                 placeholder={prevStats.dob ? prevStats.dob : "วัน/เดือน/ปีเกิด"}
                                                 value={patient.dob || ''}
-                                                onChange={e => handleDateInputChange(e.target.value, patient.dob || '', (val) => setPatient({...patient, dob: val, age: calculateAgeFromThaiDateString(val) || patient.age}))}
+                                                onChange={e => handleDateInputChange(e.target.value, patient.dob || '', (val) => setPatient({ ...patient, dob: val, age: calculateAgeFromThaiDateString(val) || patient.age }))}
                                                 className="form-control pr-8"
                                                 maxLength={10}
                                             />
                                             <input
                                                 type="date"
                                                 className="absolute left-0 right-0 top-0 bottom-0 opacity-0 cursor-pointer w-full h-full"
-                                                onClick={(e) => { try { e.target.showPicker(); } catch(err){} }}
+                                                onClick={(e) => { try { e.target.showPicker(); } catch (err) { } }}
                                                 value={(() => {
                                                     if (patient.dob && patient.dob.length === 10) {
                                                         const d = patient.dob.substring(0, 2);
@@ -2953,7 +2984,7 @@ function App() {
                                                     const [y, m, d] = e.target.value.split('-');
                                                     const thaiYear = parseInt(y, 10) < 2400 ? parseInt(y, 10) + 543 : parseInt(y, 10);
                                                     const newDob = `${d}/${m}/${thaiYear}`;
-                                                    setPatient({...patient, dob: newDob, age: calculateAgeFromThaiDateString(newDob)});
+                                                    setPatient({ ...patient, dob: newDob, age: calculateAgeFromThaiDateString(newDob) });
                                                 }}
                                             />
                                             <Calendar size={16} className="absolute right-3 text-slate-400 pointer-events-none" />
@@ -3265,29 +3296,29 @@ function App() {
                                             <h2 className="text-sm font-black text-sky-700 dark:text-sky-300">ระบุรายชื่อยาที่ต้องการคำนวณ</h2>
                                         </div>
                                         <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setShowDrugInfo(!showDrugInfo)}
-                                            className="flex items-center gap-2 text-[10px] font-black text-sky-500 hover:text-sky-400 p-1.5 bg-sky-600/5 rounded-lg border border-sky-500/20 transition-all no-print"
-                                        >
-                                            <Info size={12} /> ข้อมูลยา
-                                        </button>
-                                        {showDrugInfo && (
                                             <button
-                                                onClick={printDrugInfo}
-                                                className="flex items-center gap-2 text-[10px] font-black text-indigo-500 hover:text-indigo-400 p-1.5 bg-indigo-600/5 rounded-lg border border-indigo-500/20 transition-all no-print"
+                                                onClick={() => setShowDrugInfo(!showDrugInfo)}
+                                                className="flex items-center gap-2 text-[10px] font-black text-sky-500 hover:text-sky-400 p-1.5 bg-sky-600/5 rounded-lg border border-sky-500/20 transition-all no-print"
                                             >
-                                                <Printer size={12} /> พิมพ์ข้อมูลยา
+                                                <Info size={12} /> ข้อมูลยา
                                             </button>
-                                        )}
-                                    </div>                                    
+                                            {showDrugInfo && (
+                                                <button
+                                                    onClick={printDrugInfo}
+                                                    className="flex items-center gap-2 text-[10px] font-black text-indigo-500 hover:text-indigo-400 p-1.5 bg-indigo-600/5 rounded-lg border border-indigo-500/20 transition-all no-print"
+                                                >
+                                                    <Printer size={12} /> พิมพ์ข้อมูลยา
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="mb-4 flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">จำนวนรอบการให้ยา (Cycle):</label>
-                                        <input 
-                                            type="text" 
-                                            className="form-control text-xs w-28 px-3 py-1.5 bg-white dark:bg-slate-900" 
-                                            placeholder="เช่น 1/6" 
+                                        <input
+                                            type="text"
+                                            className="form-control text-xs w-28 px-3 py-1.5 bg-white dark:bg-slate-900"
+                                            placeholder="เช่น 1/6"
                                             value={patient.cycle || ''}
                                             onChange={e => setPatient({ ...patient, cycle: e.target.value })}
                                         />
@@ -3297,28 +3328,28 @@ function App() {
                                     <div className="mb-4">
                                         <div className="flex justify-between items-center mb-1.5">
                                             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">เลือกสูตรยา (Regimen Template):</label>
-                                            <button 
+                                            <button
                                                 onClick={() => setShowRegimens(true)}
                                                 className="text-[10px] text-sky-500 hover:text-sky-600 bg-sky-50 dark:bg-sky-900/30 px-2 py-1 rounded border border-sky-200 dark:border-sky-800 transition-colors flex items-center gap-1 font-bold"
                                             >
                                                 <Settings size={12} /> จัดการสูตรยา
                                             </button>
                                         </div>
-                                        <select 
+                                        <select
                                             className="form-control text-sm w-full bg-white dark:bg-slate-900"
                                             value={selectedRegimen}
                                             onChange={(e) => {
                                                 const val = e.target.value;
                                                 setSelectedRegimen(val);
                                                 if (val === 'custom') return;
-                                                
+
                                                 const template = regimenTemplates.find(t => t.id.toString() === val);
                                                 if (template) {
                                                     try {
                                                         const drugs = JSON.parse(template.drugs || '[]');
                                                         const drugIds = drugs.map(d => d.drugId).filter(Boolean);
                                                         setSelectedDrugs(drugIds);
-                                                        
+
                                                         // Also set adminRows for these drugs
                                                         if (drugs.length > 0) {
                                                             const newAdminRows = drugs.map((d, idx) => {
@@ -3344,7 +3375,7 @@ function App() {
                                                             });
                                                             setAdminRows(newAdminRows);
                                                         }
-                                                    } catch(e) { console.error('Error parsing regimen drugs', e); }
+                                                    } catch (e) { console.error('Error parsing regimen drugs', e); }
                                                 }
                                             }}
                                         >
@@ -3357,16 +3388,16 @@ function App() {
 
                                     {(() => {
                                         const calcTypeMap = {
-                                            'BSA':             'BSA',
+                                            'BSA': 'BSA',
                                             'CALVERT_FORMULA': 'Calvert Formula',
-                                            'FIXED_DOSE':      'Fixed Dose',
-                                            'WEIGHT_BASED':    'ตามน้ำหนักตัว',
+                                            'FIXED_DOSE': 'Fixed Dose',
+                                            'WEIGHT_BASED': 'ตามน้ำหนักตัว',
                                         };
                                         const categoryConfig = {
-                                            'CHEMOTHERAPY':     { label: '💊 เคมีบำบัด (Chemotherapy)',             prefix: '💊 ' },
-                                            'TARGETED_THERAPY': { label: '🎯 ยามุ่งเป้า (Targeted Therapy)',        prefix: '🎯 ' },
-                                            'IMMUNOTHERAPY':    { label: '🛡️ ภูมิคุ้มกันบำบัด (Immunotherapy)',    prefix: '🛡️ ' },
-                                            'SUPPORTIVE_CARE':  { label: '🩺 ยาประคับประคอง (Supportive Care)',      prefix: '🩺 ' },
+                                            'CHEMOTHERAPY': { label: '💊 เคมีบำบัด (Chemotherapy)', prefix: '💊 ' },
+                                            'TARGETED_THERAPY': { label: '🎯 ยามุ่งเป้า (Targeted Therapy)', prefix: '🎯 ' },
+                                            'IMMUNOTHERAPY': { label: '🛡️ ภูมิคุ้มกันบำบัด (Immunotherapy)', prefix: '🛡️ ' },
+                                            'SUPPORTIVE_CARE': { label: '🩺 ยาประคับประคอง (Supportive Care)', prefix: '🩺 ' },
                                         };
                                         const activeDrugs = drugsInfo.filter(d => d.raw?.is_active === 1);
                                         const grouped = {};
@@ -3463,54 +3494,54 @@ function App() {
                                                 )}
                                             </div>
                                         );
-                                        })()}
+                                    })()}
 
                                     {showDrugInfo && (
                                         <div className="animate-pop mt-4 mb-6 space-y-4">
                                             {selectedDrugs.map(drugId => {
-                                                    const dInfo = drugsInfo.find(d => d.id === drugId) || drugsInfo[0];
-                                                    return (
-                                                        <div key={dInfo.id} className={`p-5 rounded-2xl border-2 transition-all shadow-md ${dInfo.color === 'sky'
-                                                            ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-400 dark:border-sky-500/50'
-                                                            : dInfo.color === 'amber'
-                                                                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-400 dark:border-amber-500/50'
-                                                                : dInfo.color === 'purple'
-                                                                    ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-400 dark:border-purple-500/50'
-                                                                    : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-400 dark:border-emerald-500/50'
-                                                            }`}>
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <span className={`px-2 py-0.5 text-[10px] font-black uppercase rounded tracking-widest ${dInfo.color === 'sky'
-                                                                    ? 'bg-sky-500 text-white'
-                                                                    : dInfo.color === 'amber'
-                                                                        ? 'bg-amber-500 text-slate-900'
-                                                                        : dInfo.color === 'purple'
-                                                                            ? 'bg-purple-500 text-white'
-                                                                            : 'bg-emerald-500 text-slate-900'
-                                                                    }`}>
-                                                                    ข้อมูลยาที่เลือก
-                                                                </span>
-                                                                <div className={`text-base font-black uppercase tracking-wider ${dInfo.color === 'sky'
-                                                                    ? 'text-sky-700 dark:text-sky-400'
-                                                                    : dInfo.color === 'amber'
-                                                                        ? 'text-amber-700 dark:text-amber-400'
-                                                                        : dInfo.color === 'purple'
-                                                                            ? 'text-purple-700 dark:text-purple-400'
-                                                                            : 'text-emerald-700 dark:text-emerald-400'
-                                                                    }`}>
-                                                                    {dInfo.name}
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug">
-                                                                {dInfo.desc}
-                                                            </p>
-                                                            <div className="mt-3 p-3 rounded-lg bg-white/60 dark:bg-black/30 border border-slate-200 dark:border-white/5">
-                                                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-relaxed">
-                                                                    {dInfo.details}
-                                                                </p>
+                                                const dInfo = drugsInfo.find(d => d.id === drugId) || drugsInfo[0];
+                                                return (
+                                                    <div key={dInfo.id} className={`p-5 rounded-2xl border-2 transition-all shadow-md ${dInfo.color === 'sky'
+                                                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-400 dark:border-sky-500/50'
+                                                        : dInfo.color === 'amber'
+                                                            ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-400 dark:border-amber-500/50'
+                                                            : dInfo.color === 'purple'
+                                                                ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-400 dark:border-purple-500/50'
+                                                                : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-400 dark:border-emerald-500/50'
+                                                        }`}>
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className={`px-2 py-0.5 text-[10px] font-black uppercase rounded tracking-widest ${dInfo.color === 'sky'
+                                                                ? 'bg-sky-500 text-white'
+                                                                : dInfo.color === 'amber'
+                                                                    ? 'bg-amber-500 text-slate-900'
+                                                                    : dInfo.color === 'purple'
+                                                                        ? 'bg-purple-500 text-white'
+                                                                        : 'bg-emerald-500 text-slate-900'
+                                                                }`}>
+                                                                ข้อมูลยาที่เลือก
+                                                            </span>
+                                                            <div className={`text-base font-black uppercase tracking-wider ${dInfo.color === 'sky'
+                                                                ? 'text-sky-700 dark:text-sky-400'
+                                                                : dInfo.color === 'amber'
+                                                                    ? 'text-amber-700 dark:text-amber-400'
+                                                                    : dInfo.color === 'purple'
+                                                                        ? 'text-purple-700 dark:text-purple-400'
+                                                                        : 'text-emerald-700 dark:text-emerald-400'
+                                                                }`}>
+                                                                {dInfo.name}
                                                             </div>
                                                         </div>
-                                                    );
-                                                })
+                                                        <p className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug">
+                                                            {dInfo.desc}
+                                                        </p>
+                                                        <div className="mt-3 p-3 rounded-lg bg-white/60 dark:bg-black/30 border border-slate-200 dark:border-white/5">
+                                                            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-relaxed">
+                                                                {dInfo.details}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
                                             }
                                         </div>
                                     )}
@@ -3559,62 +3590,62 @@ function App() {
                                                 </label>
                                             </h3>
                                             {enableHematology && (
-                                            <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-2">
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">WBC (cells/mm³)</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="ระบุค่า WBC"
-                                                            value={wbc}
-                                                            className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setWbc(e.target.value)}
-                                                        />
+                                                <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-2">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">WBC (cells/mm³)</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="ระบุค่า WBC"
+                                                                value={wbc}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setWbc(e.target.value)}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">Platelets (cells/mm³)</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="ระบุค่า Platelets"
+                                                                value={plt}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setPlt(e.target.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">% Neutrophils</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="% N"
+                                                                value={neutrophils}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setNeutrophils(e.target.value)}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">% Bands</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="% B"
+                                                                value={bands}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setBands(e.target.value)}
+                                                            />
+                                                        </div>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">Platelets (cells/mm³)</label>
+                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">ANC (cells/mm³)</label>
                                                         <input
                                                             type="number"
-                                                            placeholder="ระบุค่า Platelets"
-                                                            value={plt}
-                                                            className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setPlt(e.target.value)}
+                                                            placeholder="คำนวณจากสูตร ANC = WBC × (%N + %B) ÷ 100"
+                                                            value={anc}
+                                                            className="form-control text-xs py-1.5 px-2 bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed"
+                                                            readOnly
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">% Neutrophils</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="% N"
-                                                            value={neutrophils}
-                                                            className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setNeutrophils(e.target.value)}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">% Bands</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="% B"
-                                                            value={bands}
-                                                            className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setBands(e.target.value)}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">ANC (cells/mm³)</label>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="คำนวณจากสูตร ANC = WBC × (%N + %B) ÷ 100"
-                                                        value={anc}
-                                                        className="form-control text-xs py-1.5 px-2 bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed"
-                                                        readOnly
-                                                    />
-                                                </div>
-                                            </div>
                                             )}
                                         </div>
 
@@ -3664,59 +3695,59 @@ function App() {
                                                 </div>
                                             )}
                                             {enableLiver && (
-                                            <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-2">
-                                                <div>
-                                                    <label className="flex items-center gap-1.5 mb-1 cursor-pointer w-fit">
-                                                        <input type="checkbox" checked={enableTbili} onChange={(e) => {
-                                                            setEnableTbili(e.target.checked);
-                                                            if (!e.target.checked) setTbili('');
-                                                        }} className="w-3 h-3 cursor-pointer" />
-                                                        <span className="text-[10px] font-bold text-slate-500">T.Bilirubin (mg/dL)</span>
-                                                    </label>
-                                                    {enableTbili && (
-                                                        <input
-                                                            type="number"
-                                                            placeholder="ระบุค่า T.Bili"
-                                                            step="0.1"
-                                                            value={tbili}
-                                                            className="form-control text-xs py-1.5 px-2 mt-1 animate-in fade-in slide-in-from-top-1"
-                                                            onChange={e => setTbili(e.target.value)}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2">
+                                                <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-2">
                                                     <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">AST (U/L)</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="AST"
-                                                            value={ast}
-                                                            className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setAst(e.target.value)}
-                                                        />
+                                                        <label className="flex items-center gap-1.5 mb-1 cursor-pointer w-fit">
+                                                            <input type="checkbox" checked={enableTbili} onChange={(e) => {
+                                                                setEnableTbili(e.target.checked);
+                                                                if (!e.target.checked) setTbili('');
+                                                            }} className="w-3 h-3 cursor-pointer" />
+                                                            <span className="text-[10px] font-bold text-slate-500">T.Bilirubin (mg/dL)</span>
+                                                        </label>
+                                                        {enableTbili && (
+                                                            <input
+                                                                type="number"
+                                                                placeholder="ระบุค่า T.Bili"
+                                                                step="0.1"
+                                                                value={tbili}
+                                                                className="form-control text-xs py-1.5 px-2 mt-1 animate-in fade-in slide-in-from-top-1"
+                                                                onChange={e => setTbili(e.target.value)}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">AST (U/L)</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="AST"
+                                                                value={ast}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setAst(e.target.value)}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">ALT (U/L)</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="ALT"
+                                                                value={alt}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setAlt(e.target.value)}
+                                                            />
+                                                        </div>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">ALT (U/L)</label>
+                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">ALP (U/L)</label>
                                                         <input
                                                             type="number"
-                                                            placeholder="ALT"
-                                                            value={alt}
+                                                            placeholder="ระบุค่า ALP"
+                                                            value={alp}
                                                             className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setAlt(e.target.value)}
+                                                            onChange={e => setAlp(e.target.value)}
                                                         />
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-[10px] font-bold text-slate-500 mb-1">ALP (U/L)</label>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="ระบุค่า ALP"
-                                                        value={alp}
-                                                        className="form-control text-xs py-1.5 px-2"
-                                                        onChange={e => setAlp(e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
                                             )}
                                         </div>
 
@@ -3728,7 +3759,7 @@ function App() {
                                                     <div className="relative">
                                                         <input type="checkbox" className="sr-only" checked={enableRenal} onChange={(e) => {
                                                             setEnableRenal(e.target.checked);
-                                                            if (!e.target.checked) { 
+                                                            if (!e.target.checked) {
                                                                 setDrugParams({ ...drugParams, gfr: '' });
                                                                 setPatientScr('');
                                                             }
@@ -3739,97 +3770,97 @@ function App() {
                                                 </label>
                                             </h3>
                                             {enableRenal && (
-                                            <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-2">
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setUseAutoGfr(false)}
-                                                        className={`py-1 rounded text-[9px] font-bold transition-all cursor-pointer ${!useAutoGfr
-                                                            ? 'bg-emerald-600 text-white shadow-sm'
-                                                            : 'bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
-                                                            }`}
-                                                    >
-                                                        Manual CrCl
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setUseAutoGfr(true)}
-                                                        className={`py-1 rounded text-[9px] font-bold transition-all cursor-pointer ${useAutoGfr
-                                                            ? 'bg-emerald-600 text-white shadow-sm'
-                                                            : 'bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
-                                                            }`}
-                                                    >
-                                                        Auto CrCl
-                                                    </button>
-                                                </div>
+                                                <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-2">
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setUseAutoGfr(false)}
+                                                            className={`py-1 rounded text-[9px] font-bold transition-all cursor-pointer ${!useAutoGfr
+                                                                ? 'bg-emerald-600 text-white shadow-sm'
+                                                                : 'bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                                                                }`}
+                                                        >
+                                                            Manual CrCl
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setUseAutoGfr(true)}
+                                                            className={`py-1 rounded text-[9px] font-bold transition-all cursor-pointer ${useAutoGfr
+                                                                ? 'bg-emerald-600 text-white shadow-sm'
+                                                                : 'bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                                                                }`}
+                                                        >
+                                                            Auto CrCl
+                                                        </button>
+                                                    </div>
 
-                                                {!useAutoGfr ? (
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">ระบุค่า CrCl (ml/min)</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="CrCl (ml/min)"
-                                                            value={drugParams.gfr}
-                                                            className="form-control text-xs py-1.5 px-2"
-                                                            onChange={e => setDrugParams({ ...drugParams, gfr: e.target.value })}
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-2">
-                                                        <div className="grid grid-cols-2 xl:grid-cols-4 lg:grid-cols-2 gap-1.5">
-                                                            <div>
-                                                                <label className="block text-[9px] font-bold text-slate-500 mb-0.5">อายุ (ปี)</label>
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder="Age"
-                                                                    value={patient.age || ''}
-                                                                    className="form-control text-xs px-2 py-1"
-                                                                    onChange={e => setPatient({ ...patient, age: e.target.value })}
-                                                                />
+                                                    {!useAutoGfr ? (
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-slate-500 mb-1">ระบุค่า CrCl (ml/min)</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="CrCl (ml/min)"
+                                                                value={drugParams.gfr}
+                                                                className="form-control text-xs py-1.5 px-2"
+                                                                onChange={e => setDrugParams({ ...drugParams, gfr: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            <div className="grid grid-cols-2 xl:grid-cols-4 lg:grid-cols-2 gap-1.5">
+                                                                <div>
+                                                                    <label className="block text-[9px] font-bold text-slate-500 mb-0.5">อายุ (ปี)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Age"
+                                                                        value={patient.age || ''}
+                                                                        className="form-control text-xs px-2 py-1"
+                                                                        onChange={e => setPatient({ ...patient, age: e.target.value })}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[9px] font-bold text-slate-500 mb-0.5">น้ำหนัก (kg)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Weight"
+                                                                        value={patient.weight || ''}
+                                                                        className="form-control text-xs px-2 py-1"
+                                                                        onChange={e => setPatient({ ...patient, weight: e.target.value })}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[9px] font-bold text-slate-500 mb-0.5">เพศ</label>
+                                                                    <select
+                                                                        value={patient.gender || ''}
+                                                                        className="form-control text-[10px] font-bold px-1 py-1"
+                                                                        onChange={e => setPatient({ ...patient, gender: e.target.value })}
+                                                                    >
+                                                                        <option value="">เลือก</option>
+                                                                        <option value="male">ชาย</option>
+                                                                        <option value="female">หญิง</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[9px] font-bold text-slate-500 mb-0.5">Scr (mg/dL)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Scr"
+                                                                        step="0.01"
+                                                                        value={patientScr}
+                                                                        className="form-control text-xs px-2 py-1"
+                                                                        onChange={e => setPatientScr(e.target.value)}
+                                                                    />
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <label className="block text-[9px] font-bold text-slate-500 mb-0.5">น้ำหนัก (kg)</label>
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder="Weight"
-                                                                    value={patient.weight || ''}
-                                                                    className="form-control text-xs px-2 py-1"
-                                                                    onChange={e => setPatient({ ...patient, weight: e.target.value })}
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[9px] font-bold text-slate-500 mb-0.5">เพศ</label>
-                                                                <select
-                                                                    value={patient.gender || ''}
-                                                                    className="form-control text-[10px] font-bold px-1 py-1"
-                                                                    onChange={e => setPatient({ ...patient, gender: e.target.value })}
-                                                                >
-                                                                    <option value="">เลือก</option>
-                                                                    <option value="male">ชาย</option>
-                                                                    <option value="female">หญิง</option>
-                                                                </select>
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[9px] font-bold text-slate-500 mb-0.5">Scr (mg/dL)</label>
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder="Scr"
-                                                                    step="0.01"
-                                                                    value={patientScr}
-                                                                    className="form-control text-xs px-2 py-1"
-                                                                    onChange={e => setPatientScr(e.target.value)}
-                                                                />
+                                                            <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-center">
+                                                                <div className="text-[9px] font-bold text-emerald-600/70 dark:text-emerald-500/70">ผลการคำนวณ CrCl (Cockcroft-Gault)</div>
+                                                                <div className="text-xs font-black text-emerald-500">
+                                                                    {autoGfrValue !== null ? (isNaN(autoGfrValue) ? 'ว่าง' : `${autoGfrValue} ml/min`) : 'รอข้อมูลครบถ้วน...'}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-center">
-                                                            <div className="text-[9px] font-bold text-emerald-600/70 dark:text-emerald-500/70">ผลการคำนวณ CrCl (Cockcroft-Gault)</div>
-                                                            <div className="text-xs font-black text-emerald-500">
-                                                                {autoGfrValue !== null ? (isNaN(autoGfrValue) ? 'ว่าง' : `${autoGfrValue} ml/min`) : 'รอข้อมูลครบถ้วน...'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -3857,12 +3888,12 @@ function App() {
                                                         { id: 'amputee', label: 'มีประวัติตัดแขนขา (Amputee)' }
                                                     ].map(opt => (
                                                         <label key={opt.id} className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-3 ${amputation === opt.id ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500' : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
-                                                            <input 
-                                                                type="radio" 
-                                                                name="amputationStatus" 
-                                                                checked={amputation === opt.id} 
-                                                                onChange={() => setAmputation(opt.id)} 
-                                                                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer" 
+                                                            <input
+                                                                type="radio"
+                                                                name="amputationStatus"
+                                                                checked={amputation === opt.id}
+                                                                onChange={() => setAmputation(opt.id)}
+                                                                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
                                                             />
                                                             <span className={`text-sm font-black ${amputation === opt.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-400'}`}>
                                                                 {opt.label}
@@ -3882,12 +3913,12 @@ function App() {
                                                                     { id: 'above_elbow', label: 'เหนือศอก (AE)' }
                                                                 ].map(opt => (
                                                                     <label key={opt.id} className={`px-3 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-2 ${ampDetails.level === opt.id ? 'bg-white dark:bg-slate-800 border-indigo-400 shadow-sm' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
-                                                                        <input 
-                                                                            type="radio" 
-                                                                            name="ampLevel" 
-                                                                            checked={ampDetails.level === opt.id} 
-                                                                            onChange={() => setAmpDetails({ ...ampDetails, level: opt.id })} 
-                                                                            className="w-4 h-4 text-indigo-600 cursor-pointer" 
+                                                                        <input
+                                                                            type="radio"
+                                                                            name="ampLevel"
+                                                                            checked={ampDetails.level === opt.id}
+                                                                            onChange={() => setAmpDetails({ ...ampDetails, level: opt.id })}
+                                                                            className="w-4 h-4 text-indigo-600 cursor-pointer"
                                                                         />
                                                                         <span className={`text-xs font-bold ${ampDetails.level === opt.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-400'}`}>
                                                                             {opt.label}
@@ -3904,12 +3935,12 @@ function App() {
                                                                     { id: 'bsa_method', label: 'ปรับตามพื้นที่ผิว (BSA)' }
                                                                 ].map(opt => (
                                                                     <label key={opt.id} className={`px-3 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-2 ${ampDetails.method === opt.id ? 'bg-white dark:bg-slate-800 border-indigo-400 shadow-sm' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
-                                                                        <input 
-                                                                            type="radio" 
-                                                                            name="ampMethod" 
-                                                                            checked={ampDetails.method === opt.id} 
-                                                                            onChange={() => setAmpDetails({ ...ampDetails, method: opt.id })} 
-                                                                            className="w-4 h-4 text-indigo-600 cursor-pointer" 
+                                                                        <input
+                                                                            type="radio"
+                                                                            name="ampMethod"
+                                                                            checked={ampDetails.method === opt.id}
+                                                                            onChange={() => setAmpDetails({ ...ampDetails, method: opt.id })}
+                                                                            className="w-4 h-4 text-indigo-600 cursor-pointer"
                                                                         />
                                                                         <span className={`text-xs font-bold ${ampDetails.method === opt.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-400'}`}>
                                                                             {opt.label}
@@ -3962,22 +3993,22 @@ function App() {
                                         <div className="grid grid-cols-2 gap-3 mb-3">
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-500 mb-1">อาการ (Symptoms)</label>
-                                            <BeautifulAutocomplete
-                                                value={toxicitySymptoms || ''}
-                                                onChange={(val) => setToxicitySymptoms(val)}
-                                                options={['ไม่มี (None)', 'Neuropathy', 'Neutropenia', 'Nausea', 'Vomiting', 'Diarrhea', 'Alopecia', 'Fatigue', 'Mucositis'].concat(customSymptoms).filter((v, i, a) => a.indexOf(v) === i)}
-                                                placeholder="เช่น Neuropathy, Neutropenia"
-                                                onSave={(val) => {
-                                                    const newCustom = [...customSymptoms, val];
-                                                    setCustomSymptoms(newCustom);
-                                                    localStorage.setItem('customSymptoms', JSON.stringify(newCustom));
-                                                }}
-                                                className="form-control text-sm px-3 py-2 w-full pr-10"
-                                            />
+                                                <BeautifulAutocomplete
+                                                    value={toxicitySymptoms || ''}
+                                                    onChange={(val) => setToxicitySymptoms(val)}
+                                                    options={['ไม่มี (None)', 'Neuropathy', 'Neutropenia', 'Nausea', 'Vomiting', 'Diarrhea', 'Alopecia', 'Fatigue', 'Mucositis'].concat(customSymptoms).filter((v, i, a) => a.indexOf(v) === i)}
+                                                    placeholder="เช่น Neuropathy, Neutropenia"
+                                                    onSave={(val) => {
+                                                        const newCustom = [...customSymptoms, val];
+                                                        setCustomSymptoms(newCustom);
+                                                        localStorage.setItem('customSymptoms', JSON.stringify(newCustom));
+                                                    }}
+                                                    className="form-control text-sm px-3 py-2 w-full pr-10"
+                                                />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-500 mb-1">ระดับความรุนแรง (Grade 1-5)</label>
-                                                <select 
+                                                <select
                                                     className="form-control text-sm px-3 py-2"
                                                     value={toxicityGrade}
                                                     onChange={e => setToxicityGrade(e.target.value)}
@@ -3993,9 +4024,9 @@ function App() {
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-bold text-slate-500 mb-1">หมายเหตุเพิ่มเติม</label>
-                                            <input 
-                                                type="text" 
-                                                className="form-control text-sm px-3 py-2" 
+                                            <input
+                                                type="text"
+                                                className="form-control text-sm px-3 py-2"
                                                 placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"
                                                 value={toxicityNotes}
                                                 onChange={e => setToxicityNotes(e.target.value)}
@@ -4034,7 +4065,7 @@ function App() {
                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Auto
                                         </span>
                                     </h2>
-                                    
+
                                     <div className="mb-4 space-y-1.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50 text-xs text-slate-600 dark:text-slate-400">
                                         <div className="font-black border-b border-slate-200 dark:border-slate-700/50 pb-1.5 mb-2 text-slate-500 uppercase text-[10px] tracking-wider">ข้อมูลที่ใช้คำนวณ</div>
                                         <div className="flex justify-between"><span>สูตร BSA:</span> <span className="font-bold text-slate-800 dark:text-slate-200">{formula === 'mosteller' ? 'Mosteller' : formula === 'dubois' ? 'DuBois' : '-'}</span></div>
@@ -4125,442 +4156,441 @@ function App() {
                             </div>
                         </div>
 
-                                                        {/* Section 06: Drug Administration */}
-                                <div className="premium-card p-6 mt-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <h2 className="text-lg font-black text-sky-700 dark:text-sky-300">กำหนดรายละเอียดการให้ยา</h2>
-                                            {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
-                                                <button
-                                                    type="button"
-                                                    onClick={async () => {
-                                                        const newState = !lockOldHistory;
-                                                        setlockOldHistory(newState);
-                                                        try {
-                                                            await axios.put('/api/settings', { lockOldHistory: newState });
-                                                            showNotification(newState ? 'ปิดการแก้ไขประวัติเก่าสำหรับเภสัชกร' : 'เปิดให้แก้ไขประวัติเก่าได้ตามปกติ', 'success');
-                                                        } catch(err) {
-                                                            showNotification('ไม่สามารถบันทึกการตั้งค่าได้', 'error');
-                                                        }
-                                                    }}
-                                                    className={`ml-3 text-[10px] px-2 py-1 rounded-md font-bold transition-all border shadow-sm ${lockOldHistory ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600'}`}
-                                                    title="เปิด/ปิดการแก้ไขประวัติเดิมสำหรับเภสัชกร"
-                                                >
-                                                    {lockOldHistory ? 'เปิดให้แก้ไขประวัติเก่าได้' : 'ปิดการแก้ไขประวัติเก่า'}
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={printWorkingFormula}
-                                                className="btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all cursor-pointer font-bold no-print"
-                                            >
-                                                <Printer size={14} /> พิมพ์ใบเตรียมยา (A4)
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={printStickers}
-                                                className="btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer font-bold no-print"
-                                            >
-                                                <Printer size={14} /> พิมพ์สติ๊กเกอร์
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleSaveOrder}
-                                                className={`btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl border transition-all cursor-pointer font-bold no-print ${editingOrderLogId ? 'bg-amber-500 text-white border-transparent hover:bg-amber-600 shadow-md shadow-amber-500/20' : 'bg-emerald-500 text-white border-transparent hover:bg-emerald-600 shadow-md shadow-emerald-500/20'}`}
-                                                title={editingOrderLogId ? 'บันทึกข้อมูล' : 'บันทึกข้อมูลการสั่งยา'}
-                                            >
-                                                {editingOrderLogId ? 'บันทึก' : '+ บันทึก'}
-                                            </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={handleAddRow}
-                                                    className="btn btn-primary text-sm flex items-center gap-2 py-2 px-6 rounded-xl bg-sky-500 hover:bg-sky-600 text-white shadow-sm transition-all cursor-pointer font-bold no-print"
-                                                >
-                                                    + เพิ่มแถว
-                                                </button>
-                                        </div>
-                                    </div>
+                        {/* Section 06: Drug Administration */}
+                        <div className="premium-card p-6 mt-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <h2 className="text-lg font-black text-sky-700 dark:text-sky-300">กำหนดรายละเอียดการให้ยา</h2>
+                                    {['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) && (
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const newState = !lockOldHistory;
+                                                setlockOldHistory(newState);
+                                                try {
+                                                    await axios.put('/api/settings', { lockOldHistory: newState });
+                                                    showNotification(newState ? 'ปิดการแก้ไขประวัติเก่าสำหรับเภสัชกร' : 'เปิดให้แก้ไขประวัติเก่าได้ตามปกติ', 'success');
+                                                } catch (err) {
+                                                    showNotification('ไม่สามารถบันทึกการตั้งค่าได้', 'error');
+                                                }
+                                            }}
+                                            className={`ml-3 text-[10px] px-2 py-1 rounded-md font-bold transition-all border shadow-sm ${lockOldHistory ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600'}`}
+                                            title="เปิด/ปิดการแก้ไขประวัติเดิมสำหรับเภสัชกร"
+                                        >
+                                            {lockOldHistory ? 'เปิดให้แก้ไขประวัติเก่าได้' : 'ปิดการแก้ไขประวัติเก่า'}
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={printWorkingFormula}
+                                        className="btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all cursor-pointer font-bold no-print"
+                                    >
+                                        <Printer size={14} /> พิมพ์ใบเตรียมยา (A4)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={printStickers}
+                                        className="btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer font-bold no-print"
+                                    >
+                                        <Printer size={14} /> พิมพ์สติ๊กเกอร์
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveOrder}
+                                        className={`btn btn-secondary text-sm flex items-center gap-2 py-2 px-6 rounded-xl border transition-all cursor-pointer font-bold no-print ${editingOrderLogId ? 'bg-amber-500 text-white border-transparent hover:bg-amber-600 shadow-md shadow-amber-500/20' : 'bg-emerald-500 text-white border-transparent hover:bg-emerald-600 shadow-md shadow-emerald-500/20'}`}
+                                        title={editingOrderLogId ? 'บันทึกข้อมูล' : 'บันทึกข้อมูลการสั่งยา'}
+                                    >
+                                        {editingOrderLogId ? 'บันทึก' : '+ บันทึก'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddRow}
+                                        className="btn btn-primary text-sm flex items-center gap-2 py-2 px-6 rounded-xl bg-sky-500 hover:bg-sky-600 text-white shadow-sm transition-all cursor-pointer font-bold no-print"
+                                    >
+                                        + เพิ่มแถว
+                                    </button>
+                                </div>
+                            </div>
 
-                                    <div className="overflow-x-auto min-h-[300px] pb-16">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="border-b border-slate-700/20 text-[11px] font-bold uppercase text-slate-400">
-                                                    <th className="px-3 py-2.5 w-10 text-center">#</th>
-                                                    <th className="px-3 py-2.5">ชื่อยา</th>
-                                                    <th className="px-3 py-2.5">ขนาดยา (Dose)</th>
-                                                    <th className="px-3 py-2.5">วิธีให้ยา</th>
-                                                    <th className="px-3 py-2.5">ตัวทำละลาย</th>
-                                                    <th className="px-3 py-2.5">Vol (ml)</th>
-                                                    <th className="px-3 py-2.5 w-24 text-center text-rose-400">Total Vol</th>
-                                                    <th className="px-3 py-2.5 min-w-[150px] w-[150px]">วันที่เริ่ม</th>
-                                                    <th className="px-3 py-2.5 min-w-[150px] w-[150px]">วันที่สิ้นสุด</th>
-                                                    <th className="px-3 py-2.5">อัตราเร็ว</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {adminRows.map((row, idx) => {
-                                                    const isPharmacist = !['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase());
-                                                    const isLockedRow = lockOldHistory && isPharmacist && row.isOldRecord;
-                                                    return (
-                                                    <tr
-                                                        key={row.id}
-                                                        className={`border-b border-slate-700/10 transition-all ${
-                                                            row.skipped ? 'opacity-50 bg-red-500/5' : ''
+                            <div className="overflow-x-auto min-h-[300px] pb-16">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-slate-700/20 text-[11px] font-bold uppercase text-slate-400">
+                                            <th className="px-3 py-2.5 w-10 text-center">#</th>
+                                            <th className="px-3 py-2.5">ชื่อยา</th>
+                                            <th className="px-3 py-2.5">ขนาดยา (Dose)</th>
+                                            <th className="px-3 py-2.5">วิธีให้ยา</th>
+                                            <th className="px-3 py-2.5">ตัวทำละลาย</th>
+                                            <th className="px-3 py-2.5">Vol (ml)</th>
+                                            <th className="px-3 py-2.5 w-24 text-center text-rose-400">Total Vol</th>
+                                            <th className="px-3 py-2.5 min-w-[150px] w-[150px]">วันที่เริ่ม</th>
+                                            <th className="px-3 py-2.5 min-w-[150px] w-[150px]">วันที่สิ้นสุด</th>
+                                            <th className="px-3 py-2.5">อัตราเร็ว</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {adminRows.map((row, idx) => {
+                                            const isPharmacist = !['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase());
+                                            const isLockedRow = lockOldHistory && isPharmacist && row.isOldRecord;
+                                            return (
+                                                <tr
+                                                    key={row.id}
+                                                    className={`border-b border-slate-700/10 transition-all ${row.skipped ? 'opacity-50 bg-red-500/5' : ''
                                                         }`}
-                                                    >
-                                                        <td className="px-3 py-2.5 text-center font-black text-slate-300 dark:text-slate-600 text-xs">
-                                                            <div className="flex flex-col items-center justify-center gap-0.5">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        if (idx === 0) return;
-                                                                        setAdminRows(prev => {
-                                                                            const newRows = [...prev];
-                                                                            [newRows[idx - 1], newRows[idx]] = [newRows[idx], newRows[idx - 1]];
-                                                                            return newRows;
-                                                                        });
-                                                                    }}
-                                                                    className={`p-0.5 rounded transition-colors ${idx === 0 ? 'opacity-0 cursor-default' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-500 cursor-pointer'}`}
-                                                                    disabled={idx === 0}
-                                                                    title="เลื่อนขึ้น"
-                                                                >
-                                                                    <ChevronUp size={14} />
-                                                                </button>
-                                                                <span>{idx + 1}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        if (idx === adminRows.length - 1) return;
-                                                                        setAdminRows(prev => {
-                                                                            const newRows = [...prev];
-                                                                            [newRows[idx], newRows[idx + 1]] = [newRows[idx + 1], newRows[idx]];
-                                                                            return newRows;
-                                                                        });
-                                                                    }}
-                                                                    className={`p-0.5 rounded transition-colors ${idx === adminRows.length - 1 ? 'opacity-0 cursor-default' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-500 cursor-pointer'}`}
-                                                                    disabled={idx === adminRows.length - 1}
-                                                                    title="เลื่อนลง"
-                                                                >
-                                                                    <ChevronDown size={14} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
-                                                            <div className="flex gap-2 items-center">
-                                                                <input
-                                                                    type="text"
-                                                                    list={`drug-list-${idx}`}
-                                                                    value={row.drugName || ''}
-                                                                    disabled={isLockedRow}
-                                                                    className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[200px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                                    onChange={e => {
-                                                                        const val = e.target.value;
-                                                                        
-                                                                        let matchedDose = row.dose;
-                                                                        let calcDose = '';
-                                                                        if (val) {
-                                                                            const foundResult = singleDrugResults.find(r => r.name.toLowerCase() === val.toLowerCase() || r.id.toLowerCase() === val.toLowerCase());
-                                                                            if (foundResult && foundResult.dose !== undefined && foundResult.dose !== null && !isNaN(parseFloat(foundResult.dose))) {
-                                                                                calcDose = `${foundResult.dose} ${foundResult.unit || 'mg'}`;
-                                                                                matchedDose = calcDose;
-                                                                            }
-
-                                                                            // Auto-fill from previous cycle
-                                                                            if (patient.hn && (['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) || lockOldHistory)) {
-                                                                                const patientLogs = allOrderLogs.filter(l => l.hn === patient.hn);
-                                                                                for (const log of patientLogs) {
-                                                                                    try {
-                                                                                        const details = JSON.parse(log.order_details);
-                                                                                        const prevRow = details.find(r => r.drugName && r.drugName.toLowerCase() === val.toLowerCase());
-                                                                                        if (prevRow && prevRow.dose) {
-                                                                                            let d = String(prevRow.dose);
-                                                                                            if (d.match(/[\d.]+/) && d.match(/[\d.]+/)[0] !== '.') {
-                                                                                                matchedDose = d;
-                                                                                            }
-                                                                                            break;
-                                                                                        }
-                                                                                    } catch(e) {}
-                                                                                }
-                                                                            }
-                                                                        }
-
-                                                                        let autoVol = row.drugVolume;
-                                                                        if (val && matchedDose) {
-                                                                            const dInfo = drugsInfo.find(d => d.name.toLowerCase() === val.toLowerCase() || d.id.toLowerCase() === val.toLowerCase());
-                                                                            if (dInfo && dInfo.raw && dInfo.raw.concentration_per_ml > 0) {
-                                                                                const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
-                                                                                if (!isNaN(numVal)) {
-                                                                                    autoVol = (numVal / parseFloat(dInfo.raw.concentration_per_ml)).toFixed(2);
-                                                                                    if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
-                                                                                }
-                                                                            } else {
-                                                                                const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === val.toLowerCase());
-                                                                                if (drugKey) {
-                                                                                    const drugData = DRUG_CONCENTRATION_DATA[drugKey];
-                                                                                    if (drugData.concentration > 0) {
-                                                                                        const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
-                                                                                        if (!isNaN(numVal)) {
-                                                                                            autoVol = (numVal / drugData.concentration).toFixed(2);
-                                                                                            if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        
-                                                                        const isValid = checkSolventRules(val, row.solvent);
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, drugName: val, dose: matchedDose, calculatedDose: calcDose, drugVolume: autoVol, solvent: isValid === false ? '' : r.solvent } : r));
-
-                                                                    }}
-                                                                    placeholder="ค้นหา/ระบุชื่อยา..."
-                                                                />
-                                                                <datalist id={`drug-list-${idx}`}>
-                                                                    {allAdminDrugs.map(drug => (
-                                                                        <option key={drug} value={drug} />
-                                                                    ))}
-                                                                </datalist>
-                                                                {row.drugName && !allAdminDrugs.includes(row.drugName) && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            const val = row.drugName.trim();
-                                                                            if (!val) return;
-                                                                            const newCustom = [...customAdminDrugs, val];
-                                                                            setCustomAdminDrugs(newCustom);
-                                                                            localStorage.setItem('customAdminDrugs', JSON.stringify(newCustom));
-                                                                        }}
-                                                                        className="ml-2 bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap animate-in fade-in"
-                                                                        title="บันทึกชื่อยานี้ไว้ใช้ครั้งต่อไป"
-                                                                    >
-                                                                        + บันทึก
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
-                                                            <div className="flex gap-1 items-center min-w-[140px]">
-                                                                <input
-                                                                    type="text"
-                                                                    value={((row.dose || '').toString().match(/[\d.]+/) && (row.dose || '').toString().match(/[\d.]+/)[0] !== '.') ? (row.dose || '').toString().match(/[\d.]+/)[0] : ''}
-                                                                    disabled={isLockedRow}
-                                                                    onChange={e => {
-                                                                        const numVal = e.target.value.replace(/[^\d.]/g, '');
-                                                                        const str = row.dose || '';
-                                                                        let currentUnit = str.replace(/[\d.\s]/g, '');
-                                                                        if (str.toLowerCase().includes('auc')) currentUnit = 'AUC';
-                                                                        if (!currentUnit) currentUnit = 'mg';
-                                                                        
-                                                                        const newVal = numVal ? `${numVal} ${currentUnit}` : '';
-                                                                        
-                                                                        let autoVol = row.drugVolume;
-                                                                        if (row.drugName) {
-                                                                            const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
-                                                                            if (dInfo && dInfo.raw && dInfo.raw.concentration_per_ml > 0) {
-                                                                                const parsedNum = parseFloat(numVal);
-                                                                                if (!isNaN(parsedNum)) {
-                                                                                    autoVol = (parsedNum / parseFloat(dInfo.raw.concentration_per_ml)).toFixed(2);
-                                                                                    if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
-                                                                                } else {
-                                                                                    autoVol = '';
-                                                                                }
-                                                                            } else {
-                                                                                const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
-                                                                                if (drugKey) {
-                                                                                    const drugData = DRUG_CONCENTRATION_DATA[drugKey];
-                                                                                    if (drugData.concentration > 0) {
-                                                                                        const parsedNum = parseFloat(numVal);
-                                                                                        if (!isNaN(parsedNum)) {
-                                                                                            autoVol = (parsedNum / drugData.concentration).toFixed(2);
-                                                                                            if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
-                                                                                        } else {
-                                                                                            autoVol = '';
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, dose: newVal, drugVolume: autoVol } : r));
-                                                                    }}
-                                                                    placeholder="ระบุตัวเลข"
-                                                                    className={`form-control py-1.5 px-2 text-xs rounded-lg w-[75px] text-center ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                                />
-                                                                <select
-                                                                    value={(() => {
-                                                                        const str = String(row.dose || '');
-                                                                        if (str.toLowerCase().includes('auc')) return 'AUC';
-                                                                        const u = str.replace(/[\d.\s]/g, '');
-                                                                        return u || 'mg';
-                                                                    })()}
-                                                                    disabled={isLockedRow}
-                                                                    onChange={e => {
-                                                                        const newUnit = e.target.value;
-                                                                        const str = String(row.dose || '');
-                                                                        const numMatch = str.match(/[\d.]+/);
-                                                                        const currentNum = numMatch ? numMatch[0] : '';
-                                                                        const newVal = currentNum ? `${currentNum} ${newUnit}` : '';
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, dose: newVal } : r));
-                                                                    }}
-                                                                    className={`form-control py-1.5 px-1 text-xs rounded-lg w-16 ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : 'bg-slate-50 dark:bg-slate-800'}`}
-                                                                >
-                                                                    <option value="mg">mg</option>
-                                                                    <option value="g">g</option>
-                                                                    <option value="mcg">mcg</option>
-                                                                    <option value="mg/m2">mg/m2</option>
-                                                                    <option value="mg/kg">mg/kg</option>
-                                                                    <option value="mcg/kg">mcg/kg</option>
-                                                                    <option value="ml">ml</option>
-                                                                    <option value="L">L</option>
-                                                                    <option value="units">units</option>
-                                                                    <option value="IU">IU</option>
-                                                                    <option value="mEq">mEq</option>
-                                                                    <option value="mmol">mmol</option>
-                                                                    <option value="AUC">AUC</option>
-                                                                </select>
-                                                            </div>
-                                                            {/* Real-time Diff Display */}
-                                                            {row.calculatedDose && row.dose && (() => {
-                                                                const calcMatch = row.calculatedDose.toString().match(/[\d.]+/);
-                                                                const doseMatch = row.dose.toString().match(/[\d.]+/);
-                                                                if (calcMatch && doseMatch) {
-                                                                    const calcVal = parseFloat(calcMatch[0]);
-                                                                    const doseVal = parseFloat(doseMatch[0]);
-                                                                    if (calcVal > 0 && calcVal !== doseVal) {
-                                                                        const diffPercent = (((doseVal - calcVal) / calcVal) * 100).toFixed(1);
-                                                                        const isOver = Math.abs(parseFloat(diffPercent)) > 10;
-                                                                        return (
-                                                                            <div className={`mt-1.5 text-[10px] font-black tracking-wide ${isOver ? 'text-rose-500 bg-rose-500/10 border-rose-500/20' : 'text-amber-500 bg-amber-500/10 border-amber-500/20'} px-1.5 py-0.5 rounded border inline-block`}>
-                                                                                {diffPercent > 0 ? '+' : ''}{diffPercent}% Diff
-                                                                            </div>
-                                                                        );
-                                                                    }
-                                                                }
-                                                                return null;
-                                                            })()}
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
-                                                            <select
-                                                                value={row.route}
-                                                                disabled={isLockedRow}
-                                                                onChange={e => setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, route: e.target.value } : r))}
-                                                                className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                >
+                                                    <td className="px-3 py-2.5 text-center font-black text-slate-300 dark:text-slate-600 text-xs">
+                                                        <div className="flex flex-col items-center justify-center gap-0.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (idx === 0) return;
+                                                                    setAdminRows(prev => {
+                                                                        const newRows = [...prev];
+                                                                        [newRows[idx - 1], newRows[idx]] = [newRows[idx], newRows[idx - 1]];
+                                                                        return newRows;
+                                                                    });
+                                                                }}
+                                                                className={`p-0.5 rounded transition-colors ${idx === 0 ? 'opacity-0 cursor-default' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-500 cursor-pointer'}`}
+                                                                disabled={idx === 0}
+                                                                title="เลื่อนขึ้น"
                                                             >
-                                                                <option value="">-- เลือกวิธี --</option>
-                                                                <option value="IV drip">IV drip</option>
-                                                                <option value="IV push">IV push</option>
-                                                                <option value="Intrathecal">Intrathecal</option>
-                                                                <option value="Subcutaneous">Subcutaneous</option>
-                                                                <option value="Oral">Oral</option>
-                                                            </select>
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
-                                                            <div className="flex gap-2 items-center">
-                                                                <input
-                                                                    type="text"
-                                                                    list={`solvent-list-${idx}`}
-                                                                    value={row.solvent === 'ระบุเอง' ? '' : (row.solvent || '')}
-                                                                    disabled={isLockedRow}
-                                                                    onChange={e => {
-                                                                        const val = e.target.value;
-                                                                        const isValid = checkSolventRules(row.drugName, val);
-                                                                        setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, solvent: isValid === false ? '' : val } : r));
-                                                                    }}
-                                                                    placeholder="ค้นหา/ระบุเอง..."
-                                                                    className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[200px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                                />
-                                                                <datalist id={`solvent-list-${idx}`}>
-                                                                    {allSolvents.map(sol => (
-                                                                        <option key={sol} value={sol} />
-                                                                    ))}
-                                                                </datalist>
-                                                                {row.solvent && row.solvent !== 'ระบุเอง' && !allSolvents.includes(row.solvent) && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            const val = row.solvent.trim();
-                                                                            if (!val) return;
-                                                                            const newCustom = [...customSolvents, val];
-                                                                            setCustomSolvents(newCustom);
-                                                                            localStorage.setItem('customSolvents', JSON.stringify(newCustom));
-                                                                        }}
-                                                                        className="ml-2 bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap animate-in fade-in"
-                                                                        title="บันทึกตัวทำละลายนี้ไว้ใช้ครั้งต่อไป"
-                                                                    >
-                                                                        + บันทึก
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
+                                                                <ChevronUp size={14} />
+                                                            </button>
+                                                            <span>{idx + 1}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (idx === adminRows.length - 1) return;
+                                                                    setAdminRows(prev => {
+                                                                        const newRows = [...prev];
+                                                                        [newRows[idx], newRows[idx + 1]] = [newRows[idx + 1], newRows[idx]];
+                                                                        return newRows;
+                                                                    });
+                                                                }}
+                                                                className={`p-0.5 rounded transition-colors ${idx === adminRows.length - 1 ? 'opacity-0 cursor-default' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-500 cursor-pointer'}`}
+                                                                disabled={idx === adminRows.length - 1}
+                                                                title="เลื่อนลง"
+                                                            >
+                                                                <ChevronDown size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <div className="flex gap-2 items-center">
                                                             <input
                                                                 type="text"
-                                                                value={row.volume || ''}
+                                                                list={`drug-list-${idx}`}
+                                                                value={row.drugName || ''}
                                                                 disabled={isLockedRow}
-                                                                                                                    onChange={e => {
-                                                        const newVol = e.target.value;
-                                                        setAdminRows(prev => prev.map((r, i) => {
-                                                            if (i === idx) {
-                                                                let totalVol = '';
-                                                                const dv = parseFloat(r.drugVolume) || 0;
-                                                                const iv = parseFloat(newVol) || 0;
-                                                                if (dv > 0 || iv > 0) {
-                                                                    totalVol = (dv + iv).toFixed(2);
-                                                                    if (totalVol.endsWith('.00')) totalVol = totalVol.replace('.00', '');
-                                                                }
-                                                                return { ...r, volume: newVol, totalVolume: totalVol };
-                                                            }
-                                                            return r;
-                                                        }));
-                                                    }}
-                                                                placeholder="เช่น 500 ml"
-                                                                className={`form-control py-1.5 px-3 text-xs rounded-lg min-w-[80px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                            />
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
-                                                            <div className="flex flex-col justify-center h-full">
-                                                                {(() => {
-                                                                    let dv = parseFloat(row.drugVolume) || 0;
-                                                                    if (dv === 0 && row.dose && row.drugName) {
-                                                                        const parsedDose = parseFloat((row.dose.toString().match(/[\d.]+/) || ['0'])[0]);
-                                                                        if (parsedDose > 0) {
-                                                                            const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
-                                                                            if (dInfo && dInfo.raw && parseFloat(dInfo.raw.concentration_per_ml) > 0) {
-                                                                                dv = parsedDose / parseFloat(dInfo.raw.concentration_per_ml);
-                                                                            } else {
-                                                                                const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
-                                                                                if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].concentration > 0) {
-                                                                                    dv = parsedDose / DRUG_CONCENTRATION_DATA[drugKey].concentration;
+                                                                className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[200px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+
+                                                                    let matchedDose = row.dose;
+                                                                    let calcDose = '';
+                                                                    if (val) {
+                                                                        const foundResult = singleDrugResults.find(r => r.name.toLowerCase() === val.toLowerCase() || r.id.toLowerCase() === val.toLowerCase());
+                                                                        if (foundResult && foundResult.dose !== undefined && foundResult.dose !== null && !isNaN(parseFloat(foundResult.dose))) {
+                                                                            calcDose = `${foundResult.dose} ${foundResult.unit || 'mg'}`;
+                                                                            matchedDose = calcDose;
+                                                                        }
+
+                                                                        // Auto-fill from previous cycle
+                                                                        if (patient.hn && (['ADMIN', 'HEAD'].includes(user?.role?.toUpperCase()) || lockOldHistory)) {
+                                                                            const patientLogs = allOrderLogs.filter(l => l.hn === patient.hn);
+                                                                            for (const log of patientLogs) {
+                                                                                try {
+                                                                                    const details = JSON.parse(log.order_details);
+                                                                                    const prevRow = details.find(r => r.drugName && r.drugName.toLowerCase() === val.toLowerCase());
+                                                                                    if (prevRow && prevRow.dose) {
+                                                                                        let d = String(prevRow.dose);
+                                                                                        if (d.match(/[\d.]+/) && d.match(/[\d.]+/)[0] !== '.') {
+                                                                                            matchedDose = d;
+                                                                                        }
+                                                                                        break;
+                                                                                    }
+                                                                                } catch (e) { }
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                    let autoVol = row.drugVolume;
+                                                                    if (val && matchedDose) {
+                                                                        const dInfo = drugsInfo.find(d => d.name.toLowerCase() === val.toLowerCase() || d.id.toLowerCase() === val.toLowerCase());
+                                                                        if (dInfo && dInfo.raw && dInfo.raw.concentration_per_ml > 0) {
+                                                                            const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
+                                                                            if (!isNaN(numVal)) {
+                                                                                autoVol = (numVal / parseFloat(dInfo.raw.concentration_per_ml)).toFixed(2);
+                                                                                if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                            }
+                                                                        } else {
+                                                                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === val.toLowerCase());
+                                                                            if (drugKey) {
+                                                                                const drugData = DRUG_CONCENTRATION_DATA[drugKey];
+                                                                                if (drugData.concentration > 0) {
+                                                                                    const numVal = parseFloat(matchedDose.toString().replace(/[^\d.]/g, ''));
+                                                                                    if (!isNaN(numVal)) {
+                                                                                        autoVol = (numVal / drugData.concentration).toFixed(2);
+                                                                                        if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
                                                                     }
-                                                                    const iv = parseFloat(row.volume) || 0;
-                                                                    if (dv === 0 && iv === 0) return <span className="text-slate-400 text-center text-xs">-</span>;
-                                                                    let tv = (dv + iv).toFixed(2);
-                                                                    if (tv.endsWith('.00')) tv = tv.replace('.00', '');
-                                                                    return <span className="font-bold text-rose-500 dark:text-rose-400 text-center text-xs bg-rose-50 dark:bg-rose-900/30 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800" title={`ปริมาตรยา (${dv.toFixed(1)} ml) + น้ำเกลือ (${iv.toFixed(1)} ml)`}>{tv}</span>;
+
+                                                                    const isValid = checkSolventRules(val, row.solvent);
+                                                                    setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, drugName: val, dose: matchedDose, calculatedDose: calcDose, drugVolume: autoVol, solvent: isValid === false ? '' : r.solvent } : r));
+
+                                                                }}
+                                                                placeholder="ค้นหา/ระบุชื่อยา..."
+                                                            />
+                                                            <datalist id={`drug-list-${idx}`}>
+                                                                {allAdminDrugs.map(drug => (
+                                                                    <option key={drug} value={drug} />
+                                                                ))}
+                                                            </datalist>
+                                                            {row.drugName && !allAdminDrugs.includes(row.drugName) && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const val = row.drugName.trim();
+                                                                        if (!val) return;
+                                                                        const newCustom = [...customAdminDrugs, val];
+                                                                        setCustomAdminDrugs(newCustom);
+                                                                        localStorage.setItem('customAdminDrugs', JSON.stringify(newCustom));
+                                                                    }}
+                                                                    className="ml-2 bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap animate-in fade-in"
+                                                                    title="บันทึกชื่อยานี้ไว้ใช้ครั้งต่อไป"
+                                                                >
+                                                                    + บันทึก
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <div className="flex gap-1 items-center min-w-[140px]">
+                                                            <input
+                                                                type="text"
+                                                                value={((row.dose || '').toString().match(/[\d.]+/) && (row.dose || '').toString().match(/[\d.]+/)[0] !== '.') ? (row.dose || '').toString().match(/[\d.]+/)[0] : ''}
+                                                                disabled={isLockedRow}
+                                                                onChange={e => {
+                                                                    const numVal = e.target.value.replace(/[^\d.]/g, '');
+                                                                    const str = row.dose || '';
+                                                                    let currentUnit = str.replace(/[\d.\s]/g, '');
+                                                                    if (str.toLowerCase().includes('auc')) currentUnit = 'AUC';
+                                                                    if (!currentUnit) currentUnit = 'mg';
+
+                                                                    const newVal = numVal ? `${numVal} ${currentUnit}` : '';
+
+                                                                    let autoVol = row.drugVolume;
+                                                                    if (row.drugName) {
+                                                                        const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
+                                                                        if (dInfo && dInfo.raw && dInfo.raw.concentration_per_ml > 0) {
+                                                                            const parsedNum = parseFloat(numVal);
+                                                                            if (!isNaN(parsedNum)) {
+                                                                                autoVol = (parsedNum / parseFloat(dInfo.raw.concentration_per_ml)).toFixed(2);
+                                                                                if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                            } else {
+                                                                                autoVol = '';
+                                                                            }
+                                                                        } else {
+                                                                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
+                                                                            if (drugKey) {
+                                                                                const drugData = DRUG_CONCENTRATION_DATA[drugKey];
+                                                                                if (drugData.concentration > 0) {
+                                                                                    const parsedNum = parseFloat(numVal);
+                                                                                    if (!isNaN(parsedNum)) {
+                                                                                        autoVol = (parsedNum / drugData.concentration).toFixed(2);
+                                                                                        if (autoVol.endsWith('.00')) autoVol = autoVol.replace('.00', '');
+                                                                                    } else {
+                                                                                        autoVol = '';
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, dose: newVal, drugVolume: autoVol } : r));
+                                                                }}
+                                                                placeholder="ระบุตัวเลข"
+                                                                className={`form-control py-1.5 px-2 text-xs rounded-lg w-[75px] text-center ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                            />
+                                                            <select
+                                                                value={(() => {
+                                                                    const str = String(row.dose || '');
+                                                                    if (str.toLowerCase().includes('auc')) return 'AUC';
+                                                                    const u = str.replace(/[\d.\s]/g, '');
+                                                                    return u || 'mg';
                                                                 })()}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-2.5 min-w-max">
-                                                            <div className="flex flex-col gap-1.5">
-                                                                <div className="relative flex items-center">
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder="วว/ดด/ปปปป"
-                                                                        value={row.startDate}
-                                                                        disabled={isLockedRow}
-                                                                        onChange={e => handleAdminDateChange(e.target.value, row.startDate, idx, 'startDate')}
-                                                                        className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                                        maxLength={10}
-                                                                    />
-                                                                    {!isLockedRow && (
+                                                                disabled={isLockedRow}
+                                                                onChange={e => {
+                                                                    const newUnit = e.target.value;
+                                                                    const str = String(row.dose || '');
+                                                                    const numMatch = str.match(/[\d.]+/);
+                                                                    const currentNum = numMatch ? numMatch[0] : '';
+                                                                    const newVal = currentNum ? `${currentNum} ${newUnit}` : '';
+                                                                    setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, dose: newVal } : r));
+                                                                }}
+                                                                className={`form-control py-1.5 px-1 text-xs rounded-lg w-16 ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : 'bg-slate-50 dark:bg-slate-800'}`}
+                                                            >
+                                                                <option value="mg">mg</option>
+                                                                <option value="g">g</option>
+                                                                <option value="mcg">mcg</option>
+                                                                <option value="mg/m2">mg/m2</option>
+                                                                <option value="mg/kg">mg/kg</option>
+                                                                <option value="mcg/kg">mcg/kg</option>
+                                                                <option value="ml">ml</option>
+                                                                <option value="L">L</option>
+                                                                <option value="units">units</option>
+                                                                <option value="IU">IU</option>
+                                                                <option value="mEq">mEq</option>
+                                                                <option value="mmol">mmol</option>
+                                                                <option value="AUC">AUC</option>
+                                                            </select>
+                                                        </div>
+                                                        {/* Real-time Diff Display */}
+                                                        {row.calculatedDose && row.dose && (() => {
+                                                            const calcMatch = row.calculatedDose.toString().match(/[\d.]+/);
+                                                            const doseMatch = row.dose.toString().match(/[\d.]+/);
+                                                            if (calcMatch && doseMatch) {
+                                                                const calcVal = parseFloat(calcMatch[0]);
+                                                                const doseVal = parseFloat(doseMatch[0]);
+                                                                if (calcVal > 0 && calcVal !== doseVal) {
+                                                                    const diffPercent = (((doseVal - calcVal) / calcVal) * 100).toFixed(1);
+                                                                    const isOver = Math.abs(parseFloat(diffPercent)) > 10;
+                                                                    return (
+                                                                        <div className={`mt-1.5 text-[10px] font-black tracking-wide ${isOver ? 'text-rose-500 bg-rose-500/10 border-rose-500/20' : 'text-amber-500 bg-amber-500/10 border-amber-500/20'} px-1.5 py-0.5 rounded border inline-block`}>
+                                                                            {diffPercent > 0 ? '+' : ''}{diffPercent}% Diff
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                            }
+                                                            return null;
+                                                        })()}
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <select
+                                                            value={row.route}
+                                                            disabled={isLockedRow}
+                                                            onChange={e => setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, route: e.target.value } : r))}
+                                                            className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                        >
+                                                            <option value="">-- เลือกวิธี --</option>
+                                                            <option value="IV drip">IV drip</option>
+                                                            <option value="IV push">IV push</option>
+                                                            <option value="Intrathecal">Intrathecal</option>
+                                                            <option value="Subcutaneous">Subcutaneous</option>
+                                                            <option value="Oral">Oral</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <div className="flex gap-2 items-center">
+                                                            <input
+                                                                type="text"
+                                                                list={`solvent-list-${idx}`}
+                                                                value={row.solvent === 'ระบุเอง' ? '' : (row.solvent || '')}
+                                                                disabled={isLockedRow}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    const isValid = checkSolventRules(row.drugName, val);
+                                                                    setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, solvent: isValid === false ? '' : val } : r));
+                                                                }}
+                                                                placeholder="ค้นหา/ระบุเอง..."
+                                                                className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[200px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                            />
+                                                            <datalist id={`solvent-list-${idx}`}>
+                                                                {allSolvents.map(sol => (
+                                                                    <option key={sol} value={sol} />
+                                                                ))}
+                                                            </datalist>
+                                                            {row.solvent && row.solvent !== 'ระบุเอง' && !allSolvents.includes(row.solvent) && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const val = row.solvent.trim();
+                                                                        if (!val) return;
+                                                                        const newCustom = [...customSolvents, val];
+                                                                        setCustomSolvents(newCustom);
+                                                                        localStorage.setItem('customSolvents', JSON.stringify(newCustom));
+                                                                    }}
+                                                                    className="ml-2 bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap animate-in fade-in"
+                                                                    title="บันทึกตัวทำละลายนี้ไว้ใช้ครั้งต่อไป"
+                                                                >
+                                                                    + บันทึก
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <input
+                                                            type="text"
+                                                            value={row.volume || ''}
+                                                            disabled={isLockedRow}
+                                                            onChange={e => {
+                                                                const newVol = e.target.value;
+                                                                setAdminRows(prev => prev.map((r, i) => {
+                                                                    if (i === idx) {
+                                                                        let totalVol = '';
+                                                                        const dv = parseFloat(r.drugVolume) || 0;
+                                                                        const iv = parseFloat(newVol) || 0;
+                                                                        if (dv > 0 || iv > 0) {
+                                                                            totalVol = (dv + iv).toFixed(2);
+                                                                            if (totalVol.endsWith('.00')) totalVol = totalVol.replace('.00', '');
+                                                                        }
+                                                                        return { ...r, volume: newVol, totalVolume: totalVol };
+                                                                    }
+                                                                    return r;
+                                                                }));
+                                                            }}
+                                                            placeholder="เช่น 500 ml"
+                                                            className={`form-control py-1.5 px-3 text-xs rounded-lg min-w-[80px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                        />
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <div className="flex flex-col justify-center h-full">
+                                                            {(() => {
+                                                                let dv = parseFloat(row.drugVolume) || 0;
+                                                                if (dv === 0 && row.dose && row.drugName) {
+                                                                    const parsedDose = parseFloat((row.dose.toString().match(/[\d.]+/) || ['0'])[0]);
+                                                                    if (parsedDose > 0) {
+                                                                        const dInfo = drugsInfo.find(d => d.name.toLowerCase() === row.drugName.toLowerCase() || d.id.toLowerCase() === row.drugName.toLowerCase());
+                                                                        if (dInfo && dInfo.raw && parseFloat(dInfo.raw.concentration_per_ml) > 0) {
+                                                                            dv = parsedDose / parseFloat(dInfo.raw.concentration_per_ml);
+                                                                        } else {
+                                                                            const drugKey = Object.keys(DRUG_CONCENTRATION_DATA).find(k => k.toLowerCase() === row.drugName.toLowerCase());
+                                                                            if (drugKey && DRUG_CONCENTRATION_DATA[drugKey].concentration > 0) {
+                                                                                dv = parsedDose / DRUG_CONCENTRATION_DATA[drugKey].concentration;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                const iv = parseFloat(row.volume) || 0;
+                                                                if (dv === 0 && iv === 0) return <span className="text-slate-400 text-center text-xs">-</span>;
+                                                                let tv = (dv + iv).toFixed(2);
+                                                                if (tv.endsWith('.00')) tv = tv.replace('.00', '');
+                                                                return <span className="font-bold text-rose-500 dark:text-rose-400 text-center text-xs bg-rose-50 dark:bg-rose-900/30 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800" title={`ปริมาตรยา (${dv.toFixed(1)} ml) + น้ำเกลือ (${iv.toFixed(1)} ml)`}>{tv}</span>;
+                                                            })()}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-2.5 min-w-max">
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <div className="relative flex items-center">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="วว/ดด/ปปปป"
+                                                                    value={row.startDate}
+                                                                    disabled={isLockedRow}
+                                                                    onChange={e => handleAdminDateChange(e.target.value, row.startDate, idx, 'startDate')}
+                                                                    className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                                    maxLength={10}
+                                                                />
+                                                                {!isLockedRow && (
                                                                     <input
                                                                         type="date"
                                                                         min={new Date().toISOString().split('T')[0]}
                                                                         className="absolute left-0 right-0 top-0 bottom-0 opacity-0 w-full h-full cursor-pointer"
-                                                                        onClick={(e) => { try { e.target.showPicker(); } catch(err){} }}
+                                                                        onClick={(e) => { try { e.target.showPicker(); } catch (err) { } }}
                                                                         value={(() => {
                                                                             if (row.startDate && row.startDate.length === 10) {
                                                                                 const d = row.startDate.substring(0, 2);
@@ -4580,29 +4610,29 @@ function App() {
                                                                             handleAdminDateChange(`${d}/${m}/${thaiYear}`, row.startDate, idx, 'startDate');
                                                                         }}
                                                                     />
-                                                                    )}
-                                                                    <Calendar size={14} className="absolute right-3 text-slate-400 pointer-events-none" />
-                                                                </div>
+                                                                )}
+                                                                <Calendar size={14} className="absolute right-3 text-slate-400 pointer-events-none" />
                                                             </div>
-                                                        </td>
-                                                        <td className="px-3 py-2.5 min-w-max">
-                                                            <div className="flex gap-2 items-center min-w-max">
-                                                                <div className="relative flex items-center">
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder="วว/ดด/ปปปป"
-                                                                        value={row.endDate}
-                                                                        disabled={isLockedRow}
-                                                                        onChange={e => handleAdminDateChange(e.target.value, row.endDate, idx, 'endDate')}
-                                                                        className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                                        maxLength={10}
-                                                                    />
-                                                                    {!isLockedRow && (
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-2.5 min-w-max">
+                                                        <div className="flex gap-2 items-center min-w-max">
+                                                            <div className="relative flex items-center">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="วว/ดด/ปปปป"
+                                                                    value={row.endDate}
+                                                                    disabled={isLockedRow}
+                                                                    onChange={e => handleAdminDateChange(e.target.value, row.endDate, idx, 'endDate')}
+                                                                    className={`form-control py-1.5 pl-3 pr-8 text-xs rounded-lg font-bold min-w-[150px] w-[150px] max-w-[150px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                                    maxLength={10}
+                                                                />
+                                                                {!isLockedRow && (
                                                                     <input
                                                                         type="date"
                                                                         min={new Date().toISOString().split('T')[0]}
                                                                         className="absolute left-0 right-0 top-0 bottom-0 opacity-0 w-full h-full cursor-pointer"
-                                                                        onClick={(e) => { try { e.target.showPicker(); } catch(err){} }}
+                                                                        onClick={(e) => { try { e.target.showPicker(); } catch (err) { } }}
                                                                         value={(() => {
                                                                             if (row.endDate && row.endDate.length === 10) {
                                                                                 const d = row.endDate.substring(0, 2);
@@ -4622,68 +4652,68 @@ function App() {
                                                                             handleAdminDateChange(`${d}/${m}/${thaiYear}`, row.endDate, idx, 'endDate');
                                                                         }}
                                                                     />
-                                                                    )}
-                                                                    <Calendar size={14} className="absolute right-3 text-slate-400 pointer-events-none" />
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-2.5">
-                                                            <div className="flex gap-2 items-center">
-                                                                <input
-                                                                    type="text"
-                                                                    list={`rate-list-${idx}`}
-                                                                    placeholder="เช่น 100 mL/hr"
-                                                                    value={row.rate || ''}
-                                                                    disabled={isLockedRow}
-                                                                    onChange={e => setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, rate: e.target.value } : r))}
-                                                                    className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[130px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
-                                                                />
-                                                                <datalist id={`rate-list-${idx}`}>
-                                                                    {allRates.map(rate => (
-                                                                        <option key={rate} value={rate} />
-                                                                    ))}
-                                                                </datalist>
-                                                                {row.rate && !allRates.includes(row.rate) && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            const val = row.rate.trim();
-                                                                            if (!val) return;
-                                                                            const newCustom = [...customRates, val];
-                                                                            setCustomRates(newCustom);
-                                                                            localStorage.setItem('customRates', JSON.stringify(newCustom));
-                                                                        }}
-                                                                        className="ml-2 bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap animate-in fade-in"
-                                                                        title="บันทึกอัตราเร็วนี้ไว้ใช้ครั้งต่อไป"
-                                                                    >
-                                                                        + บันทึก
-                                                                    </button>
                                                                 )}
-                                                                {adminRows.length > 1 && !isLockedRow && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setAdminRows(prev => prev.filter((_, i) => i !== idx))}
-                                                                        className="ml-2 text-red-400 hover:text-red-600 p-1 rounded-md hover:bg-red-50 transition-colors shrink-0"
-                                                                        title="ลบแถว"
-                                                                    >
-                                                                        <Trash2 size={16} />
-                                                                    </button>
-                                                                )}
+                                                                <Calendar size={14} className="absolute right-3 text-slate-400 pointer-events-none" />
                                                             </div>
-                                                        </td>
-                                                    </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    {adminRows.some(r => r.skipped) && (
-                                        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-xs font-bold animate-pop">
-                                            ⚠️ มีแถวที่ไม่ได้ส่งยา (ทำเครื่องหมายงดรับยา) โปรดตรวจสอบก่อนลงบันทึกประวัติ
-                                        </div>
-                                    )}
-
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-2.5">
+                                                        <div className="flex gap-2 items-center">
+                                                            <input
+                                                                type="text"
+                                                                list={`rate-list-${idx}`}
+                                                                placeholder="เช่น 100 mL/hr"
+                                                                value={row.rate || ''}
+                                                                disabled={isLockedRow}
+                                                                onChange={e => setAdminRows(prev => prev.map((r, i) => i === idx ? { ...r, rate: e.target.value } : r))}
+                                                                className={`form-control py-1.5 px-3 text-xs rounded-lg font-bold min-w-[130px] ${isLockedRow ? 'bg-slate-100 opacity-70 cursor-not-allowed text-slate-500' : ''}`}
+                                                            />
+                                                            <datalist id={`rate-list-${idx}`}>
+                                                                {allRates.map(rate => (
+                                                                    <option key={rate} value={rate} />
+                                                                ))}
+                                                            </datalist>
+                                                            {row.rate && !allRates.includes(row.rate) && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const val = row.rate.trim();
+                                                                        if (!val) return;
+                                                                        const newCustom = [...customRates, val];
+                                                                        setCustomRates(newCustom);
+                                                                        localStorage.setItem('customRates', JSON.stringify(newCustom));
+                                                                    }}
+                                                                    className="ml-2 bg-sky-100 text-sky-600 hover:bg-sky-200 border border-sky-200 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap animate-in fade-in"
+                                                                    title="บันทึกอัตราเร็วนี้ไว้ใช้ครั้งต่อไป"
+                                                                >
+                                                                    + บันทึก
+                                                                </button>
+                                                            )}
+                                                            {adminRows.length > 1 && !isLockedRow && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setAdminRows(prev => prev.filter((_, i) => i !== idx))}
+                                                                    className="ml-2 text-red-400 hover:text-red-600 p-1 rounded-md hover:bg-red-50 transition-colors shrink-0"
+                                                                    title="ลบแถว"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {adminRows.some(r => r.skipped) && (
+                                <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-xs font-bold animate-pop">
+                                    ⚠️ มีแถวที่ไม่ได้ส่งยา (ทำเครื่องหมายงดรับยา) โปรดตรวจสอบก่อนลงบันทึกประวัติ
                                 </div>
+                            )}
+
+                        </div>
 
                     </div>
                 )}
@@ -4821,7 +4851,7 @@ function App() {
                     </div>
                 </div>
             )}
-            
+
             {/* Edit Patient Data Modal */}
             {editPatientNameData && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
@@ -4836,7 +4866,7 @@ function App() {
                         </p>
                         <div className="mb-4">
                             <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">ชื่อ-นามสกุลใหม่</label>
-                            <input 
+                            <input
                                 type="text"
                                 value={editPatientNameData.newName}
                                 onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newName: e.target.value })}
@@ -4847,7 +4877,7 @@ function App() {
                         </div>
                         <div className="mb-4">
                             <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">เพศ</label>
-                            <select 
+                            <select
                                 value={editPatientNameData.newGender}
                                 onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newGender: e.target.value })}
                                 className="form-control text-sm py-2 px-3 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
@@ -4867,14 +4897,14 @@ function App() {
                                     type="text"
                                     placeholder={patients.find(p => p.hn === editPatientNameData.hn)?.dob || "วัน/เดือน/ปีเกิด"}
                                     value={editPatientNameData.newDob || ''}
-                                    onChange={e => handleDateInputChange(e.target.value, editPatientNameData.newDob || '', (val) => setEditPatientNameData({...editPatientNameData, newDob: val, newAge: calculateAgeFromThaiDateString(val) || editPatientNameData.newAge}))}
+                                    onChange={e => handleDateInputChange(e.target.value, editPatientNameData.newDob || '', (val) => setEditPatientNameData({ ...editPatientNameData, newDob: val, newAge: calculateAgeFromThaiDateString(val) || editPatientNameData.newAge }))}
                                     className="form-control text-sm py-2 pl-3 pr-8 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
                                     maxLength={10}
                                 />
                                 <input
                                     type="date"
                                     className="absolute left-0 right-0 top-0 bottom-0 opacity-0 cursor-pointer w-full h-full"
-                                    onClick={(e) => { try { e.target.showPicker(); } catch(err){} }}
+                                    onClick={(e) => { try { e.target.showPicker(); } catch (err) { } }}
                                     value={(() => {
                                         if (editPatientNameData.newDob && editPatientNameData.newDob.length === 10) {
                                             const d = editPatientNameData.newDob.substring(0, 2);
@@ -4892,7 +4922,7 @@ function App() {
                                         const [y, m, d] = e.target.value.split('-');
                                         const thaiYear = parseInt(y, 10) < 2400 ? parseInt(y, 10) + 543 : parseInt(y, 10);
                                         const newDob = `${d}/${m}/${thaiYear}`;
-                                        setEditPatientNameData({...editPatientNameData, newDob, newAge: calculateAgeFromThaiDateString(newDob)});
+                                        setEditPatientNameData({ ...editPatientNameData, newDob, newAge: calculateAgeFromThaiDateString(newDob) });
                                     }}
                                 />
                                 <Calendar size={16} className="absolute right-3 text-slate-400 pointer-events-none" />
@@ -4900,7 +4930,7 @@ function App() {
                         </div>
                         <div className="mb-6">
                             <label className="text-xs font-black text-slate-500 mb-1.5 uppercase block">หอผู้ป่วย (WARD)</label>
-                            <select 
+                            <select
                                 value={editPatientNameData.newWard || ''}
                                 onChange={(e) => setEditPatientNameData({ ...editPatientNameData, newWard: e.target.value })}
                                 className="form-control text-sm py-2 px-3 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all font-medium text-slate-800 dark:text-white"
@@ -4988,19 +5018,19 @@ function App() {
                     </div>
                 </div>
             )}
-            <AdminRegimens 
-                isOpen={showRegimens} 
-                onClose={() => setShowRegimens(false)} 
-                showNotification={showNotification} 
-                isDark={theme === 'dark'} 
-                drugsInfo={drugsInfo} 
+            <AdminRegimens
+                isOpen={showRegimens}
+                onClose={() => setShowRegimens(false)}
+                showNotification={showNotification}
+                isDark={theme === 'dark'}
+                drugsInfo={drugsInfo}
             />
             {showOfflinePrintHistory && (
-                <OfflinePrintHistoryModal 
-                    show={showOfflinePrintHistory} 
-                    onClose={() => setShowOfflinePrintHistory(false)} 
-                    user={user} 
-                    showNotification={showNotification} 
+                <OfflinePrintHistoryModal
+                    show={showOfflinePrintHistory}
+                    onClose={() => setShowOfflinePrintHistory(false)}
+                    user={user}
+                    showNotification={showNotification}
                     patient={patient}
                 />
             )}
